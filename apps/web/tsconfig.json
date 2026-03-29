@@ -1,9 +1,10 @@
 {
-  "extends": "@workspace/typescript-config/nextjs.json",
+  "extends": "@flcn-lms/typescript-config/nextjs.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"],
-      "@workspace/ui/*": ["../../packages/ui/src/*"],
+      "@flcn-lms/ui/*": ["../../packages/ui/src/*"],
+      "@/i18n/*": ["./i18n/*"],
     },
     "plugins": [
       {
@@ -14,6 +15,7 @@
   "include": [
     "next-env.d.ts",
     "next.config.ts",
+    "global.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",

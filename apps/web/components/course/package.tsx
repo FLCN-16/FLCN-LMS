@@ -1,7 +1,8 @@
+import { useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel, Check } from "@hugeicons/core-free-icons"
 
-import { Heading, Text } from "@workspace/ui/components/typography"
+import { Heading, Text } from "@flcn-lms/ui/components/typography"
 
 interface CoursePackageFeatureProps {
   title: string
@@ -22,7 +23,7 @@ function CoursePackageFeature({
 
 interface CoursePackageProps {
   title: string
-  price: string
+  price: string | number
   validityMonths: number
   features: CoursePackageFeatureProps[]
 }
@@ -33,6 +34,8 @@ function CoursePackage({
   validityMonths,
   features,
 }: CoursePackageProps) {
+  const t = useTranslations("course.packages")
+
   return (
     <div className="flex cursor-pointer flex-col overflow-hidden rounded">
       <div className="flex items-center justify-between bg-primary px-3 py-1.5 font-mono text-primary-foreground">
@@ -40,14 +43,18 @@ function CoursePackage({
           {title}
         </Heading>
         <div className="flex items-center gap-x-2">
-          <Text className="text-md">{price} INR</Text>
+          <Text className="text-md">
+            {price} {t("currency")}
+          </Text>
         </div>
       </div>
 
       <div className="flex flex-col gap-y-3 rounded-b border border-t-0 px-3 py-4">
         <div className="flex flex-col">
-          <Text className="text-xs uppercase">Validity</Text>
-          <Text className="text-lg font-semibold">{validityMonths} Months</Text>
+          <Text className="text-xs uppercase">{t("validity")}</Text>
+          <Text className="text-lg font-semibold">
+            {t("validityValue", { months: validityMonths })}
+          </Text>
         </div>
 
         <div className="flex flex-col gap-y-1 rounded-b">

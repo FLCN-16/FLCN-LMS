@@ -1,45 +1,55 @@
-import { Button } from "@workspace/ui/components/button"
+"use client"
+
+import { useTranslations } from "next-intl"
+
+import { Button } from "@flcn-lms/ui/components/button"
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
-
-import { cn } from "@workspace/ui/lib/utils"
+} from "@flcn-lms/ui/components/field"
+import { Input } from "@flcn-lms/ui/components/input"
+import { cn } from "@flcn-lms/ui/lib/utils"
 
 function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
+  const t = useTranslations("auth.login")
+
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            Enter your email below to login to your account
+            {t("subtitle")}
           </p>
         </div>
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            placeholder={t("emailPlaceholder")}
+            required
+          />
         </Field>
         <Field>
           <div className="flex items-center">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
             <a
               href="#"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
-              Forgot your password?
+              {t("forgotPassword")}
             </a>
           </div>
           <Input id="password" type="password" required />
         </Field>
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit">{t("submit")}</Button>
         </Field>
-        <FieldSeparator>Or continue with</FieldSeparator>
+        <FieldSeparator>{t("orContinueWith")}</FieldSeparator>
         <Field>
           <Button variant="outline" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -48,12 +58,12 @@ function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
                 fill="currentColor"
               />
             </svg>
-            Login with GitHub
+            {t("loginWithGithub")}
           </Button>
           <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
+            {t("noAccount")}{" "}
             <a href="#" className="underline underline-offset-4">
-              Sign up
+              {t("signUp")}
             </a>
           </FieldDescription>
         </Field>

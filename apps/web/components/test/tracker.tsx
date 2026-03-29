@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,16 +11,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@workspace/ui/components/alert-dialog"
-import { Button } from "@workspace/ui/components/button"
+} from "@flcn-lms/ui/components/alert-dialog"
+import { Button } from "@flcn-lms/ui/components/button"
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@workspace/ui/components/card"
-import { Text } from "@workspace/ui/components/typography"
-import { cn } from "@workspace/ui/lib/utils"
+} from "@flcn-lms/ui/components/card"
+import { Text } from "@flcn-lms/ui/components/typography"
+import { cn } from "@flcn-lms/ui/lib/utils"
 
 enum QuestionStatus {
   Answered = "answered",
@@ -56,27 +57,29 @@ function QuestionIndex({
 }
 
 function TestTracker() {
+  const t = useTranslations("test.tracker")
+
   return (
     <Card className="px-4">
       <CardHeader className="grid grid-cols-2 gap-4 py-6 font-mono">
         <div className="flex items-center gap-x-3">
           <div className="size-4 rounded-xs bg-green-500" />
-          <Text>Answered</Text>
+          <Text>{t("answered")}</Text>
         </div>
 
         <div className="flex items-center gap-x-3">
           <div className="size-4 rounded-xs bg-gray-600" />
-          <Text>Unanswered</Text>
+          <Text>{t("unanswered")}</Text>
         </div>
 
         <div className="flex items-center gap-x-3">
           <div className="size-4 rounded-xs bg-blue-600" />
-          <Text>For Review</Text>
+          <Text>{t("forReview")}</Text>
         </div>
 
         <div className="flex items-center gap-x-3">
           <div className="size-4 rounded-xs border border-gray-600 bg-gray-200" />
-          <Text>Current</Text>
+          <Text>{t("current")}</Text>
         </div>
       </CardHeader>
 
@@ -101,23 +104,22 @@ function TestTracker() {
               size="xl"
               className="w-full rounded-xs font-mono"
             >
-              Submit Final Test
+              {t("submitFinalTest")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>{t("confirmTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                You are about to submit your final test. This action cannot be
-                undone.
+                {t("confirmDescription")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel variant="destructive" className="rounded-xs">
-                Cancel
+                {t("cancel")}
               </AlertDialogCancel>
               <AlertDialogAction className="rounded-xs">
-                Sure, Submit Final Test
+                {t("confirmSubmit")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

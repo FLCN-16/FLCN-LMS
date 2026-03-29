@@ -1,0 +1,167 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "notFound": "Page not found",
+    "backHome": "Back to home",
+    "allRightsReserved": "All rights reserved.",
+    "documents": "Documents"
+  },
+  "footer": {
+    "tagline": "Beautifully crafted shadcn blocks by efferd.",
+    "copyright": "&copy; {year} FLCN LMS | All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "groups": {
+      "product": "Product",
+      "resources": "Resources",
+      "company": "Company"
+    }
+  },
+  "nav": {
+    "allCourses": "All Courses",
+    "about": "About",
+    "login": "Login",
+    "joinFree": "Join for Free"
+  },
+  "mobileNav": {
+    "home": "Home",
+    "products": "Products",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "getStarted": "Get Started"
+  },
+  "themeToggle": {
+    "toggleTheme": "Toggle theme"
+  },
+  "auth": {
+    "brandName": "Acme Inc.",
+    "login": {
+      "title": "Login to your account",
+      "subtitle": "Enter your email below to login to your account",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Login",
+      "orContinueWith": "Or continue with",
+      "loginWithGithub": "Login with GitHub",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    }
+  },
+  "course": {
+    "breadcrumb": {
+      "neet": "NEET",
+      "class11": "Class 11"
+    },
+    "header": {
+      "online": "Online",
+      "english": "English",
+      "alreadyEnrolled": "{count}+ already enrolled",
+      "startsFrom": "Starts From:",
+      "enrollNow": "Enroll Now",
+      "courseSeriesTitle": "{count} course series",
+      "courseSeriesDesc": "Get in-depth knowledge of a subject",
+      "ratingTitle": "{rating} Rating",
+      "ratingDesc": "from {count} reviews of courses in this program",
+      "flexibleScheduleTitle": "Flexible schedule",
+      "flexibleScheduleDesc": "Learn at your own pace",
+      "weeksTitle": "{count} weeks to complete",
+      "weeksDesc": "at {hours} hours a week"
+    },
+    "packages": {
+      "sectionTitle": "Packages",
+      "validity": "Validity",
+      "validityValue": "{months} Months",
+      "currency": "INR"
+    },
+    "testimonials": {
+      "sectionTitle": "What our community thinks"
+    },
+    "support": {
+      "sectionTitle": "Frequently asked questions",
+      "faqDuration": "How long does the course take to complete?",
+      "faqDurationAnswer": "The course takes to complete.",
+      "moreQuestions": "More Questions?",
+      "connectVia": "Connect with us via below methods"
+    },
+    "notFound": "Course Not Found"
+  },
+  "test": {
+    "notFound": "Test Not Found",
+    "timer": {
+      "timeRemaining": "Time Remaining"
+    },
+    "tracker": {
+      "answered": "Answered",
+      "unanswered": "Unanswered",
+      "forReview": "For Review",
+      "current": "Current",
+      "submitFinalTest": "Submit Final Test",
+      "confirmTitle": "Are you absolutely sure?",
+      "confirmDescription": "You are about to submit your final test. This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirmSubmit": "Sure, Submit Final Test"
+    },
+    "attempt": {
+      "markForReview": "Mark For Review",
+      "previous": "Previous",
+      "saveAndNext": "Save & Next"
+    },
+    "header": {
+      "testName": "UPSC Test",
+      "testSubtitle": "UPSC Pre Exam test 1",
+      "pause": "Pause",
+      "resume": "Resume"
+    },
+    "fullscreen": {
+      "requiredTitle": "Fullscreen Required",
+      "requiredSubtitle": "Before you begin",
+      "exitedTitle": "Fullscreen Exited",
+      "exitedSubtitle": "Test paused",
+      "violation": "Violation",
+      "violationAlert": "Exiting fullscreen is a violation and has been logged. Re-enter to resume your test.",
+      "ruleNoExit": "Do not exit fullscreen during the test",
+      "rulePressEsc": "Pressing Esc or switching tabs will pause the test",
+      "ruleViolations": "Violations are logged and may affect your result",
+      "enterAndStart": "Enter Fullscreen & Start Test",
+      "reEnterAndResume": "Re-enter Fullscreen & Resume"
+    }
+  },
+  "panel": {
+    "courseConsumption": {
+      "footerCopyright": "&copy; 2026 FLCN LMS. All rights reserved."
+    },
+    "user": {
+      "footerCopyright": "&copy; 2026 FLCN LMS. All rights reserved.",
+      "sidebar": {
+        "brandName": "Acme Inc.",
+        "orders": "Orders",
+        "settings": "Settings"
+      },
+      "orders": "Orders",
+      "settings": "User Settings",
+      "profile": "User Profile"
+    },
+    "courseSidebar": {
+      "brandName": "Acme Inc.",
+      "orders": "Orders",
+      "settings": "Settings"
+    }
+  },
+  "testimonial": {
+    "learnerSince": "Learner since {year}",
+    "quote": "To be able to take courses at my own pace and rhythm has been an amazing experience. I can learn whenever it fits my schedule and mood."
+  },
+  "notFound": {
+    "marketing": "Not Found"
+  },
+  "blogs": "Blogs",
+  "cart": "Cart",
+  "checkout": "Checkout",
+  "courses": "Courses",
+  "coursesByCategory": "Courses by Category {category}",
+  "instructors": "Instructors",
+  "library": "Library"
+}

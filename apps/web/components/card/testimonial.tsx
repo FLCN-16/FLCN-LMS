@@ -1,13 +1,16 @@
-import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
+import { useTranslations } from "next-intl"
+import { Avatar, AvatarFallback } from "@flcn-lms/ui/components/avatar"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@workspace/ui/components/card"
+} from "@flcn-lms/ui/components/card"
 
 function TestimonialCard() {
+  const t = useTranslations("testimonial")
+
   return (
     <Card className="rounded-md">
       <CardHeader className="flex items-center gap-x-3">
@@ -16,14 +19,11 @@ function TestimonialCard() {
         </Avatar>
         <div className="flex flex-col">
           <CardTitle>Felipe M.</CardTitle>
-          <CardDescription>Learner since 2018</CardDescription>
+          <CardDescription>{t("learnerSince", { year: 2018 })}</CardDescription>
         </div>
       </CardHeader>
 
-      <CardContent>
-        To be able to take courses at my own pace and rhythm has been an amazing
-        experience. I can learn whenever it fits my schedule and mood.
-      </CardContent>
+      <CardContent>{t("quote")}</CardContent>
     </Card>
   )
 }

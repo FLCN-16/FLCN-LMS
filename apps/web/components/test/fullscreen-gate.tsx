@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Alert01Icon, ArrowDiagonalIcon } from "@hugeicons/core-free-icons"
 
@@ -10,12 +11,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@workspace/ui/components/dialog"
-import { Button } from "@workspace/ui/components/button"
-import { Badge } from "@workspace/ui/components/badge"
-import { Alert, AlertDescription } from "@workspace/ui/components/alert"
-import { Separator } from "@workspace/ui/components/separator"
-
+} from "@flcn-lms/ui/components/dialog"
+import { Button } from "@flcn-lms/ui/components/button"
+import { Badge } from "@flcn-lms/ui/components/badge"
+import { Alert, AlertDescription } from "@flcn-lms/ui/components/alert"
+import { Separator } from "@flcn-lms/ui/components/separator"
 import {
   TestTimePauseEvent,
   TestTimeResumeEvent,
@@ -26,6 +26,7 @@ interface FullscreenGateProps {
 }
 
 function FullscreenGate({ children }: FullscreenGateProps) {
+  const t = useTranslations("test.fullscreen")
   const { isFullscreen, hasExited, enterFullscreen } = useForceFullscreen({
     onEnter: () => {
       document.dispatchEvent(TestTimeResumeEvent)
@@ -35,12 +36,13 @@ function FullscreenGate({ children }: FullscreenGateProps) {
     },
   })
 
+  const rules = [t("ruleNoExit"), t("rulePressEsc"), t("ruleViolations")]
+
   return (
     <>
       {children}
 
       <Dialog open={!isFullscreen}>
-        {/* Prevent closing by clicking outside or pressing Escape */}
         <DialogContent
           className="max-w-sm"
           onPointerDownOutside={(e) => e.preventDefault()}
@@ -65,15 +67,15 @@ function FullscreenGate({ children }: FullscreenGateProps) {
               </div>
               <div className="flex-1">
                 <DialogTitle className="text-sm leading-none font-semibold">
-                  {hasExited ? "Fullscreen Exited" : "Fullscreen Required"}
+                  {hasExited ? t("exitedTitle") : t("requiredTitle")}
                 </DialogTitle>
                 <DialogDescription className="mt-1 text-xs">
-                  {hasExited ? "Test paused" : "Before you begin"}
+                  {hasExited ? t("exitedSubtitle") : t("requiredSubtitle")}
                 </DialogDescription>
               </div>
               {hasExited && (
                 <Badge variant="destructive" className="text-xs">
-                  Violation
+                  {t("violation")}
                 </Badge>
               )}
             </div>
@@ -88,17 +90,12 @@ function FullscreenGate({ children }: FullscreenGateProps) {
                 className="border-destructive/20 bg-destructive/5 py-2"
               >
                 <AlertDescription className="text-xs">
-                  Exiting fullscreen is a violation and has been logged.
-                  Re-enter to resume your test.
+                  {t("violationAlert")}
                 </AlertDescription>
               </Alert>
             ) : (
               <ul className="space-y-2">
-                {[
-                  "Do not exit fullscreen during the test",
-                  "Pressing Esc or switching tabs will pause the test",
-                  "Violations are logged and may affect your result",
-                ].map((rule) => (
+                {rules.map((rule) => (
                   <li
                     key={rule}
                     className="flex items-start gap-2 text-xs text-muted-foreground"
@@ -117,9 +114,7 @@ function FullscreenGate({ children }: FullscreenGateProps) {
                 color="currentColor"
                 strokeWidth={2}
               />
-              {hasExited
-                ? "Re-enter Fullscreen & Resume"
-                : "Enter Fullscreen & Start Test"}
+              {hasExited ? t("reEnterAndResume") : t("enterAndStart")}
             </Button>
           </div>
         </DialogContent>

@@ -1,0 +1,167 @@
+{
+  "common": {
+    "loading": "در حال بارگذاری...",
+    "error": "مشکلی پیش آمد",
+    "notFound": "صفحه پیدا نشد",
+    "backHome": "بازگشت به خانه",
+    "allRightsReserved": "تمامی حقوق محفوظ است.",
+    "documents": "مستندات"
+  },
+  "footer": {
+    "tagline": "بلوک‌های shadcn زیبا توسط efferd.",
+    "copyright": "© {year} FLCN LMS | تمامی حقوق محفوظ است.",
+    "privacyPolicy": "سیاست حریم خصوصی",
+    "termsOfService": "شرایط خدمات",
+    "groups": {
+      "product": "محصول",
+      "resources": "منابع",
+      "company": "شرکت"
+    }
+  },
+  "nav": {
+    "allCourses": "همه دوره‌ها",
+    "about": "درباره ما",
+    "login": "ورود",
+    "joinFree": "عضویت رایگان"
+  },
+  "mobileNav": {
+    "home": "خانه",
+    "products": "محصولات",
+    "pricing": "قیمت‌گذاری",
+    "blog": "وبلاگ",
+    "getStarted": "شروع کنید"
+  },
+  "themeToggle": {
+    "toggleTheme": "تغییر تم"
+  },
+  "auth": {
+    "brandName": "آکمه",
+    "login": {
+      "title": "ورود به حساب کاربری",
+      "subtitle": "ایمیل خود را وارد کنید تا وارد حساب شوید",
+      "email": "ایمیل",
+      "emailPlaceholder": "m@example.com",
+      "password": "رمز عبور",
+      "forgotPassword": "رمز عبور را فراموش کرده‌اید؟",
+      "submit": "ورود",
+      "orContinueWith": "یا ادامه با",
+      "loginWithGithub": "ورود با GitHub",
+      "noAccount": "حساب کاربری ندارید؟",
+      "signUp": "ثبت‌نام"
+    }
+  },
+  "course": {
+    "breadcrumb": {
+      "neet": "NEET",
+      "class11": "کلاس ۱۱"
+    },
+    "header": {
+      "online": "آنلاین",
+      "english": "انگلیسی",
+      "alreadyEnrolled": "{count}+ ثبت‌نام کرده‌اند",
+      "startsFrom": "شروع از:",
+      "enrollNow": "ثبت‌نام کنید",
+      "courseSeriesTitle": "مجموعه {count} دوره",
+      "courseSeriesDesc": "دانش عمیق در یک موضوع کسب کنید",
+      "ratingTitle": "امتیاز {rating}",
+      "ratingDesc": "از {count} نظر در این برنامه",
+      "flexibleScheduleTitle": "برنامه انعطاف‌پذیر",
+      "flexibleScheduleDesc": "با سرعت خودتان یاد بگیرید",
+      "weeksTitle": "{count} هفته برای تکمیل",
+      "weeksDesc": "در {hours} ساعت در هفته"
+    },
+    "packages": {
+      "sectionTitle": "بسته‌ها",
+      "validity": "اعتبار",
+      "validityValue": "{months} ماه",
+      "currency": "تومان"
+    },
+    "testimonials": {
+      "sectionTitle": "نظر جامعه ما"
+    },
+    "support": {
+      "sectionTitle": "سوالات متداول",
+      "faqDuration": "تکمیل دوره چقدر طول می‌کشد؟",
+      "faqDurationAnswer": "دوره برای تکمیل نیاز دارد.",
+      "moreQuestions": "سوال بیشتری دارید؟",
+      "connectVia": "از طریق روش‌های زیر با ما در ارتباط باشید"
+    },
+    "notFound": "دوره پیدا نشد"
+  },
+  "test": {
+    "notFound": "آزمون پیدا نشد",
+    "timer": {
+      "timeRemaining": "زمان باقی‌مانده"
+    },
+    "tracker": {
+      "answered": "پاسخ داده شده",
+      "unanswered": "پاسخ داده نشده",
+      "forReview": "برای بررسی",
+      "current": "فعلی",
+      "submitFinalTest": "ارسال آزمون نهایی",
+      "confirmTitle": "آیا کاملاً مطمئن هستید؟",
+      "confirmDescription": "شما در حال ارسال آزمون نهایی خود هستید. این عمل قابل بازگشت نیست.",
+      "cancel": "لغو",
+      "confirmSubmit": "بله، ارسال آزمون نهایی"
+    },
+    "attempt": {
+      "markForReview": "علامت‌گذاری برای بررسی",
+      "previous": "قبلی",
+      "saveAndNext": "ذخیره و بعدی"
+    },
+    "header": {
+      "testName": "آزمون UPSC",
+      "testSubtitle": "آزمون پیش‌آزمون UPSC ۱",
+      "pause": "توقف",
+      "resume": "ادامه"
+    },
+    "fullscreen": {
+      "requiredTitle": "تمام‌صفحه لازم است",
+      "requiredSubtitle": "قبل از شروع",
+      "exitedTitle": "تمام‌صفحه خارج شد",
+      "exitedSubtitle": "آزمون متوقف شد",
+      "violation": "تخلف",
+      "violationAlert": "خروج از تمام‌صفحه تخلف است و ثبت شده. برای ادامه آزمون دوباره وارد شوید.",
+      "ruleNoExit": "در طول آزمون از تمام‌صفحه خارج نشوید",
+      "rulePressEsc": "فشار دادن Esc یا تغییر تب آزمون را متوقف می‌کند",
+      "ruleViolations": "تخلفات ثبت می‌شوند و ممکن است بر نتیجه شما تأثیر بگذارند",
+      "enterAndStart": "ورود به تمام‌صفحه و شروع آزمون",
+      "reEnterAndResume": "ورود مجدد به تمام‌صفحه و ادامه"
+    }
+  },
+  "panel": {
+    "courseConsumption": {
+      "footerCopyright": "© ۲۰۲۶ FLCN LMS. تمامی حقوق محفوظ است."
+    },
+    "user": {
+      "footerCopyright": "© ۲۰۲۶ FLCN LMS. تمامی حقوق محفوظ است.",
+      "sidebar": {
+        "brandName": "آکمه",
+        "orders": "سفارشات",
+        "settings": "تنظیمات"
+      },
+      "orders": "سفارشات",
+      "settings": "تنظیمات کاربر",
+      "profile": "پروفایل کاربر"
+    },
+    "courseSidebar": {
+      "brandName": "آکمه",
+      "orders": "سفارشات",
+      "settings": "تنظیمات"
+    }
+  },
+  "testimonial": {
+    "learnerSince": "یادگیرنده از {year}",
+    "quote": "توانایی یادگیری با سرعت و ریتم خودم تجربه‌ای شگفت‌انگیز بوده است. می‌توانم هر زمان که برنامه و حالم اجازه می‌دهد یاد بگیرم."
+  },
+  "notFound": {
+    "marketing": "پیدا نشد"
+  },
+  "blogs": "وبلاگ",
+  "cart": "سبد خرید",
+  "checkout": "پرداخت",
+  "courses": "دوره‌ها",
+  "coursesByCategory": "دوره‌ها بر اساس دسته‌بندی {category}",
+  "instructors": "مدرسان",
+  "library": "کتابخانه"
+}

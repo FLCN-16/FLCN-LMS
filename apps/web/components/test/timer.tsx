@@ -2,9 +2,10 @@
 
 import React from "react"
 import dayjs from "dayjs"
+import { useTranslations } from "next-intl"
 
-import { Card, CardContent } from "@workspace/ui/components/card"
-import { Text } from "@workspace/ui/components/typography"
+import { Card, CardContent } from "@flcn-lms/ui/components/card"
+import { Text } from "@flcn-lms/ui/components/typography"
 
 import useTimer from "@/hooks/use-timer"
 import {
@@ -14,6 +15,7 @@ import {
 } from "@/lib/test-timer-events"
 
 function TestTimer() {
+  const t = useTranslations("test.timer")
   const { isRunning, isExpired, duration, resume, pause } = useTimer({
     startTimestamp: dayjs().toDate().getTime(),
     expiryTimestamp: dayjs().add(1, "hour").toDate().getTime(),
@@ -43,7 +45,7 @@ function TestTimer() {
   return (
     <Card className="py-8">
       <CardContent className="flex flex-col items-center gap-y-1">
-        <Text className="font-semibold uppercase">Time Remaining</Text>
+        <Text className="font-semibold uppercase">{t("timeRemaining")}</Text>
         <Text className="font-mono text-4xl font-semibold">{duration}</Text>
       </CardContent>
     </Card>

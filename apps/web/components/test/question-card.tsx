@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { CheckSquare, Square } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
-import { Badge } from "@workspace/ui/components/badge"
+import { Badge } from "@flcn-lms/ui/components/badge"
 import {
   Card,
   CardAction,
@@ -13,20 +13,20 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@workspace/ui/components/card"
+} from "@flcn-lms/ui/components/card"
 import {
   Item,
   ItemContent,
   ItemMedia,
   ItemTitle,
-} from "@workspace/ui/components/item"
-import { Heading, Text } from "@workspace/ui/components/typography"
+} from "@flcn-lms/ui/components/item"
+import { Heading, Text } from "@flcn-lms/ui/components/typography"
 import {
   TestTimePauseEvent,
   TestTimeResumeEvent,
 } from "@/lib/test-timer-events"
 
-import { cn } from "@workspace/ui/lib/utils"
+import { cn } from "@flcn-lms/ui/lib/utils"
 
 interface QuestionAnswerProps {
   answer: string

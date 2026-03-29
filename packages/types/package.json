@@ -1,0 +1,17 @@
+{
+  "name": "@flcn-lms/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./exam-type": "./src/exam-type.ts",
+    "./questions": "./src/questions.ts",
+    "./test-series": "./src/test-series.ts",
+    "./attempts": "./src/attempts.ts",
+    "./leaderboard": "./src/leaderboard.ts"
+  },
+  "devDependencies": {
+    "@flcn-lms/typescript-config": "workspace:*",
+    "typescript": "^5.7.3"
+  }
+}

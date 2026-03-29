@@ -1,4 +1,4 @@
 {
-  "extends": "@workspace/typescript-config/base.json"
+  "extends": "@flcn-lms/typescript-config/base.json"
 }
 

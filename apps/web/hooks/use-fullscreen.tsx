@@ -10,9 +10,7 @@ function useForceFullscreen({
   onExit,
   onEnter,
 }: UseForceFullscreenOptions = {}) {
-  const [isFullscreen, setIsFullscreen] = useState(
-    () => !!document.fullscreenElement
-  )
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [hasExited, setHasExited] = useState(false)
   const isMounted = useRef(false) // ✅ track if listener has fired at least once
 

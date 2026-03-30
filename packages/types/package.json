@@ -8,7 +8,9 @@
     "./questions": "./src/questions.ts",
     "./test-series": "./src/test-series.ts",
     "./attempts": "./src/attempts.ts",
-    "./leaderboard": "./src/leaderboard.ts"
+    "./leaderboard": "./src/leaderboard.ts",
+    "./cart": "./src/cart.ts",
+    "./tenant": "./src/tenant.ts"
   },
   "devDependencies": {
     "@flcn-lms/typescript-config": "workspace:*",

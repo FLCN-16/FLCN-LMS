@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel, Check } from "@hugeicons/core-free-icons"
 
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
+import { cn } from "@flcn-lms/ui/lib/utils"
 
 interface CoursePackageFeatureProps {
   title: string
@@ -38,7 +39,12 @@ function CoursePackage({
 
   return (
     <div className="flex cursor-pointer flex-col overflow-hidden rounded">
-      <div className="flex items-center justify-between bg-primary px-3 py-1.5 font-mono text-primary-foreground">
+      <div
+        className={cn(
+          "flex items-center justify-between px-3 py-1.5 font-mono",
+          "bg-linear-to-r from-violet-700 to-orange-700 text-primary-foreground"
+        )}
+      >
         <Heading variant="h5" className="uppercase">
           {title}
         </Heading>

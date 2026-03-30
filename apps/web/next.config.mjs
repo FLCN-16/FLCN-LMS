@@ -9,6 +9,9 @@ const nextConfig = {
       {
         hostname: "placehold.co",
       },
+      {
+        hostname: "d3njjcbhbojbot.cloudfront.net",
+      },
     ],
   },
   async redirects() {

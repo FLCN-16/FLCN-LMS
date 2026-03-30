@@ -156,7 +156,9 @@
   },
   "blogs": "Blogs",
   "cart": "Cart",
-  "checkout": "Checkout",
+  "checkout": {
+    "title": "Checkout"
+  },
   "courses": "Courses",
   "coursesByCategory": "Courses by Category {category}",
   "instructors": "Instructors",

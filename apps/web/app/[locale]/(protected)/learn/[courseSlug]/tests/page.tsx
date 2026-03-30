@@ -1,11 +1,11 @@
 interface CourseTestsPageProps {
-  params: Promise<{ slug: string }>
+  params: Promise<{ courseSlug: string }>
 }
 
 async function CourseTestsPage({ params }: CourseTestsPageProps) {
-  const { slug } = await params
+  const { courseSlug } = await params
 
-  return <div>Course Tests: {slug}</div>
+  return <div>Course Tests: {courseSlug}</div>
 }
 
 export default CourseTestsPage

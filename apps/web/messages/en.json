@@ -9,7 +9,7 @@
   },
   "footer": {
     "tagline": "Beautifully crafted shadcn blocks by efferd.",
-    "copyright": "&copy; {year} FLCN LMS | All rights reserved.",
+    "copyright": "\u00A9 {year} FLCN LMS | All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "groups": {
@@ -130,11 +130,8 @@
     }
   },
   "panel": {
-    "courseConsumption": {
-      "footerCopyright": "&copy; 2026 FLCN LMS. All rights reserved."
-    },
+    "courseConsumption": {},
     "user": {
-      "footerCopyright": "&copy; 2026 FLCN LMS. All rights reserved.",
       "sidebar": {
         "brandName": "Acme Inc.",
         "orders": "Orders",

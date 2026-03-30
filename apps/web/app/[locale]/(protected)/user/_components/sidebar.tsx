@@ -1,9 +1,11 @@
 import React from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Book01Icon,
+  Bookmark02Icon,
+  LibraryIcon,
   Settings05Icon,
   TransactionHistoryIcon,
 } from "@hugeicons/core-free-icons"
@@ -25,13 +27,23 @@ function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const menuItems = [
     {
+      title: "Library",
+      url: "/user/library",
+      icon: LibraryIcon,
+    },
+    {
+      title: "Bookmarks",
+      url: "/user/bookmarks",
+      icon: Bookmark02Icon,
+    },
+    {
       title: t("orders"),
-      url: "/panel/user/orders",
+      url: "/user/orders",
       icon: TransactionHistoryIcon,
     },
     {
       title: t("settings"),
-      url: "/panel/user/settings",
+      url: "/user/settings",
       icon: Settings05Icon,
     },
   ]
@@ -50,7 +62,9 @@ function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <HugeiconsIcon icon={Book01Icon} className="size-4" />
                 </div>
-                <span className="text-base font-semibold">{t("brandName")}</span>
+                <span className="text-base font-semibold">
+                  {t("brandName")}
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -7,7 +7,9 @@ import "@videojs/react/video/minimal-skin.css"
 
 const Player = createPlayer({ features: videoFeatures })
 
-interface PlayerProps extends VideoProps {}
+interface PlayerProps extends VideoProps {
+  isDrmContent?: boolean
+}
 
 function PlayerComponent({ src }: PlayerProps) {
   return (

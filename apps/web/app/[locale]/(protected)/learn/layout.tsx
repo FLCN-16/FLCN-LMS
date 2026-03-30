@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl"
+import { getTranslations } from "next-intl/server"
 import { SidebarInset, SidebarProvider } from "@flcn-lms/ui/components/sidebar"
 
 import Sidebar from "./_components/sidebar"
@@ -9,7 +9,7 @@ async function CourseConsumptionLayout({
 }: {
   children: React.ReactNode
 }) {
-  const t = useTranslations("panel.courseConsumption")
+  const footerTrans = await getTranslations("footer")
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -33,7 +33,7 @@ async function CourseConsumptionLayout({
           </div>
           <footer className="p-4">
             <p className="text-sm text-muted-foreground">
-              {t("footerCopyright")}
+              {footerTrans("copyright", { year: new Date().getFullYear() })}
             </p>
           </footer>
         </SidebarInset>

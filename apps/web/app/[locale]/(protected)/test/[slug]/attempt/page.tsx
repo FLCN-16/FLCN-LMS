@@ -2,9 +2,10 @@ import { useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
 
+import { Button } from "@flcn-lms/ui/components/button"
+
 import FullscreenGate from "@/components/test/fullscreen-gate"
 import TestQuestionCard from "@/components/test/question-card"
-import { Button } from "@flcn-lms/ui/components/button"
 
 interface TestPageProps {
   params: Promise<{ slug: string }>

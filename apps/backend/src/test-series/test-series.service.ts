@@ -26,13 +26,24 @@ export class TestSeriesService {
 
   // --- Test Series ---
 
-  async createSeries(tenantId: string, userId: string, dto: CreateTestSeriesDto): Promise<TestSeries> {
-    const series = this.seriesRepo.create({ ...dto, tenantId, createdBy: userId });
+  async createSeries(
+    tenantId: string,
+    userId: string,
+    dto: CreateTestSeriesDto,
+  ): Promise<TestSeries> {
+    const series = this.seriesRepo.create({
+      ...dto,
+      tenantId,
+      createdBy: userId,
+    });
     return this.seriesRepo.save(series);
   }
 
   async findAllSeries(tenantId: string): Promise<TestSeries[]> {
-    return this.seriesRepo.find({ where: { tenantId }, order: { createdAt: 'DESC' } });
+    return this.seriesRepo.find({
+      where: { tenantId },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async findOneSeries(tenantId: string, id: string): Promise<TestSeries> {
@@ -44,7 +55,11 @@ export class TestSeriesService {
     return series;
   }
 
-  async updateSeries(tenantId: string, id: string, dto: Partial<CreateTestSeriesDto>): Promise<TestSeries> {
+  async updateSeries(
+    tenantId: string,
+    id: string,
+    dto: Partial<CreateTestSeriesDto>,
+  ): Promise<TestSeries> {
     const series = await this.findOneSeries(tenantId, id);
     Object.assign(series, dto);
     return this.seriesRepo.save(series);
@@ -63,7 +78,11 @@ export class TestSeriesService {
 
   // --- Tests ---
 
-  async createTest(tenantId: string, seriesId: string, dto: CreateTestDto): Promise<Test> {
+  async createTest(
+    tenantId: string,
+    seriesId: string,
+    dto: CreateTestDto,
+  ): Promise<Test> {
     const series = await this.findOneSeries(tenantId, seriesId);
     const test = this.testRepo.create({ ...dto, testSeriesId: series.id });
 
@@ -99,7 +118,11 @@ export class TestSeriesService {
     });
   }
 
-  async findOneTest(tenantId: string, seriesId: string, testId: string): Promise<Test> {
+  async findOneTest(
+    tenantId: string,
+    seriesId: string,
+    testId: string,
+  ): Promise<Test> {
     await this.findOneSeries(tenantId, seriesId);
     const test = await this.testRepo.findOne({
       where: { id: testId, testSeriesId: seriesId },
@@ -109,13 +132,22 @@ export class TestSeriesService {
     return test;
   }
 
-  async updateTest(tenantId: string, seriesId: string, testId: string, dto: Partial<CreateTestDto>): Promise<Test> {
+  async updateTest(
+    tenantId: string,
+    seriesId: string,
+    testId: string,
+    dto: Partial<CreateTestDto>,
+  ): Promise<Test> {
     const test = await this.findOneTest(tenantId, seriesId, testId);
     Object.assign(test, dto);
     return this.testRepo.save(test);
   }
 
-  async publishTest(tenantId: string, seriesId: string, testId: string): Promise<Test> {
+  async publishTest(
+    tenantId: string,
+    seriesId: string,
+    testId: string,
+  ): Promise<Test> {
     const test = await this.findOneTest(tenantId, seriesId, testId);
     test.isPublished = true;
     return this.testRepo.save(test);
@@ -123,13 +155,25 @@ export class TestSeriesService {
 
   // --- Enrollments ---
 
-  async enroll(tenantId: string, seriesId: string, userId: string, paymentId?: string): Promise<TestSeriesEnrollment> {
+  async enroll(
+    tenantId: string,
+    seriesId: string,
+    userId: string,
+    paymentId?: string,
+  ): Promise<TestSeriesEnrollment> {
     await this.findOneSeries(tenantId, seriesId);
-    const enrollment = this.enrollmentRepo.create({ testSeriesId: seriesId, userId, paymentId });
+    const enrollment = this.enrollmentRepo.create({
+      testSeriesId: seriesId,
+      userId,
+      paymentId,
+    });
     return this.enrollmentRepo.save(enrollment);
   }
 
-  async getEnrollments(tenantId: string, seriesId: string): Promise<TestSeriesEnrollment[]> {
+  async getEnrollments(
+    tenantId: string,
+    seriesId: string,
+  ): Promise<TestSeriesEnrollment[]> {
     await this.findOneSeries(tenantId, seriesId);
     return this.enrollmentRepo.find({ where: { testSeriesId: seriesId } });
   }

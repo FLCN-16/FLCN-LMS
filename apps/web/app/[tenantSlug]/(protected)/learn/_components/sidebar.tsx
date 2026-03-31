@@ -63,7 +63,9 @@ function CourseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <HugeiconsIcon icon={Book01Icon} className="size-4" />
                 </div>
-                <span className="text-base font-semibold">{t("brandName")}</span>
+                <span className="text-base font-semibold">
+                  {t("brandName")}
+                </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -32,7 +32,10 @@ export class TestSeriesController {
   }
 
   @Get(':id')
-  findOneSeries(@Headers('x-tenant-id') tenantId: string, @Param('id') id: string) {
+  findOneSeries(
+    @Headers('x-tenant-id') tenantId: string,
+    @Param('id') id: string,
+  ) {
     return this.service.findOneSeries(tenantId, id);
   }
 
@@ -46,12 +49,18 @@ export class TestSeriesController {
   }
 
   @Patch(':id/publish')
-  publishSeries(@Headers('x-tenant-id') tenantId: string, @Param('id') id: string) {
+  publishSeries(
+    @Headers('x-tenant-id') tenantId: string,
+    @Param('id') id: string,
+  ) {
     return this.service.publishSeries(tenantId, id);
   }
 
   @Delete(':id')
-  removeSeries(@Headers('x-tenant-id') tenantId: string, @Param('id') id: string) {
+  removeSeries(
+    @Headers('x-tenant-id') tenantId: string,
+    @Param('id') id: string,
+  ) {
     return this.service.removeSeries(tenantId, id);
   }
 
@@ -66,7 +75,10 @@ export class TestSeriesController {
   }
 
   @Get(':id/tests')
-  findAllTests(@Headers('x-tenant-id') tenantId: string, @Param('id') seriesId: string) {
+  findAllTests(
+    @Headers('x-tenant-id') tenantId: string,
+    @Param('id') seriesId: string,
+  ) {
     return this.service.findAllTests(tenantId, seriesId);
   }
 
@@ -110,7 +122,10 @@ export class TestSeriesController {
   }
 
   @Get(':id/enrollments')
-  getEnrollments(@Headers('x-tenant-id') tenantId: string, @Param('id') seriesId: string) {
+  getEnrollments(
+    @Headers('x-tenant-id') tenantId: string,
+    @Param('id') seriesId: string,
+  ) {
     return this.service.getEnrollments(tenantId, seriesId);
   }
 }

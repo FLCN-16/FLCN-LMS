@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import type { ResponseStatus } from '@flcn-lms/types/attempts';
+import { ResponseStatus } from '../entities/question-response.entity';
 
 export class SaveResponseDto {
   @IsString()
@@ -27,7 +27,7 @@ export class SaveResponseDto {
   @IsString()
   subjectiveAnswer?: string;
 
-  @IsEnum(['UNATTEMPTED', 'ATTEMPTED', 'MARKED_REVIEW', 'ATTEMPTED_MARKED'])
+  @IsEnum(ResponseStatus)
   status: ResponseStatus;
 
   @IsOptional()

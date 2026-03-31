@@ -11,10 +11,7 @@ export class LeaderboardController {
   }
 
   @Get('tests/:testId')
-  getTopN(
-    @Param('testId') testId: string,
-    @Query('limit') limit?: string,
-  ) {
+  getTopN(@Param('testId') testId: string, @Query('limit') limit?: string) {
     return this.service.getTopN(testId, limit ? parseInt(limit) : 100);
   }
 

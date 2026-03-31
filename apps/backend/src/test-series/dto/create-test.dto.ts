@@ -9,7 +9,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import type { TestType, ResultMode } from '@flcn-lms/types/test-series';
+import { TestType, ResultMode } from '../entities/test.entity';
 
 export class CreateTestSectionDto {
   @IsString()
@@ -50,7 +50,7 @@ export class CreateTestDto {
   @IsString()
   description?: string;
 
-  @IsEnum(['FULL_LENGTH', 'SECTIONAL', 'CHAPTER_WISE', 'DPP', 'PREVIOUS_YEAR'])
+  @IsEnum(TestType)
   testType: TestType;
 
   @IsNumber()
@@ -83,7 +83,7 @@ export class CreateTestDto {
   shuffleOptions?: boolean;
 
   @IsOptional()
-  @IsEnum(['INSTANT', 'AFTER_END_DATE', 'MANUAL'])
+  @IsEnum(ResultMode)
   showResultAfter?: ResultMode;
 
   @IsOptional()

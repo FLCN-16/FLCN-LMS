@@ -8,7 +8,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import type { QuestionType, Difficulty } from '@flcn-lms/types/questions';
+import { QuestionType, Difficulty } from '../entities/question.entity';
 
 export class CreateOptionDto {
   @IsString()
@@ -26,7 +26,7 @@ export class CreateOptionDto {
 }
 
 export class CreateQuestionDto {
-  @IsEnum(['MCQ', 'MSQ', 'INTEGER', 'SUBJECTIVE'])
+  @IsEnum(QuestionType)
   type: QuestionType;
 
   @IsString()
@@ -39,7 +39,7 @@ export class CreateQuestionDto {
   @IsString()
   subtopic?: string;
 
-  @IsEnum(['EASY', 'MEDIUM', 'HARD'])
+  @IsEnum(Difficulty)
   difficulty: Difficulty;
 
   @IsString()

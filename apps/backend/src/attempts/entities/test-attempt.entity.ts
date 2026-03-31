@@ -32,7 +32,11 @@ export class TestAttempt {
   @Column({ default: 1 })
   attemptNumber: number;
 
-  @Column({ type: 'enum', enum: AttemptStatus, default: AttemptStatus.IN_PROGRESS })
+  @Column({
+    type: 'enum',
+    enum: AttemptStatus,
+    default: AttemptStatus.IN_PROGRESS,
+  })
   status: AttemptStatus;
 
   @CreateDateColumn()

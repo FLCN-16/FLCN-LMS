@@ -52,7 +52,10 @@ export class LeaderboardService {
     });
   }
 
-  async getUserRank(testId: string, userId: string): Promise<Leaderboard | null> {
+  async getUserRank(
+    testId: string,
+    userId: string,
+  ): Promise<Leaderboard | null> {
     return this.leaderboardRepo.findOne({ where: { testId, userId } });
   }
 }

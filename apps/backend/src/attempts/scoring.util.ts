@@ -13,18 +13,24 @@ export function scoreResponses(
 ): ScoredResponse[] {
   return responses.map((res) => {
     const q = questions.find((q) => q.id === res.questionId);
-    if (!q) return { questionId: res.questionId, isCorrect: false, marksAwarded: 0 };
+    if (!q)
+      return { questionId: res.questionId, isCorrect: false, marksAwarded: 0 };
 
     const posMarks = q.positiveMarks;
     const negMarks = q.negativeMarks;
 
     if (q.type === QuestionType.MCQ) {
       const correctOption = q.options.find((o) => o.isCorrect);
-      const isCorrect = !!correctOption && res.selectedOptionIds?.[0] === correctOption.id;
+      const isCorrect =
+        !!correctOption && res.selectedOptionIds?.[0] === correctOption.id;
       return {
         questionId: q.id,
         isCorrect,
-        marksAwarded: isCorrect ? posMarks : res.selectedOptionIds?.length ? -negMarks : 0,
+        marksAwarded: isCorrect
+          ? posMarks
+          : res.selectedOptionIds?.length
+            ? -negMarks
+            : 0,
       };
     }
 
@@ -42,7 +48,8 @@ export function scoreResponses(
     }
 
     if (q.type === QuestionType.INTEGER) {
-      const isCorrect = res.integerAnswer !== null && res.integerAnswer === q.correctInteger;
+      const isCorrect =
+        res.integerAnswer !== null && res.integerAnswer === q.correctInteger;
       return {
         questionId: q.id,
         isCorrect,

@@ -11,7 +11,10 @@ export class ExamTypesService {
     private readonly repo: Repository<ExamType>,
   ) {}
 
-  async findAll(tenantId: string, includeInactive = false): Promise<ExamType[]> {
+  async findAll(
+    tenantId: string,
+    includeInactive = false,
+  ): Promise<ExamType[]> {
     const qb = this.repo
       .createQueryBuilder('e')
       .where('e.tenantId = :tenantId', { tenantId });
@@ -26,7 +29,11 @@ export class ExamTypesService {
     return this.repo.save(entity);
   }
 
-  async update(tenantId: string, id: string, dto: UpdateExamTypeDto): Promise<ExamType> {
+  async update(
+    tenantId: string,
+    id: string,
+    dto: UpdateExamTypeDto,
+  ): Promise<ExamType> {
     const entity = await this.repo.findOne({ where: { id, tenantId } });
     if (!entity) throw new NotFoundException('Exam type not found');
     Object.assign(entity, dto);
@@ -51,7 +58,9 @@ export class ExamTypesService {
     ];
 
     for (const d of defaults) {
-      const exists = await this.repo.findOne({ where: { tenantId, slug: d.slug } });
+      const exists = await this.repo.findOne({
+        where: { tenantId, slug: d.slug },
+      });
       if (!exists) await this.repo.save(this.repo.create({ ...d, tenantId }));
     }
   }

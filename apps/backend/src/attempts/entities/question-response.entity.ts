@@ -35,7 +35,11 @@ export class QuestionResponse {
   @Column('text', { nullable: true })
   subjectiveAnswer: string;
 
-  @Column({ type: 'enum', enum: ResponseStatus, default: ResponseStatus.UNATTEMPTED })
+  @Column({
+    type: 'enum',
+    enum: ResponseStatus,
+    default: ResponseStatus.UNATTEMPTED,
+  })
   status: ResponseStatus;
 
   @Column({ default: 0 })

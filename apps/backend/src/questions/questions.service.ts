@@ -14,7 +14,11 @@ export class QuestionsService {
     private readonly optionRepo: Repository<QuestionOption>,
   ) {}
 
-  async create(tenantId: string, userId: string, dto: CreateQuestionDto): Promise<Question> {
+  async create(
+    tenantId: string,
+    userId: string,
+    dto: CreateQuestionDto,
+  ): Promise<Question> {
     const question = this.questionRepo.create({
       ...dto,
       tenantId,
@@ -26,18 +30,32 @@ export class QuestionsService {
 
   async findAll(
     tenantId: string,
-    filters: { subject?: string; topic?: string; difficulty?: Difficulty; type?: QuestionType; isApproved?: boolean },
+    filters: {
+      subject?: string;
+      topic?: string;
+      difficulty?: Difficulty;
+      type?: QuestionType;
+      isApproved?: boolean;
+    },
   ): Promise<Question[]> {
     const qb = this.questionRepo
       .createQueryBuilder('q')
       .leftJoinAndSelect('q.options', 'options')
       .where('q.tenantId = :tenantId', { tenantId });
 
-    if (filters.subject) qb.andWhere('q.subject = :subject', { subject: filters.subject });
-    if (filters.topic) qb.andWhere('q.topic = :topic', { topic: filters.topic });
-    if (filters.difficulty) qb.andWhere('q.difficulty = :difficulty', { difficulty: filters.difficulty });
+    if (filters.subject)
+      qb.andWhere('q.subject = :subject', { subject: filters.subject });
+    if (filters.topic)
+      qb.andWhere('q.topic = :topic', { topic: filters.topic });
+    if (filters.difficulty)
+      qb.andWhere('q.difficulty = :difficulty', {
+        difficulty: filters.difficulty,
+      });
     if (filters.type) qb.andWhere('q.type = :type', { type: filters.type });
-    if (filters.isApproved !== undefined) qb.andWhere('q.isApproved = :isApproved', { isApproved: filters.isApproved });
+    if (filters.isApproved !== undefined)
+      qb.andWhere('q.isApproved = :isApproved', {
+        isApproved: filters.isApproved,
+      });
 
     return qb.orderBy('q.createdAt', 'DESC').getMany();
   }
@@ -51,7 +69,11 @@ export class QuestionsService {
     return q;
   }
 
-  async update(tenantId: string, id: string, dto: Partial<CreateQuestionDto>): Promise<Question> {
+  async update(
+    tenantId: string,
+    id: string,
+    dto: Partial<CreateQuestionDto>,
+  ): Promise<Question> {
     const q = await this.findOne(tenantId, id);
     Object.assign(q, dto);
     if (dto.options) {

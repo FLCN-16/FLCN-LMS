@@ -1,6 +1,6 @@
 export interface ExamType {
   id: string
-  tenantId?: string
+  instituteId?: string
   slug: string
   label: string
   description?: string

@@ -1,11 +1,11 @@
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
 
 import { AspectRatio } from "@flcn-lms/ui/components/aspect-ratio"
-import { Heading, Text } from "@flcn-lms/ui/components/typography"
 import { Button } from "@flcn-lms/ui/components/button"
-
+import { Heading, Text } from "@flcn-lms/ui/components/typography"
 import { cn } from "@flcn-lms/ui/lib/utils"
+
 import formatPrice from "@/lib/format-price"
 
 interface CourseCardProps {

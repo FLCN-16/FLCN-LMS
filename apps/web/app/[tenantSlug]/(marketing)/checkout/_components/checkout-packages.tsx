@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@flcn-lms/ui/components/card"
+
 import CoursePackage from "@/components/course/package"
 
 const checkoutPackages = [

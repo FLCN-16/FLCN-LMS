@@ -1,12 +1,12 @@
 "use client"
 
-import * as React from "react"
-import { Dialog as DialogPrimitive } from "radix-ui"
-
-import { cn } from "@flcn-lms/ui/lib/utils"
-import { Button } from "@flcn-lms/ui/components/button"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Dialog as DialogPrimitive } from "radix-ui"
+import * as React from "react"
+
+import { Button } from "@flcn-lms/ui/components/button"
+import { cn } from "@flcn-lms/ui/lib/utils"
 
 function Dialog({
   ...props

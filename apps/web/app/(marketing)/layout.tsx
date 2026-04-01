@@ -1,7 +1,7 @@
 import type React from "react"
 
-import MarketingHeader from "./_components/header"
 import MarketingFooter from "./_components/footer"
+import MarketingHeader from "./_components/header"
 
 import "@flcn-lms/ui/globals.css"
 

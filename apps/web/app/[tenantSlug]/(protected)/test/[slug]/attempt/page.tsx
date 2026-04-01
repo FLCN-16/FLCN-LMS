@@ -1,6 +1,6 @@
-import { getTranslations } from "next-intl/server"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { getTranslations } from "next-intl/server"
 
 import { Button } from "@flcn-lms/ui/components/button"
 

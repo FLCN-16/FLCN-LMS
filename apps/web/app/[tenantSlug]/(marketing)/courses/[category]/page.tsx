@@ -1,5 +1,6 @@
-import CourseCard from "@/components/card/course"
 import { getTranslations } from "next-intl/server"
+
+import CourseCard from "@/components/card/course"
 
 interface CourseByCategoryPageParams {
   params: Promise<{ category: string }>

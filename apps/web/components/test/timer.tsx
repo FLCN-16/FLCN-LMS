@@ -1,17 +1,17 @@
 "use client"
 
-import React from "react"
 import dayjs from "dayjs"
 import { useTranslations } from "next-intl"
+import React from "react"
 
 import { Card, CardContent } from "@flcn-lms/ui/components/card"
 import { Text } from "@flcn-lms/ui/components/typography"
 
 import useTimer from "@/hooks/use-timer"
 import {
+  TestTimeExpiredEvent,
   TestTimePauseEvent,
   TestTimeResumeEvent,
-  TestTimeExpiredEvent,
 } from "@/lib/test-timer-events"
 
 function TestTimer() {

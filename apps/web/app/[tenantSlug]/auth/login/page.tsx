@@ -1,10 +1,11 @@
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
 import Image from "next/image"
+import Link from "next/link"
 
 import { Button } from "@flcn-lms/ui/components/button"
-import Link from "next/link"
+
 import LoginForm from "@/components/form/login-form"
 
 function AuthLogin() {

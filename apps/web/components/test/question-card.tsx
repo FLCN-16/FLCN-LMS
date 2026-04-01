@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
-
 import { CheckSquare, Square } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
+import { useEffect, useState } from "react"
 
 import { Badge } from "@flcn-lms/ui/components/badge"
 import {
@@ -21,12 +20,12 @@ import {
   ItemTitle,
 } from "@flcn-lms/ui/components/item"
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
+import { cn } from "@flcn-lms/ui/lib/utils"
+
 import {
   TestTimePauseEvent,
   TestTimeResumeEvent,
 } from "@/lib/test-timer-events"
-
-import { cn } from "@flcn-lms/ui/lib/utils"
 
 interface QuestionAnswerProps {
   answer: string

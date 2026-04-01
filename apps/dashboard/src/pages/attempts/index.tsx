@@ -1,7 +1,6 @@
+import { IconAlertTriangle, IconEye } from "@tabler/icons-react"
 import { Helmet } from "react-helmet-async"
 import { Link } from "react-router-dom"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { IconAlertTriangle, IconEye } from "@tabler/icons-react"
 
 import { Badge } from "@flcn-lms/ui/components/badge"
 import { Button } from "@flcn-lms/ui/components/button"
@@ -14,7 +13,7 @@ import {
   TableRow,
 } from "@flcn-lms/ui/components/table"
 
-import { attemptsApi } from "../../lib/api/attempts"
+import { useAttempts, useDisqualifyAttempt } from "@/queries/attempts"
 
 const STATUS_VARIANT = {
   IN_PROGRESS: "secondary",
@@ -30,17 +29,8 @@ function fmt(secs: number) {
 }
 
 export default function AttemptsPage() {
-  const qc = useQueryClient()
-
-  const { data: attempts = [], isLoading } = useQuery({
-    queryKey: ["attempts"],
-    queryFn: () => attemptsApi.list(),
-  })
-
-  const disqualifyMutation = useMutation({
-    mutationFn: (id: string) => attemptsApi.disqualify(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["attempts"] }),
-  })
+  const { data: attempts = [], isLoading } = useAttempts()
+  const disqualifyMutation = useDisqualifyAttempt()
 
   return (
     <>
@@ -50,7 +40,9 @@ export default function AttemptsPage() {
       <div className="px-4 lg:px-6">
         <div className="mb-4">
           <h2 className="text-xl font-semibold">Attempts</h2>
-          <p className="text-sm text-muted-foreground">{attempts.length} total attempts</p>
+          <p className="text-sm text-muted-foreground">
+            {attempts.length} total attempts
+          </p>
         </div>
 
         <div className="rounded-lg border">
@@ -70,30 +62,53 @@ export default function AttemptsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={8}
+                    className="py-8 text-center text-muted-foreground"
+                  >
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : attempts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={8}
+                    className="py-8 text-center text-muted-foreground"
+                  >
                     No attempts yet.
                   </TableCell>
                 </TableRow>
               ) : (
                 attempts.map((a) => (
-                  <TableRow key={a.id} className={a.isDisqualified ? "opacity-50" : ""}>
-                    <TableCell className="font-mono text-xs">{a.userId.slice(0, 8)}…</TableCell>
-                    <TableCell className="font-mono text-xs">{a.testId.slice(0, 8)}…</TableCell>
+                  <TableRow
+                    key={a.id}
+                    className={a.isDisqualified ? "opacity-50" : ""}
+                  >
+                    <TableCell className="font-mono text-xs">
+                      {a.userId.slice(0, 8)}…
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {a.testId.slice(0, 8)}…
+                    </TableCell>
                     <TableCell>{a.attemptNumber}</TableCell>
                     <TableCell>
-                      <Badge variant={STATUS_VARIANT[a.status]}>{a.status}</Badge>
+                      <Badge variant={STATUS_VARIANT[a.status]}>
+                        {a.status}
+                      </Badge>
                       {a.isDisqualified && (
-                        <Badge variant="destructive" className="ml-1">DQ</Badge>
+                        <Badge variant="destructive" className="ml-1">
+                          DQ
+                        </Badge>
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className={a.tabSwitchCount > 3 ? "text-destructive font-medium" : ""}>
+                      <span
+                        className={
+                          a.tabSwitchCount > 3
+                            ? "font-medium text-destructive"
+                            : ""
+                        }
+                      >
                         {a.tabSwitchCount}
                       </span>
                     </TableCell>
@@ -101,13 +116,20 @@ export default function AttemptsPage() {
                       {new Date(a.startedAt).toLocaleString()}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {a.remainingTimeSecs != null ? fmt(a.remainingTimeSecs) : "—"}
+                      {a.remainingTimeSecs != null
+                        ? fmt(a.remainingTimeSecs)
+                        : "—"}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         {a.status === "SUBMITTED" && (
-                          <Button size="icon" variant="ghost" className="size-7" asChild>
-                            <Link to={`/panel/attempts/${a.id}/result`}>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="size-7"
+                            asChild
+                          >
+                            <Link to={`/attempts/${a.id}/result`}>
                               <IconEye className="size-4" />
                             </Link>
                           </Button>
@@ -118,7 +140,9 @@ export default function AttemptsPage() {
                             variant="ghost"
                             className="size-7 text-destructive hover:text-destructive"
                             title="Disqualify"
-                            onClick={() => disqualifyMutation.mutate(a.id)}
+                            onClick={() =>
+                              disqualifyMutation.mutate({ attemptId: a.id })
+                            }
                           >
                             <IconAlertTriangle className="size-4" />
                           </Button>

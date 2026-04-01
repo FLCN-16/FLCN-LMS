@@ -1,1 +1,1 @@
-export { default } from "@flcn-lms/ui/postcss.config";
+export { default } from "@flcn-lms/ui/postcss.config"

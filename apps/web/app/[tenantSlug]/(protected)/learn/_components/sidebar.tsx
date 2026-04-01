@@ -1,12 +1,12 @@
-import React from "react"
-import Link from "next/link"
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
 import {
   Book01Icon,
   Settings05Icon,
   TransactionHistoryIcon,
 } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
+import React from "react"
+import Link from "next/link"
 
 import {
   Sidebar,

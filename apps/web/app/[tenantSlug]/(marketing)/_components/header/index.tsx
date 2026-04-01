@@ -1,8 +1,8 @@
-import dynamic from "next/dynamic"
 import { useTranslations } from "next-intl"
+import dynamic from "next/dynamic"
+import Link from "next/link"
 
 import { Button } from "@flcn-lms/ui/components/button"
-import { Skeleton } from "@flcn-lms/ui/components/skeleton"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -10,8 +10,8 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@flcn-lms/ui/components/navigation-menu"
+import { Skeleton } from "@flcn-lms/ui/components/skeleton"
 
-import Link from "next/link"
 import AppLogo from "@/components/logo"
 
 const MobileNav = dynamic(() => import("./mobile-nav"), {

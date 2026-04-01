@@ -1,7 +1,11 @@
+import {
+  IconArrowLeft,
+  IconPencil,
+  IconPlus,
+  IconSend,
+} from "@tabler/icons-react"
 import { Helmet } from "react-helmet-async"
 import { Link, useParams } from "react-router-dom"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { IconArrowLeft, IconPencil, IconPlus, IconSend } from "@tabler/icons-react"
 
 import { Badge } from "@flcn-lms/ui/components/badge"
 import { Button } from "@flcn-lms/ui/components/button"
@@ -14,27 +18,24 @@ import {
   TableRow,
 } from "@flcn-lms/ui/components/table"
 
-import { testSeriesApi } from "../../lib/api/test-series"
+import {
+  usePublishTest,
+  useTestSeriesDetail,
+  useTestsList,
+} from "@/queries/test-series"
 
 export default function TestsPage() {
   const { seriesId } = useParams<{ seriesId: string }>()
-  const qc = useQueryClient()
+  const publishMutation = usePublishTest()
 
-  const { data: series } = useQuery({
-    queryKey: ["test-series", seriesId],
-    queryFn: () => testSeriesApi.get(seriesId!),
+  const { data: series } = useTestSeriesDetail({
+    variables: { id: seriesId! },
     enabled: !!seriesId,
   })
 
-  const { data: tests = [], isLoading } = useQuery({
-    queryKey: ["tests", seriesId],
-    queryFn: () => testSeriesApi.listTests(seriesId!),
+  const { data: tests = [], isLoading } = useTestsList({
+    variables: { seriesId: seriesId! },
     enabled: !!seriesId,
-  })
-
-  const publishMutation = useMutation({
-    mutationFn: (testId: string) => testSeriesApi.publishTest(seriesId!, testId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["tests", seriesId] }),
   })
 
   return (
@@ -45,16 +46,20 @@ export default function TestsPage() {
       <div className="px-4 lg:px-6">
         <div className="mb-4 flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link to="/panel/test-series">
+            <Link to="/test-series">
               <IconArrowLeft className="size-4" />
             </Link>
           </Button>
           <div className="flex-1">
-            <h2 className="text-xl font-semibold">{series?.title ?? "Tests"}</h2>
-            <p className="text-sm text-muted-foreground">{tests.length} tests</p>
+            <h2 className="text-xl font-semibold">
+              {series?.title ?? "Tests"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {tests.length} tests
+            </p>
           </div>
           <Button size="sm" asChild>
-            <Link to={`/panel/test-series/${seriesId}/tests/new`}>
+            <Link to={`/test-series/${seriesId}/tests/new`}>
               <IconPlus className="size-4" />
               Add Test
             </Link>
@@ -78,16 +83,22 @@ export default function TestsPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={8}
+                    className="py-8 text-center text-muted-foreground"
+                  >
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : tests.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={8}
+                    className="py-8 text-center text-muted-foreground"
+                  >
                     No tests yet.{" "}
                     <Link
-                      to={`/panel/test-series/${seriesId}/tests/new`}
+                      to={`/test-series/${seriesId}/tests/new`}
                       className="underline underline-offset-4"
                     >
                       Add the first test.
@@ -97,7 +108,9 @@ export default function TestsPage() {
               ) : (
                 tests.map((t) => (
                   <TableRow key={t.id}>
-                    <TableCell className="text-muted-foreground">{t.order}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {t.order}
+                    </TableCell>
                     <TableCell className="font-medium">{t.title}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{t.testType}</Badge>
@@ -112,8 +125,15 @@ export default function TestsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button size="icon" variant="ghost" className="size-7" asChild>
-                          <Link to={`/panel/test-series/${seriesId}/tests/${t.id}/edit`}>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="size-7"
+                          asChild
+                        >
+                          <Link
+                            to={`/test-series/${seriesId}/tests/${t.id}/edit`}
+                          >
                             <IconPencil className="size-4" />
                           </Link>
                         </Button>
@@ -123,7 +143,16 @@ export default function TestsPage() {
                             variant="ghost"
                             className="size-7"
                             title="Publish"
-                            onClick={() => publishMutation.mutate(t.id)}
+                            onClick={() => {
+                              if (!seriesId) {
+                                return
+                              }
+
+                              publishMutation.mutate({
+                                seriesId,
+                                testId: t.id,
+                              })
+                            }}
                           >
                             <IconSend className="size-4" />
                           </Button>

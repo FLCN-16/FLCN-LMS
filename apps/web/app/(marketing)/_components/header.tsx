@@ -1,7 +1,8 @@
 import Link from "next/link"
 
-import AppLogo from "@/components/logo"
 import { Button } from "@flcn-lms/ui/components/button"
+
+import AppLogo from "@/components/logo"
 
 function MarketingHeader() {
   return (

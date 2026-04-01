@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server"
+
 import { SidebarInset, SidebarProvider } from "@flcn-lms/ui/components/sidebar"
 
-import Sidebar from "./_components/sidebar"
 import CourseHeader from "./_components/header"
+import Sidebar from "./_components/sidebar"
 
 async function CourseConsumptionLayout({
   children,

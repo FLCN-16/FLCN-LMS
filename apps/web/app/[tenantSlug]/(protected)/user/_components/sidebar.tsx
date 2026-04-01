@@ -1,7 +1,3 @@
-import React from "react"
-import Link from "next/link"
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Book01Icon,
   Bookmark02Icon,
@@ -9,6 +5,10 @@ import {
   Settings05Icon,
   TransactionHistoryIcon,
 } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
+import React from "react"
+import Link from "next/link"
 
 import {
   Sidebar,

@@ -1,0 +1,19 @@
+{
+  "name": "@flcn-lms/prettier-config",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "format": "prettier --ignore-path ../../.prettierignore --config ../../prettier.config.mjs --write ."
+  },
+  "exports": {
+    ".": "./index.mjs"
+  },
+  "peerDependencies": {
+    "prettier": "^3.0.0"
+  },
+  "dependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "prettier-plugin-tailwindcss": "^0.7.2"
+  }
+}

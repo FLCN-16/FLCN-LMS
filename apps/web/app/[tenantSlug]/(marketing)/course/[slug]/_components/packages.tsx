@@ -1,9 +1,9 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import { useTranslations } from "next-intl"
-import { Swiper, SwiperSlide } from "swiper/react"
 import { FreeMode, Mousewheel } from "swiper/modules"
+import { Swiper, SwiperSlide } from "swiper/react"
+import dynamic from "next/dynamic"
 
 import { Heading } from "@flcn-lms/ui/components/typography"
 

@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Edit02Icon, User02Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 
 import { Button } from "@flcn-lms/ui/components/button"
 import {

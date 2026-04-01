@@ -1,8 +1,8 @@
 import { type Metadata } from "next"
 import { type OpenGraph } from "next/dist/lib/metadata/types/opengraph-types"
 
-import logoImg from "@/public/logo.svg"
 import logoIconImg from "@/public/logo-icon.svg"
+import logoImg from "@/public/logo.svg"
 
 // ✅ Union type is simpler and idiomatic for a binary config value
 type ColorMode = "light" | "dark"

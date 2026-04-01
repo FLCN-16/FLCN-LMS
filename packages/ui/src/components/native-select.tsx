@@ -1,8 +1,8 @@
+import { UnfoldMoreIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import * as React from "react"
 
 import { cn } from "@flcn-lms/ui/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { UnfoldMoreIcon } from "@hugeicons/core-free-icons"
 
 type NativeSelectProps = Omit<React.ComponentProps<"select">, "size"> & {
   size?: "sm" | "default"

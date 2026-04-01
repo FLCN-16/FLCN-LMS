@@ -1,9 +1,14 @@
 "use client"
 
-import * as React from "react"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
+import {
+  ArrowDown01Icon,
+  Cancel01Icon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import * as React from "react"
 
-import { cn } from "@flcn-lms/ui/lib/utils"
 import { Button } from "@flcn-lms/ui/components/button"
 import {
   InputGroup,
@@ -11,12 +16,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@flcn-lms/ui/components/input-group"
-import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  ArrowDown01Icon,
-  Cancel01Icon,
-  Tick02Icon,
-} from "@hugeicons/core-free-icons"
+import { cn } from "@flcn-lms/ui/lib/utils"
 
 const Combobox = ComboboxPrimitive.Root
 

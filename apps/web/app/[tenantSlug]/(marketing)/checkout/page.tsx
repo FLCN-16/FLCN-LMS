@@ -1,6 +1,7 @@
-import dynamic from "next/dynamic"
-import metaObject from "@/lib/meta-config"
 import { getTranslations } from "next-intl/server"
+import dynamic from "next/dynamic"
+
+import metaObject from "@/lib/meta-config"
 
 const CheckoutSummary = dynamic(() => import("./_components/checkout-summary"))
 const CheckoutPackages = dynamic(

@@ -11,7 +11,6 @@ import {
 import { Input } from "@flcn-lms/ui/components/input"
 import { cn } from "@flcn-lms/ui/lib/utils"
 
-
 function ForgotPasswordPage({
   className,
   ...props

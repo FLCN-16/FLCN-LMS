@@ -1,17 +1,17 @@
-import Link from "next/link"
-import { getTranslations } from "next-intl/server"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { StarIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { getTranslations } from "next-intl/server"
+import Link from "next/link"
 
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@flcn-lms/ui/components/avatar"
-import { Heading, Text } from "@flcn-lms/ui/components/typography"
 import { Badge } from "@flcn-lms/ui/components/badge"
 import { Button } from "@flcn-lms/ui/components/button"
 import { Separator } from "@flcn-lms/ui/components/separator"
+import { Heading, Text } from "@flcn-lms/ui/components/typography"
 import { cn } from "@flcn-lms/ui/lib/utils"
 
 async function CourseDetailHeader() {

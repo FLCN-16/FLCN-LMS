@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic"
+
 import { AspectRatio } from "@flcn-lms/ui/components/aspect-ratio"
 
 const PlayerComponent = dynamic(() => import("@/components/player"))

@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@flcn-lms/ui/components/card"
+
 import CourseResource from "@/components/card/course-resource"
 
 function CourseModuleLessons() {

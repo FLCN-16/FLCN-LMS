@@ -1,11 +1,21 @@
 import { useState } from "react"
+
+import {
+  IconDatabase,
+  IconPencil,
+  IconPlus,
+  IconTrash,
+} from "@tabler/icons-react"
 import { Helmet } from "react-helmet-async"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { IconPencil, IconPlus, IconDatabase, IconTrash } from "@tabler/icons-react"
 
 import { Badge } from "@flcn-lms/ui/components/badge"
 import { Button } from "@flcn-lms/ui/components/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@flcn-lms/ui/components/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@flcn-lms/ui/components/card"
 import {
   Dialog,
   DialogContent,
@@ -19,47 +29,79 @@ import { Switch } from "@flcn-lms/ui/components/switch"
 import { Textarea } from "@flcn-lms/ui/components/textarea"
 
 import {
-  examTypesApi,
+  useCreateExamType,
+  useDeleteExamType,
+  useExamTypesList,
+  useSeedExamTypes,
+  useUpdateExamType,
   type ExamType,
-  type CreateExamTypePayload,
-} from "../../lib/api/exam-types"
+} from "@/queries/exam-types"
+
+function ExamTypeForm({
+  defaultValues,
+}: {
+  defaultValues?: Partial<ExamType>
+}) {
+  return (
+    <FieldGroup>
+      {!defaultValues && (
+        <Field>
+          <FieldLabel>Slug</FieldLabel>
+          <Input name="slug" placeholder="JEE_MAINS" required />
+        </Field>
+      )}
+      <Field>
+        <FieldLabel>Label</FieldLabel>
+        <Input
+          name="label"
+          placeholder="JEE Mains"
+          required
+          defaultValue={defaultValues?.label}
+        />
+      </Field>
+      <Field>
+        <FieldLabel>Description</FieldLabel>
+        <Textarea
+          name="description"
+          rows={2}
+          defaultValue={defaultValues?.description ?? ""}
+        />
+      </Field>
+      <Field>
+        <FieldLabel>Order</FieldLabel>
+        <Input
+          name="order"
+          type="number"
+          defaultValue={defaultValues?.order ?? 0}
+          className="max-w-xs"
+        />
+      </Field>
+    </FieldGroup>
+  )
+}
 
 export default function ExamTypesPage() {
-  const qc = useQueryClient()
   const [createOpen, setCreateOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<ExamType | null>(null)
 
-  const { data: examTypes = [], isLoading } = useQuery({
-    queryKey: ["exam-types"],
-    queryFn: () => examTypesApi.list(true), // include inactive
+  const { data: examTypes = [], isLoading } = useExamTypesList({
+    variables: { includeInactive: true },
   })
 
-  const createMutation = useMutation({
-    mutationFn: (data: CreateExamTypePayload) => examTypesApi.create(data),
+  const createMutation = useCreateExamType({
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["exam-types"] })
       setCreateOpen(false)
     },
   })
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof examTypesApi.update>[1] }) =>
-      examTypesApi.update(id, data),
+  const updateMutation = useUpdateExamType({
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["exam-types"] })
       setEditTarget(null)
     },
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => examTypesApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["exam-types"] }),
-  })
-
-  const seedMutation = useMutation({
-    mutationFn: () => examTypesApi.seed(),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["exam-types"] }),
-  })
+  const deleteMutation = useDeleteExamType()
+  const seedMutation = useSeedExamTypes()
 
   function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -86,29 +128,6 @@ export default function ExamTypesPage() {
     })
   }
 
-  const ExamTypeForm = ({ defaultValues }: { defaultValues?: Partial<ExamType> }) => (
-    <FieldGroup>
-      {!defaultValues && (
-        <Field>
-          <FieldLabel>Slug</FieldLabel>
-          <Input name="slug" placeholder="JEE_MAINS" required />
-        </Field>
-      )}
-      <Field>
-        <FieldLabel>Label</FieldLabel>
-        <Input name="label" placeholder="JEE Mains" required defaultValue={defaultValues?.label} />
-      </Field>
-      <Field>
-        <FieldLabel>Description</FieldLabel>
-        <Textarea name="description" rows={2} defaultValue={defaultValues?.description ?? ""} />
-      </Field>
-      <Field>
-        <FieldLabel>Order</FieldLabel>
-        <Input name="order" type="number" defaultValue={defaultValues?.order ?? 0} className="max-w-xs" />
-      </Field>
-    </FieldGroup>
-  )
-
   return (
     <>
       <Helmet>
@@ -118,7 +137,9 @@ export default function ExamTypesPage() {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold">Exam Types</h2>
-            <p className="text-sm text-muted-foreground">{examTypes.length} types</p>
+            <p className="text-sm text-muted-foreground">
+              {examTypes.length} types
+            </p>
           </div>
           <div className="flex gap-2">
             <Button
@@ -162,22 +183,31 @@ export default function ExamTypesPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <CardTitle className="text-sm">{et.label}</CardTitle>
-                      <p className="font-mono text-xs text-muted-foreground">{et.slug}</p>
+                      <p className="font-mono text-xs text-muted-foreground">
+                        {et.slug}
+                      </p>
                     </div>
                     <Switch
                       checked={et.isActive}
                       onCheckedChange={(checked) =>
-                        updateMutation.mutate({ id: et.id, data: { isActive: checked } })
+                        updateMutation.mutate({
+                          id: et.id,
+                          data: { isActive: checked },
+                        })
                       }
                     />
                   </div>
                 </CardHeader>
                 <CardContent>
                   {et.description && (
-                    <p className="mb-3 text-xs text-muted-foreground">{et.description}</p>
+                    <p className="mb-3 text-xs text-muted-foreground">
+                      {et.description}
+                    </p>
                   )}
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">order {et.order}</Badge>
+                    <Badge variant="outline" className="text-xs">
+                      order {et.order}
+                    </Badge>
                     <div className="ml-auto flex gap-1">
                       <Button
                         size="icon"
@@ -191,7 +221,7 @@ export default function ExamTypesPage() {
                         size="icon"
                         variant="ghost"
                         className="size-7 text-destructive hover:text-destructive"
-                        onClick={() => deleteMutation.mutate(et.id)}
+                        onClick={() => deleteMutation.mutate({ id: et.id })}
                       >
                         <IconTrash className="size-3.5" />
                       </Button>
@@ -205,7 +235,10 @@ export default function ExamTypesPage() {
       </div>
 
       {/* Edit dialog */}
-      <Dialog open={!!editTarget} onOpenChange={(o) => !o && setEditTarget(null)}>
+      <Dialog
+        open={!!editTarget}
+        onOpenChange={(o) => !o && setEditTarget(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit — {editTarget?.label}</DialogTitle>

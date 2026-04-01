@@ -3,7 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "license": "PROPRIETARY",
+  "scripts": {
+    "format": "prettier --ignore-path ../../.prettierignore --config ../../prettier.config.mjs --write ."
+  },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@flcn-lms/prettier-config": "workspace:*",
+    "prettier": "^3.8.1"
   }
 }

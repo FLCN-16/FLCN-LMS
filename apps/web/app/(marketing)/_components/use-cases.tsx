@@ -1,5 +1,6 @@
 import Image from "next/image"
 
+import { AspectRatio } from "@flcn-lms/ui/components/aspect-ratio"
 import { Button } from "@flcn-lms/ui/components/button"
 import {
   Card,
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@flcn-lms/ui/components/card"
-import { AspectRatio } from "@flcn-lms/ui/components/aspect-ratio"
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
 
 const USE_CASES = [

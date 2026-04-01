@@ -1,13 +1,13 @@
 import Image from "next/image"
 
 import type { CartItem } from "@flcn-lms/types"
-import { Text } from "@flcn-lms/ui/components/typography"
 import {
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardContent,
 } from "@flcn-lms/ui/components/card"
+import { Text } from "@flcn-lms/ui/components/typography"
 
 import formatPrice from "@/lib/format-price"
 

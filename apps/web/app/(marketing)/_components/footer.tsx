@@ -1,5 +1,6 @@
-import AppLogo from "@/components/logo"
 import { getTranslations } from "next-intl/server"
+
+import AppLogo from "@/components/logo"
 
 async function MarketingFooter() {
   const tFooter = await getTranslations("footer")

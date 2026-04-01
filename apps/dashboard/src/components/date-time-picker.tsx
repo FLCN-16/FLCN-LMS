@@ -1,12 +1,21 @@
 import { useState } from "react"
-import { format, setHours, setMinutes } from "date-fns"
+
 import { IconCalendar, IconClock, IconX } from "@tabler/icons-react"
+import { format, setHours, setMinutes } from "date-fns"
 
 import { Button } from "@flcn-lms/ui/components/button"
 import { Calendar } from "@flcn-lms/ui/components/calendar"
-import { Field, FieldDescription, FieldLabel } from "@flcn-lms/ui/components/field"
+import {
+  Field,
+  FieldDescription,
+  FieldLabel,
+} from "@flcn-lms/ui/components/field"
 import { Input } from "@flcn-lms/ui/components/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@flcn-lms/ui/components/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@flcn-lms/ui/components/popover"
 import { Separator } from "@flcn-lms/ui/components/separator"
 import { cn } from "@flcn-lms/ui/lib/utils"
 
@@ -22,16 +31,22 @@ interface BaseProps {
 
 // ─── DateTimePicker ──────────────────────────────────────────────────────────
 
-export function DateTimePicker({ label, name, description, defaultValue, optional }: BaseProps) {
+export function DateTimePicker({
+  label,
+  name,
+  description,
+  defaultValue,
+  optional,
+}: BaseProps) {
   const [date, setDate] = useState<Date | undefined>(
-    defaultValue ? new Date(defaultValue) : undefined,
+    defaultValue ? new Date(defaultValue) : undefined
   )
   const [open, setOpen] = useState(false)
 
   function handleDaySelect(day: Date | undefined) {
     if (!day) return setDate(undefined)
     setDate((prev) =>
-      setMinutes(setHours(day, prev?.getHours() ?? 0), prev?.getMinutes() ?? 0),
+      setMinutes(setHours(day, prev?.getHours() ?? 0), prev?.getMinutes() ?? 0)
     )
   }
 
@@ -48,7 +63,11 @@ export function DateTimePicker({ label, name, description, defaultValue, optiona
     <Field>
       <FieldLabel>
         {label}
-        {optional && <span className="ml-1.5 text-xs font-normal text-muted-foreground">(optional)</span>}
+        {optional && (
+          <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+            (optional)
+          </span>
+        )}
       </FieldLabel>
 
       {/* Hidden input carries the value for FormData */}
@@ -86,8 +105,13 @@ export function DateTimePicker({ label, name, description, defaultValue, optiona
                 type="button"
                 variant="ghost"
                 size="icon"
-                className={cn("ml-auto size-7 text-muted-foreground hover:text-foreground")}
-                onClick={() => { setDate(undefined); setOpen(false) }}
+                className={cn(
+                  "ml-auto size-7 text-muted-foreground hover:text-foreground"
+                )}
+                onClick={() => {
+                  setDate(undefined)
+                  setOpen(false)
+                }}
               >
                 <IconX className="size-3.5" />
               </Button>
@@ -103,9 +127,15 @@ export function DateTimePicker({ label, name, description, defaultValue, optiona
 
 // ─── DatePicker (date only, no time) ────────────────────────────────────────
 
-export function DatePicker({ label, name, description, defaultValue, optional }: BaseProps) {
+export function DatePicker({
+  label,
+  name,
+  description,
+  defaultValue,
+  optional,
+}: BaseProps) {
   const [date, setDate] = useState<Date | undefined>(
-    defaultValue ? new Date(defaultValue) : undefined,
+    defaultValue ? new Date(defaultValue) : undefined
   )
   const [open, setOpen] = useState(false)
 
@@ -113,10 +143,18 @@ export function DatePicker({ label, name, description, defaultValue, optional }:
     <Field>
       <FieldLabel>
         {label}
-        {optional && <span className="ml-1.5 text-xs font-normal text-muted-foreground">(optional)</span>}
+        {optional && (
+          <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+            (optional)
+          </span>
+        )}
       </FieldLabel>
 
-      <input type="hidden" name={name} value={date ? format(date, "yyyy-MM-dd") : ""} />
+      <input
+        type="hidden"
+        name={name}
+        value={date ? format(date, "yyyy-MM-dd") : ""}
+      />
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -135,7 +173,10 @@ export function DatePicker({ label, name, description, defaultValue, optional }:
           <Calendar
             mode="single"
             selected={date}
-            onSelect={(d) => { setDate(d); setOpen(false) }}
+            onSelect={(d) => {
+              setDate(d)
+              setOpen(false)
+            }}
           />
           {date && (
             <div className="border-t p-2">
@@ -144,7 +185,10 @@ export function DatePicker({ label, name, description, defaultValue, optional }:
                 variant="ghost"
                 size="sm"
                 className="w-full text-xs text-muted-foreground"
-                onClick={() => { setDate(undefined); setOpen(false) }}
+                onClick={() => {
+                  setDate(undefined)
+                  setOpen(false)
+                }}
               >
                 Clear
               </Button>

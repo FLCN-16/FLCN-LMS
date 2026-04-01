@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl"
+
 import { Separator } from "@flcn-lms/ui/components/separator"
 import { SidebarTrigger } from "@flcn-lms/ui/components/sidebar"
 

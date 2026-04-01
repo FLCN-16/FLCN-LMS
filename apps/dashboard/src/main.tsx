@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { createRoot } from "react-dom/client"
 import { HelmetProvider } from "react-helmet-async"
 
-import AuthProvider from "@/contexts/auth.tsx"
+import AuthProvider from "@/features/auth/auth.context.tsx"
 
 import App from "./App.tsx"
 

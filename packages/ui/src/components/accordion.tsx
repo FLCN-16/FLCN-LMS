@@ -1,11 +1,11 @@
 "use client"
 
-import * as React from "react"
+import { ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { Accordion as AccordionPrimitive } from "radix-ui"
+import * as React from "react"
 
 import { cn } from "@flcn-lms/ui/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowDown01Icon, ArrowUp01Icon } from "@hugeicons/core-free-icons"
 
 function Accordion({
   className,

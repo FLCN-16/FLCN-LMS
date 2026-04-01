@@ -4,7 +4,6 @@ import { getLocale, getMessages } from "next-intl/server"
 import { TooltipProvider } from "@flcn-lms/ui/components/tooltip"
 
 import { ThemeProvider } from "@/components/theme-provider"
-
 import { isRtl, type Locale } from "@/i18n/config"
 
 async function RootLayout({ children }: { children: React.ReactNode }) {

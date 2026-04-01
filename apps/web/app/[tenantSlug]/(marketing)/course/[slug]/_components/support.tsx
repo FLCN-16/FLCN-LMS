@@ -1,8 +1,7 @@
-import { getTranslations } from "next-intl/server"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { QuestionIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { getTranslations } from "next-intl/server"
 
-import { Heading } from "@flcn-lms/ui/components/typography"
 import {
   Accordion,
   AccordionContent,
@@ -16,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@flcn-lms/ui/components/card"
+import { Heading } from "@flcn-lms/ui/components/typography"
 
 async function CourseDetailSupport() {
   const t = await getTranslations("course.support")

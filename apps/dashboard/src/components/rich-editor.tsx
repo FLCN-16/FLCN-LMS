@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef } from "react"
+
 import Quill from "quill"
+
 import "quill/dist/quill.snow.css"
 
 import { cn } from "@flcn-lms/ui/lib/utils"
@@ -54,7 +56,8 @@ export function RichEditor({
     quillRef.current = quill
 
     return () => {
-      if (toolbarRef.current) toolbarRef.current.innerHTML = buildToolbarHTML(mode)
+      if (toolbarRef.current)
+        toolbarRef.current.innerHTML = buildToolbarHTML(mode)
       if (editorRef.current) editorRef.current.innerHTML = ""
       quillRef.current = null
     }
@@ -62,11 +65,21 @@ export function RichEditor({
   }, [])
 
   return (
-    <div className={cn("overflow-hidden rounded-md border border-input", className)}>
+    <div
+      className={cn(
+        "overflow-hidden rounded-md border border-input",
+        className
+      )}
+    >
       {/* Scoped style — lives outside editorRef so Quill never wipes it */}
       <style>{`#re-${uid} .ql-editor { min-height: ${minHeight}px; padding: 0.75rem; font-size: 0.875rem; font-family: inherit; } #re-${uid} .ql-editor.ql-blank::before { font-style: normal; color: var(--muted-foreground); }`}</style>
 
-      <input ref={hiddenRef} type="hidden" name={name} defaultValue={defaultValue} />
+      <input
+        ref={hiddenRef}
+        type="hidden"
+        name={name}
+        defaultValue={defaultValue}
+      />
 
       <div
         ref={toolbarRef}

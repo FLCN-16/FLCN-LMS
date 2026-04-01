@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server"
+
 import { SidebarInset, SidebarProvider } from "@flcn-lms/ui/components/sidebar"
 
-import UserSidebar from "./_components/sidebar"
 import UserHeader from "./_components/header"
+import UserSidebar from "./_components/sidebar"
 
 async function UserLayout({ children }: { children: React.ReactNode }) {
   const footerTranslations = await getTranslations("footer")

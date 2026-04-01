@@ -1,14 +1,109 @@
-export type TestType = 'FULL_LENGTH' | 'SECTIONAL' | 'CHAPTER_WISE' | 'DPP' | 'PREVIOUS_YEAR'
-export type ResultMode = 'INSTANT' | 'AFTER_END_DATE' | 'MANUAL'
+export type CourseStatus = "DRAFT" | "REVIEW" | "PUBLISHED" | "ARCHIVED"
+export type LessonType = "VIDEO" | "LIVE" | "PDF" | "QUIZ" | "DPP" | "TEXT"
+
+export type TestType =
+  | "FULL_LENGTH"
+  | "SECTIONAL"
+  | "CHAPTER_WISE"
+  | "DPP"
+  | "PREVIOUS_YEAR"
+
+export type ResultMode = "INSTANT" | "AFTER_END_DATE" | "MANUAL"
+
+export interface CourseModuleLessonAttachment {
+  name: string
+  url: string
+}
+
+export interface CourseLesson {
+  id: string
+  moduleId: string
+  slug: string
+  title: string
+  type: LessonType
+  videoUrl?: string
+  videoDurationSecs?: number
+  pdfUrl?: string
+  textContent?: string
+  liveSessionId?: string
+  isFree: boolean
+  order: number
+  thumbnailUrl?: string
+  attachments?: CourseModuleLessonAttachment[]
+  createdAt: string
+}
+
+export interface CourseModule {
+  id: string
+  courseId: string
+  slug: string
+  title: string
+  description?: string
+  order: number
+  isFree: boolean
+  lessons?: CourseLesson[]
+}
+
+export interface CourseEnrollment {
+  id: string
+  courseId: string
+  userId: string
+  enrolledAt: string
+  expiresAt?: string
+  paymentId?: string
+  progressPercent: number
+}
+
+export interface LessonProgress {
+  id: string
+  enrollmentId: string
+  lessonId: string
+  isCompleted: boolean
+  watchedSecs: number
+  completedAt?: string
+  updatedAt: string
+}
+
+export interface CourseMetadata {
+  id: string
+  instituteId?: string
+  categoryId: string
+  instructorId: string
+  slug: string
+  title: string
+  description?: string
+  thumbnailUrl?: string
+  trailerUrl?: string
+  seoTitle?: string
+  seoDescription?: string
+  seoKeywords?: string[]
+  seoImageUrl?: string
+  status: CourseStatus
+  isPaid: boolean
+  price?: number
+  discountPrice?: number
+  validityDays?: number
+  highlights?: string[]
+  totalStudents: number
+  totalLessons: number
+  rating: number
+  createdAt: string
+  updatedAt: string
+  modules?: CourseModule[]
+}
 
 export interface TestSeries {
   id: string
-  tenantId?: string
+  instituteId?: string
   slug: string
   title: string
   description?: string
   examType: string
   thumbnail?: string
+  seoTitle?: string
+  seoDescription?: string
+  seoKeywords?: string[]
+  seoImageUrl?: string
   isPaid: boolean
   price?: number
   totalTests: number
@@ -70,6 +165,10 @@ export interface CreateTestSeriesPayload {
   price?: number
   validTill?: string
   thumbnail?: string
+  seoTitle?: string
+  seoDescription?: string
+  seoKeywords?: string[]
+  seoImageUrl?: string
 }
 
 export interface CreateTestSectionPayload {

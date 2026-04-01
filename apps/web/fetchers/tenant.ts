@@ -1,6 +1,6 @@
-import { fetcher } from "@/lib/fetcher"
-
 import { TenantConfig } from "@flcn-lms/types/tenant"
+
+import { fetcher } from "@/lib/fetcher"
 
 export async function getTenantConfig(
   tenantSlug: string

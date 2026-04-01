@@ -1,21 +1,22 @@
 "use client"
 
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Alert01Icon, ArrowDiagonalIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
 
-import useForceFullscreen from "@/hooks/use-fullscreen"
+import { Alert, AlertDescription } from "@flcn-lms/ui/components/alert"
+import { Badge } from "@flcn-lms/ui/components/badge"
+import { Button } from "@flcn-lms/ui/components/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@flcn-lms/ui/components/dialog"
-import { Button } from "@flcn-lms/ui/components/button"
-import { Badge } from "@flcn-lms/ui/components/badge"
-import { Alert, AlertDescription } from "@flcn-lms/ui/components/alert"
 import { Separator } from "@flcn-lms/ui/components/separator"
+
+import useForceFullscreen from "@/hooks/use-fullscreen"
 import {
   TestTimePauseEvent,
   TestTimeResumeEvent,

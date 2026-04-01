@@ -1,17 +1,18 @@
 "use client"
 
-import type React from "react"
-import Link from "next/link"
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
 import {
   Facebook01Icon,
   InstagramIcon,
   LinkedinIcon,
   YoutubeIcon,
 } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
+import type React from "react"
+import Link from "next/link"
 
 import { Button } from "@flcn-lms/ui/components/button"
+
 import AppLogo from "@/components/logo"
 
 interface FooterLink {

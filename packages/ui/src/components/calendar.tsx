@@ -1,21 +1,21 @@
 "use client"
 
-import * as React from "react"
+import {
+  ArrowDownIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+} from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import {
   DayPicker,
   getDefaultClassNames,
   type DayButton,
   type Locale,
 } from "react-day-picker"
+import * as React from "react"
 
-import { cn } from "@flcn-lms/ui/lib/utils"
 import { Button, buttonVariants } from "@flcn-lms/ui/components/button"
-import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ArrowDownIcon,
-} from "@hugeicons/core-free-icons"
+import { cn } from "@flcn-lms/ui/lib/utils"
 
 function Calendar({
   className,

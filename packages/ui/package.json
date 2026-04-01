@@ -4,8 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint": "eslint",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --ignore-path ../../.prettierignore --config ../../prettier.config.mjs --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -39,8 +40,10 @@
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "@flcn-lms/eslint-config": "workspace:*",
+    "@flcn-lms/prettier-config": "workspace:*",
     "@flcn-lms/typescript-config": "workspace:*",
     "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
   },

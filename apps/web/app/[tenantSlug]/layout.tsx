@@ -1,18 +1,17 @@
-import { Metadata } from "next"
-import { Geist_Mono, DM_Sans, Space_Grotesk } from "next/font/google"
 import { NextIntlClientProvider } from "next-intl"
 import { getLocale, getMessages } from "next-intl/server"
+import { Metadata } from "next"
+import { DM_Sans, Geist_Mono, Space_Grotesk } from "next/font/google"
 
 import { TooltipProvider } from "@flcn-lms/ui/components/tooltip"
-
 import { cn } from "@flcn-lms/ui/lib/utils"
 
 import { ThemeProvider } from "@/components/theme-provider"
-
 import { isRtl, type Locale } from "@/i18n/config"
 
 import "swiper/css"
 import "@flcn-lms/ui/globals.css"
+
 import { getTenantConfig } from "@/fetchers/tenant"
 
 const spaceGroteskHeading = Space_Grotesk({

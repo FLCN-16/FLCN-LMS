@@ -1,6 +1,6 @@
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel, Check } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
 
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
 import { cn } from "@flcn-lms/ui/lib/utils"

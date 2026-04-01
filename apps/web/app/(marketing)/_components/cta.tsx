@@ -1,7 +1,7 @@
 import Link from "next/link"
 
-import { Card, CardContent } from "@flcn-lms/ui/components/card"
 import { Button } from "@flcn-lms/ui/components/button"
+import { Card, CardContent } from "@flcn-lms/ui/components/card"
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
 
 function CtaSection() {

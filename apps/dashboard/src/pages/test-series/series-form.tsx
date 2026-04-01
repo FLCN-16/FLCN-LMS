@@ -1,9 +1,13 @@
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
 
 import { Badge } from "@flcn-lms/ui/components/badge"
 import { Button } from "@flcn-lms/ui/components/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@flcn-lms/ui/components/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@flcn-lms/ui/components/card"
 import {
   Combobox,
   ComboboxContent,
@@ -12,15 +16,25 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@flcn-lms/ui/components/combobox"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@flcn-lms/ui/components/field"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@flcn-lms/ui/components/field"
 import { Input } from "@flcn-lms/ui/components/input"
 import { Separator } from "@flcn-lms/ui/components/separator"
 import { Skeleton } from "@flcn-lms/ui/components/skeleton"
 import { Textarea } from "@flcn-lms/ui/components/textarea"
 
+import { EntitySeoForm } from "@/components/entity-seo-form"
+import { useExamTypesList } from "@/queries/exam-types"
+import {
+  type CreateTestSeriesPayload,
+  type TestSeries,
+} from "@/queries/test-series"
+
 import { DateTimePicker } from "../../components/date-time-picker"
-import { examTypesApi } from "../../lib/api/exam-types"
-import { type CreateTestSeriesPayload, type TestSeries } from "../../lib/api/test-series"
 
 interface Props {
   defaultValues?: Partial<TestSeries>
@@ -29,23 +43,36 @@ interface Props {
   submitLabel?: string
 }
 
-export function SeriesForm({ defaultValues, onSubmit, isLoading, submitLabel = "Save" }: Props) {
+export function SeriesForm({
+  defaultValues,
+  onSubmit,
+  isLoading,
+  submitLabel = "Save",
+}: Props) {
   const [isPaid, setIsPaid] = useState(defaultValues?.isPaid !== false)
-  const [examType, setExamType] = useState<string>(defaultValues?.examType ?? "")
+  const [examType, setExamType] = useState<string>(
+    defaultValues?.examType ?? ""
+  )
 
-  const { data: examTypes = [], isLoading: examTypesLoading } = useQuery({
-    queryKey: ["exam-types"],
-    queryFn: () => examTypesApi.list(),
-  })
+  const { data: examTypes = [], isLoading: examTypesLoading } =
+    useExamTypesList()
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
+    const seoKeywords = String(fd.get("seoKeywords") ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean)
     onSubmit({
       slug: fd.get("slug") as string,
       title: fd.get("title") as string,
       description: (fd.get("description") as string) || undefined,
       examType,
+      seoTitle: (fd.get("seoTitle") as string) || undefined,
+      seoDescription: (fd.get("seoDescription") as string) || undefined,
+      seoKeywords: seoKeywords.length > 0 ? seoKeywords : undefined,
+      seoImageUrl: (fd.get("seoImageUrl") as string) || undefined,
       isPaid,
       price: isPaid && fd.get("price") ? Number(fd.get("price")) : undefined,
       validTill: (fd.get("validTill") as string) || undefined,
@@ -54,7 +81,6 @@ export function SeriesForm({ defaultValues, onSubmit, isLoading, submitLabel = "
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
       {/* Basic info */}
       <Card>
         <CardHeader className="border-b">
@@ -81,7 +107,9 @@ export function SeriesForm({ defaultValues, onSubmit, isLoading, submitLabel = "
                   required
                   defaultValue={defaultValues?.slug}
                 />
-                <FieldDescription>Used in URLs — lowercase, hyphens only</FieldDescription>
+                <FieldDescription>
+                  Used in URLs — lowercase, hyphens only
+                </FieldDescription>
               </Field>
 
               <Field>
@@ -92,7 +120,6 @@ export function SeriesForm({ defaultValues, onSubmit, isLoading, submitLabel = "
                   <Combobox
                     value={examType}
                     onValueChange={(v) => setExamType(v ?? "")}
-                    allowCustomValue
                   >
                     <ComboboxInput
                       placeholder="Search or type a custom type…"
@@ -123,7 +150,9 @@ export function SeriesForm({ defaultValues, onSubmit, isLoading, submitLabel = "
             <Field>
               <FieldLabel>
                 Description
-                <Badge variant="outline" className="ml-2 text-xs font-normal">optional</Badge>
+                <Badge variant="outline" className="ml-2 text-xs font-normal">
+                  optional
+                </Badge>
               </FieldLabel>
               <Textarea
                 name="description"
@@ -135,6 +164,8 @@ export function SeriesForm({ defaultValues, onSubmit, isLoading, submitLabel = "
           </FieldGroup>
         </CardContent>
       </Card>
+
+      <EntitySeoForm entityLabel="Test Series" defaultValues={defaultValues} />
 
       {/* Pricing */}
       <Card>
@@ -173,7 +204,7 @@ export function SeriesForm({ defaultValues, onSubmit, isLoading, submitLabel = "
                 <Field>
                   <FieldLabel>Price (₹)</FieldLabel>
                   <div className="relative max-w-xs">
-                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
                       ₹
                     </span>
                     <Input

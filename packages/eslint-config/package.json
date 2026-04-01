@@ -3,12 +3,16 @@
   "version": "0.0.0",
   "type": "module",
   "private": true,
+  "scripts": {
+    "format": "prettier --ignore-path ../../.prettierignore --config ../../prettier.config.mjs --write ."
+  },
   "exports": {
     "./base": "./base.js",
     "./next-js": "./next.js",
     "./react-internal": "./react-internal.js"
   },
   "devDependencies": {
+    "@flcn-lms/prettier-config": "workspace:*",
     "@eslint/js": "^9.39.2",
     "@next/eslint-plugin-next": "^16.1.6",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
@@ -20,6 +24,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-turbo": "^2.8.1",
     "globals": "^17.2.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"
   }

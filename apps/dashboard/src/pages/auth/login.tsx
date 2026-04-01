@@ -1,9 +1,12 @@
 import { Helmet } from "react-helmet-async"
-import { Link } from "react-router-dom"
+import { Controller, useForm } from "react-hook-form"
+import { Link, useNavigate } from "react-router-dom"
+import { useState } from "react"
 
 import { Button } from "@flcn-lms/ui/components/button"
 import {
   Field,
+  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -11,13 +14,52 @@ import {
 import { Input } from "@flcn-lms/ui/components/input"
 import { cn } from "@flcn-lms/ui/lib/utils"
 
+import useAuth from "@/features/auth/use-auth.hook"
 
-function LoginPage({
-  className,
-  ...props
-}: React.ComponentProps<"form">) {
+interface LoginFormValues {
+  email: string
+  password: string
+  remember: boolean
+}
+
+function LoginPage({ className, ...props }: React.ComponentProps<"form">) {
+  const navigate = useNavigate()
+  const auth = useAuth()
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    defaultValues: {
+      email: "",
+      password: "",
+      remember: false,
+    },
+  })
+
+  const onSubmit = handleSubmit(async (values) => {
+    setServerError(null)
+
+    try {
+      await auth.login(values.email, values.password, values.remember)
+      navigate("/")
+    } catch (error) {
+      setServerError(
+        error instanceof Error
+          ? error.message
+          : "Unable to login. Please try again."
+      )
+    }
+  })
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      onSubmit={onSubmit}
+      {...props}
+    >
       <Helmet>
         <title>Login — FLCN Dashboard</title>
       </Helmet>
@@ -28,10 +70,45 @@ function LoginPage({
             Enter your email below to login to your account
           </p>
         </div>
+
+        {serverError ? (
+          <Field>
+            <FieldDescription className="text-center text-destructive">
+              {serverError}
+            </FieldDescription>
+          </Field>
+        ) : null}
+
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Controller
+            control={control}
+            name="email"
+            rules={{
+              required: "Email is required",
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Enter a valid email address",
+              },
+            }}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                autoComplete="email"
+                aria-invalid={Boolean(errors.email)}
+              />
+            )}
+          />
+          {errors.email ? (
+            <FieldDescription className="text-destructive">
+              {errors.email.message}
+            </FieldDescription>
+          ) : null}
         </Field>
+
         <Field>
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -42,11 +119,50 @@ function LoginPage({
               Forgot your password?
             </Link>
           </div>
-          <Input id="password" type="password" required />
+          <Controller
+            control={control}
+            name="password"
+            rules={{ required: "Password is required" }}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                aria-invalid={Boolean(errors.password)}
+              />
+            )}
+          />
+          {errors.password ? (
+            <FieldDescription className="text-destructive">
+              {errors.password.message}
+            </FieldDescription>
+          ) : null}
         </Field>
+
         <Field>
-          <Button type="submit">Login</Button>
+          <Controller
+            control={control}
+            name="remember"
+            render={({ field }) => (
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={field.value}
+                  onChange={(event) => field.onChange(event.target.checked)}
+                />
+                Remember me
+              </label>
+            )}
+          />
         </Field>
+
+        <Field>
+          <Button type="submit" disabled={isSubmitting || auth.isLoading}>
+            {isSubmitting || auth.isLoading ? "Logging in..." : "Login"}
+          </Button>
+        </Field>
+
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
           <Button variant="outline" type="button">

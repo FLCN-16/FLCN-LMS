@@ -1,11 +1,11 @@
 "use client"
 
-import * as React from "react"
+import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
+import * as React from "react"
 
 import { cn } from "@flcn-lms/ui/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowRight01Icon, Tick02Icon } from "@hugeicons/core-free-icons"
 
 function ContextMenu({
   ...props

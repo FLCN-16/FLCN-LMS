@@ -1,14 +1,34 @@
 import { Badge } from "@flcn-lms/ui/components/badge"
 import { Button } from "@flcn-lms/ui/components/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@flcn-lms/ui/components/card"
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@flcn-lms/ui/components/field"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@flcn-lms/ui/components/card"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@flcn-lms/ui/components/field"
 import { Input } from "@flcn-lms/ui/components/input"
-import { NativeSelect, NativeSelectOption } from "@flcn-lms/ui/components/native-select"
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@flcn-lms/ui/components/native-select"
 import { Separator } from "@flcn-lms/ui/components/separator"
+
 
 import { DateTimePicker } from "../../components/date-time-picker"
 import { RichEditor } from "../../components/rich-editor"
-import type { CreateTestPayload, Test, TestType, ResultMode } from "../../lib/api/test-series"
+
+import type {
+  CreateTestPayload,
+  ResultMode,
+  Test,
+  TestType,
+} from "@/queries/test-series"
 
 interface Props {
   defaultValues?: Partial<Test>
@@ -54,7 +74,6 @@ export function TestForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
       {/* Identity */}
       <Card>
         <CardHeader className="border-b">
@@ -119,8 +138,12 @@ export function TestForm({
                   defaultValue={defaultValues?.showResultAfter ?? "INSTANT"}
                   className="w-full"
                 >
-                  <NativeSelectOption value="INSTANT">Instant</NativeSelectOption>
-                  <NativeSelectOption value="AFTER_END_DATE">After End Date</NativeSelectOption>
+                  <NativeSelectOption value="INSTANT">
+                    Instant
+                  </NativeSelectOption>
+                  <NativeSelectOption value="AFTER_END_DATE">
+                    After End Date
+                  </NativeSelectOption>
                   <NativeSelectOption value="MANUAL">Manual</NativeSelectOption>
                 </NativeSelect>
               </Field>
@@ -148,7 +171,7 @@ export function TestForm({
                     defaultValue={defaultValues?.durationMins ?? 180}
                     className="pr-10"
                   />
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                  <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
                     min
                   </span>
                 </div>
@@ -188,7 +211,9 @@ export function TestForm({
                 defaultValue={defaultValues?.attemptLimit ?? 1}
                 className="max-w-xs"
               />
-              <FieldDescription>Set to 0 for unlimited attempts</FieldDescription>
+              <FieldDescription>
+                Set to 0 for unlimited attempts
+              </FieldDescription>
             </Field>
           </FieldGroup>
         </CardContent>
@@ -199,7 +224,9 @@ export function TestForm({
         <CardHeader className="border-b">
           <div className="flex items-center justify-between">
             <CardTitle>Scheduling</CardTitle>
-            <Badge variant="outline" className="text-xs font-normal">optional</Badge>
+            <Badge variant="outline" className="text-xs font-normal">
+              optional
+            </Badge>
           </div>
         </CardHeader>
         <CardContent className="pt-4">
@@ -229,7 +256,9 @@ export function TestForm({
         <CardHeader className="border-b">
           <div className="flex items-center justify-between">
             <CardTitle>Instructions</CardTitle>
-            <Badge variant="outline" className="text-xs font-normal">optional</Badge>
+            <Badge variant="outline" className="text-xs font-normal">
+              optional
+            </Badge>
           </div>
         </CardHeader>
         <CardContent className="pt-4">
@@ -241,7 +270,9 @@ export function TestForm({
               minHeight={180}
               mode="basic"
             />
-            <FieldDescription>Supports rich text — bold, lists, links</FieldDescription>
+            <FieldDescription>
+              Supports rich text — bold, lists, links
+            </FieldDescription>
           </Field>
         </CardContent>
       </Card>

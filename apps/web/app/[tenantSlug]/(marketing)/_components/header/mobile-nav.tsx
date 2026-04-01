@@ -1,18 +1,18 @@
 "use client"
 
-import { useState } from "react"
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Menu07Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
+import { useState } from "react"
+import Link from "next/link"
 
 import { Button } from "@flcn-lms/ui/components/button"
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetTrigger,
-  SheetClose,
 } from "@flcn-lms/ui/components/sheet"
-import Link from "next/link"
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false)

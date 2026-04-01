@@ -1,5 +1,6 @@
-import CourseCard from "@/components/card/course"
 import { getTranslations } from "next-intl/server"
+
+import CourseCard from "@/components/card/course"
 
 async function CoursesPage() {
   const t = await getTranslations()

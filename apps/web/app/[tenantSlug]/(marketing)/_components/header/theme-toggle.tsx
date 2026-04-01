@@ -1,8 +1,8 @@
 "use client"
 
-import { useTheme } from "next-themes"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Moon01Icon, Sun01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTheme } from "next-themes"
 
 import { Button } from "@flcn-lms/ui/components/button"
 

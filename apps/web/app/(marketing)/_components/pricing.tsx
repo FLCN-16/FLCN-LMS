@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { Badge } from "@flcn-lms/ui/components/badge"
+import { Button } from "@flcn-lms/ui/components/button"
 import {
   Card,
   CardContent,
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@flcn-lms/ui/components/card"
-import { Button } from "@flcn-lms/ui/components/button"
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
 
 const PRICING_PLANS = [

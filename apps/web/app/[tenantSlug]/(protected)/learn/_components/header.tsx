@@ -1,6 +1,6 @@
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { FullScreenIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@flcn-lms/ui/components/button"
 import { Separator } from "@flcn-lms/ui/components/separator"

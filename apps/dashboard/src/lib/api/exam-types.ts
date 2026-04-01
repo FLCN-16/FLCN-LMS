@@ -1,6 +1,6 @@
 import type {
-  ExamType,
   CreateExamTypePayload,
+  ExamType,
   UpdateExamTypePayload,
 } from "@flcn-lms/types/exam-type"
 

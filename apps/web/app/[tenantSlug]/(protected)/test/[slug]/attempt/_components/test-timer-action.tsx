@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Time03Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
+import { useEffect, useState } from "react"
 
 import { Button } from "@flcn-lms/ui/components/button"
+
 import {
   TestTimePauseEvent,
   TestTimeResumeEvent,

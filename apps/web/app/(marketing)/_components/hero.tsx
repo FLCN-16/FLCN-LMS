@@ -1,10 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { AspectRatio } from "@flcn-lms/ui/components/aspect-ratio"
 import { Badge } from "@flcn-lms/ui/components/badge"
 import { Button } from "@flcn-lms/ui/components/button"
 import { Card, CardContent } from "@flcn-lms/ui/components/card"
-import { AspectRatio } from "@flcn-lms/ui/components/aspect-ratio"
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
 
 function HeroSection() {
@@ -22,10 +22,6 @@ function HeroSection() {
               Built for coaching & institutes
             </span>
           </div>
-
-          <Badge variant="secondary">
-            LMS infrastructure for exam‑heavy teams
-          </Badge>
 
           <Heading variant="h1" className="mt-2">
             Launch your own branded LMS without rebuilding everything

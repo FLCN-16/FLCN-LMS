@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+
 import { parseTenant } from "@/lib/middleware/parse"
 import { resolveDomain } from "@/lib/middleware/resolve-domain"
 import { tenantProxy } from "@/lib/middleware/tenant-proxy"

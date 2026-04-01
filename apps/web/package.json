@@ -7,8 +7,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --ignore-path ../../.prettierignore --config ./prettier.config.mjs --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -27,12 +28,14 @@
   },
   "devDependencies": {
     "@flcn-lms/eslint-config": "workspace:^",
+    "@flcn-lms/prettier-config": "workspace:*",
     "@flcn-lms/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   }
 }

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server"
 
 import { Heading } from "@flcn-lms/ui/components/typography"
+
 import TestimonialCard from "@/components/card/testimonial"
 
 async function CourseDetailTestimonials() {

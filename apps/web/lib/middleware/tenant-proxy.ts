@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+
 import { COOKIES } from "@/lib/cookies"
 
 const PROTECTED_PATHS = ["/learn", "/user", "/test", "/live", "/checkout"]

@@ -1,38 +1,48 @@
+import { IconArrowLeft } from "@tabler/icons-react"
 import { Helmet } from "react-helmet-async"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { IconArrowLeft } from "@tabler/icons-react"
 
 import { Button } from "@flcn-lms/ui/components/button"
 import { Skeleton } from "@flcn-lms/ui/components/skeleton"
 
-import { testSeriesApi, type CreateTestPayload } from "../../lib/api/test-series"
+import {
+  useTestDetail,
+  useTestSeriesDetail,
+  useUpdateTest,
+  type CreateTestPayload,
+} from "@/queries/test-series"
+
 import { TestForm } from "./test-form"
 
 export default function EditTestPage() {
   const { seriesId, testId } = useParams<{ seriesId: string; testId: string }>()
   const navigate = useNavigate()
-  const qc = useQueryClient()
+  const mutation = useUpdateTest()
 
-  const { data: series } = useQuery({
-    queryKey: ["test-series", seriesId],
-    queryFn: () => testSeriesApi.get(seriesId!),
+  const { data: series } = useTestSeriesDetail({
+    variables: { id: seriesId! },
     enabled: !!seriesId,
   })
 
-  const { data: test, isLoading } = useQuery({
-    queryKey: ["tests", seriesId, testId],
-    queryFn: () => testSeriesApi.getTest(seriesId!, testId!),
+  const { data: test, isLoading } = useTestDetail({
+    variables: { seriesId: seriesId!, testId: testId! },
     enabled: !!seriesId && !!testId,
   })
 
-  const mutation = useMutation({
-    mutationFn: (data: CreateTestPayload) => testSeriesApi.updateTest(seriesId!, testId!, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tests", seriesId] })
-      navigate(`/panel/test-series/${seriesId}`)
-    },
-  })
+  const handleSubmit = (data: CreateTestPayload) => {
+    if (!seriesId || !testId) {
+      return
+    }
+
+    mutation.mutate(
+      { seriesId, testId, data },
+      {
+        onSuccess: () => {
+          navigate(`/test-series/${seriesId}`)
+        },
+      }
+    )
+  }
 
   return (
     <>
@@ -42,7 +52,7 @@ export default function EditTestPage() {
       <div className="px-4 lg:px-6">
         <div className="mb-6 flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link to={`/panel/test-series/${seriesId}`}>
+            <Link to={`/test-series/${seriesId}`}>
               <IconArrowLeft className="size-4" />
             </Link>
           </Button>
@@ -61,7 +71,7 @@ export default function EditTestPage() {
         ) : test ? (
           <TestForm
             defaultValues={test}
-            onSubmit={(data) => mutation.mutate(data)}
+            onSubmit={handleSubmit}
             isLoading={mutation.isPending}
             submitLabel="Save Changes"
           />

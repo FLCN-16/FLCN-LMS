@@ -1,8 +1,9 @@
-import { useTranslations } from "next-intl"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft02Icon, NoteEditIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useTranslations } from "next-intl"
 
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
+
 import TestTimerAction from "./test-timer-action"
 
 function TestHeader() {

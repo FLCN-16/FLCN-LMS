@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gosimple/slug v1.15.0
 	github.com/joho/godotenv v1.5.1
+	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/swaggo/swag v1.16.6
 	golang.org/x/crypto v0.50.0
 	gorm.io/datatypes v1.2.7

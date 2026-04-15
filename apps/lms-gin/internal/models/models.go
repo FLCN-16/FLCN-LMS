@@ -470,3 +470,100 @@ func (lc *LicenseConfig) BeforeCreate(tx *gorm.DB) error {
 	}
 	return nil
 }
+
+// DailyPracticePaper (DPP) represents a daily practice paper assignment
+type DailyPracticePaper struct {
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	Title       string    `gorm:"not null" json:"title"`
+	Description string    `gorm:"type:text" json:"description"`
+	CourseID    *uuid.UUID `gorm:"type:uuid" json:"course_id"`
+	BatchID     *uuid.UUID `gorm:"type:uuid" json:"batch_id"`
+	CreatedByID uuid.UUID `gorm:"type:uuid;not null" json:"created_by_id"`
+	ScheduledAt time.Time `gorm:"not null" json:"scheduled_at"`
+	DueAt       time.Time `json:"due_at"`
+	Status      string    `gorm:"type:varchar(50);default:'draft'" json:"status"` // draft, published, closed
+	IsActive    bool      `gorm:"default:true" json:"is_active"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+
+	// Relationships
+	Course    *Course `gorm:"foreignKey:CourseID" json:"course,omitempty"`
+	CreatedBy User    `gorm:"foreignKey:CreatedByID" json:"created_by,omitempty"`
+}
+
+// TableName specifies the table name for DailyPracticePaper
+func (DailyPracticePaper) TableName() string {
+	return "daily_practice_papers"
+}
+
+// BeforeCreate generates UUID before creating
+func (dpp *DailyPracticePaper) BeforeCreate(tx *gorm.DB) error {
+	if dpp.ID == uuid.Nil {
+		dpp.ID = uuid.New()
+	}
+	return nil
+}
+
+// Announcement represents a system announcement
+type Announcement struct {
+	ID        uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
+	Title     string     `gorm:"not null" json:"title"`
+	Content   string     `gorm:"type:text;not null" json:"content"`
+	AuthorID  uuid.UUID  `gorm:"type:uuid;not null" json:"author_id"`
+	CourseID  *uuid.UUID `gorm:"type:uuid" json:"course_id"` // NULL = broadcast to all
+	BatchID   *uuid.UUID `gorm:"type:uuid" json:"batch_id"`  // NULL = broadcast to all
+	Priority  string     `gorm:"type:varchar(50);default:'normal'" json:"priority"` // low, normal, high, urgent
+	Status    string     `gorm:"type:varchar(50);default:'published'" json:"status"` // draft, published, archived
+	Published bool       `gorm:"default:true" json:"published"`
+	ExpiresAt *time.Time `json:"expires_at"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+
+	// Relationships
+	Author Course `gorm:"foreignKey:AuthorID" json:"author,omitempty"`
+	Course *Course `gorm:"foreignKey:CourseID" json:"course,omitempty"`
+}
+
+// TableName specifies the table name for Announcement
+func (Announcement) TableName() string {
+	return "announcements"
+}
+
+// BeforeCreate generates UUID before creating
+func (a *Announcement) BeforeCreate(tx *gorm.DB) error {
+	if a.ID == uuid.Nil {
+		a.ID = uuid.New()
+	}
+	return nil
+}
+
+// CourseReview represents a student review and rating for a course
+type CourseReview struct {
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	CourseID  uuid.UUID `gorm:"type:uuid;not null" json:"course_id"`
+	StudentID uuid.UUID `gorm:"type:uuid;not null" json:"student_id"`
+	Rating    int       `gorm:"type:integer;check:rating >= 1 AND rating <= 5" json:"rating"` // 1-5
+	Title     string    `json:"title"`
+	Comment   string    `gorm:"type:text" json:"comment"`
+	Status    string    `gorm:"type:varchar(50);default:'pending'" json:"status"` // pending, approved, rejected, hidden
+	HelpCount int       `gorm:"default:0" json:"help_count"`                      // Number of "helpful" votes
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	// Relationships
+	Course  Course `gorm:"foreignKey:CourseID" json:"course,omitempty"`
+	Student User   `gorm:"foreignKey:StudentID" json:"student,omitempty"`
+}
+
+// TableName specifies the table name for CourseReview
+func (CourseReview) TableName() string {
+	return "course_reviews"
+}
+
+// BeforeCreate generates UUID before creating
+func (cr *CourseReview) BeforeCreate(tx *gorm.DB) error {
+	if cr.ID == uuid.Nil {
+		cr.ID = uuid.New()
+	}
+	return nil
+}

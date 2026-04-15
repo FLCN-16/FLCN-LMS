@@ -68,6 +68,41 @@ const (
 	ReportsView     Permission = "reports:view"
 	AnalyticsView   Permission = "analytics:view"
 	LeaderboardView Permission = "leaderboard:view"
+
+	// ================================================
+	// DPP (DAILY PRACTICE PAPER) PERMISSIONS
+	// ================================================
+	DPPCreate  Permission = "dpp:create"
+	DPPRead    Permission = "dpp:read"
+	DPPUpdate  Permission = "dpp:update"
+	DPPDelete  Permission = "dpp:delete"
+	DPPPublish Permission = "dpp:publish"
+
+	// ================================================
+	// ANNOUNCEMENT PERMISSIONS
+	// ================================================
+	AnnouncementCreate  Permission = "announcements:create"
+	AnnouncementRead    Permission = "announcements:read"
+	AnnouncementUpdate  Permission = "announcements:update"
+	AnnouncementDelete  Permission = "announcements:delete"
+	AnnouncementArchive Permission = "announcements:archive"
+
+	// ================================================
+	// COURSE REVIEW PERMISSIONS
+	// ================================================
+	ReviewCreate  Permission = "reviews:create"
+	ReviewRead    Permission = "reviews:read"
+	ReviewUpdate  Permission = "reviews:update"
+	ReviewDelete  Permission = "reviews:delete"
+	ReviewApprove Permission = "reviews:approve"
+	ReviewReject  Permission = "reviews:reject"
+
+	// ================================================
+	// CERTIFICATE PERMISSIONS
+	// ================================================
+	CertificateCreate Permission = "certificates:create"
+	CertificateRead  Permission = "certificates:read"
+	CertificateDelete Permission = "certificates:delete"
 )
 
 // RolePermissions maps roles to their permissions
@@ -99,6 +134,18 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== REPORTS & ANALYTICS ======
 		ReportsView, AnalyticsView, LeaderboardView,
+
+		// ====== DPP PERMISSIONS ======
+		DPPCreate, DPPRead, DPPUpdate, DPPDelete, DPPPublish,
+
+		// ====== ANNOUNCEMENT PERMISSIONS ======
+		AnnouncementCreate, AnnouncementRead, AnnouncementUpdate, AnnouncementDelete, AnnouncementArchive,
+
+		// ====== REVIEW PERMISSIONS ======
+		ReviewCreate, ReviewRead, ReviewUpdate, ReviewDelete, ReviewApprove, ReviewReject,
+
+		// ====== CERTIFICATE PERMISSIONS ======
+		CertificateCreate, CertificateRead, CertificateDelete,
 	},
 
 	"faculty": {
@@ -120,6 +167,22 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== REPORTS & ANALYTICS ======
 		ReportsView, AnalyticsView, LeaderboardView,
+
+		// ====== DPP PERMISSIONS ======
+		// Faculty can create, read, update, delete, and publish DPPs
+		DPPCreate, DPPRead, DPPUpdate, DPPDelete, DPPPublish,
+
+		// ====== ANNOUNCEMENT PERMISSIONS ======
+		// Faculty can manage announcements
+		AnnouncementCreate, AnnouncementRead, AnnouncementUpdate, AnnouncementDelete, AnnouncementArchive,
+
+		// ====== REVIEW PERMISSIONS ======
+		// Faculty can read and moderate course reviews
+		ReviewRead, ReviewApprove, ReviewReject,
+
+		// ====== CERTIFICATE PERMISSIONS ======
+		// Faculty can create and read certificates
+		CertificateCreate, CertificateRead,
 	},
 
 	"student": {
@@ -141,5 +204,21 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== REPORTS & ANALYTICS ======
 		LeaderboardView,
+
+		// ====== DPP PERMISSIONS ======
+		// Students can read DPPs
+		DPPRead,
+
+		// ====== ANNOUNCEMENT PERMISSIONS ======
+		// Students can read announcements
+		AnnouncementRead,
+
+		// ====== REVIEW PERMISSIONS ======
+		// Students can create, read, and update their own reviews
+		ReviewCreate, ReviewRead, ReviewUpdate, ReviewDelete,
+
+		// ====== CERTIFICATE PERMISSIONS ======
+		// Students can read their own certificates
+		CertificateRead,
 	},
 }

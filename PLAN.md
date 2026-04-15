@@ -10,7 +10,7 @@
 | App | Status |
 |---|---|
 | `apps/backend` (NestJS SaaS) | ✅ Core complete — auth, licenses, billing, API keys, rate limiting, refunds |
-| `apps/lms-gin` (Go LMS API) | ✅ Core complete — courses, tests, attempts, enrollments, live sessions |
+| `apps/lms-gin` (Go LMS API) | ✅ Core complete — courses, tests, attempts, enrollments, live sessions, DPP, announcements, reviews |
 | `apps/dashboard` (Vite/React) | 🟡 Partial — courses/tests/analytics built; 16 feature areas are stubs |
 | `apps/web` (Next.js storefront) | 🔴 Mostly stubs — no API integration, student panel is empty shells |
 | `packages/ui` | ✅ Complete component library |
@@ -100,7 +100,7 @@ Core course/test management is working. These 16 stub areas need to be built:
 ### 2.2 Daily Practice Papers (DPP)
 - [ ] `pages/dpp/index.tsx` — list DPPs assigned per course/batch
 - [ ] `pages/dpp/new.tsx` — create DPP form (select questions from bank, assign to batch/date)
-- [ ] Backend endpoint needed: `POST /api/v1/dpp` (Go Gin)
+- [x] Backend endpoint needed: `POST /api/v1/dpp` (Go Gin) ✅
 - [ ] DPP completion stats per student
 
 ### 2.3 Revenue & Billing
@@ -113,7 +113,7 @@ Core course/test management is working. These 16 stub areas need to be built:
 ### 2.4 Communications
 - [ ] `pages/communications/announcements/index.tsx` — create/list announcements targeted to batches or all students
 - [ ] `pages/communications/push-notifications/index.tsx` — push notification management (title, body, target audience, schedule)
-- [ ] Backend endpoints needed: announcements CRUD + notification service integration (FCM/OneSignal)
+- [x] Backend endpoints needed: announcements CRUD ✅ (Go Gin) + notification service integration (FCM/OneSignal) — pending
 
 ### 2.5 Institute Management
 - [ ] `pages/institute/batches/index.tsx` — batch list with student counts, assign courses to batches
@@ -208,19 +208,21 @@ Core course/test management is working. These 16 stub areas need to be built:
 ## SECTION 4 — Go Gin Backend (apps/lms-gin)
 
 ### 4.1 Missing API Endpoints
-- [ ] `POST /api/v1/dpp` — create Daily Practice Paper (question set)
-- [ ] `GET /api/v1/dpp` — list DPPs with filters (batch, date, course)
-- [ ] `POST /api/v1/announcements` — create announcement for batch/all-students
-- [ ] `GET /api/v1/announcements` — list announcements for current user
-- [ ] `GET /api/v1/courses/:slug/reviews` — course reviews/ratings
-- [ ] `POST /api/v1/courses/:slug/reviews` — submit review with rating
+- [x] `POST /api/v1/dpp` — create Daily Practice Paper (question set) ✅
+- [x] `GET /api/v1/dpp` — list DPPs with filters (batch, date, course) ✅
+- [x] `POST /api/v1/announcements` — create announcement for batch/all-students ✅
+- [x] `GET /api/v1/announcements` — list announcements for current user ✅
+- [x] `GET /api/v1/courses/:slug/reviews` — course reviews/ratings ✅
+- [x] `POST /api/v1/courses/:slug/reviews` — submit review with rating ✅
 - [ ] `GET /api/v1/certificates/:id/download` — generate and serve PDF certificate
 
 ### 4.2 Certificate Generation
-- [ ] Generate PDF certificates on course completion using `go-pdf` or `chromedp`
+- [x] Generate PDF certificates on course completion using `gofpdf` ✅
 - [ ] Store generated PDF in S3/object storage
-- [ ] `certificate_repository.go` exists — wire to generation service
-- [ ] Endpoint: `GET /api/v1/user/certificates` — list user certificates with download links
+- [x] `certificate_repository.go` exists — wired to generation service ✅
+- [x] Endpoint: `GET /api/v1/user/certificates` — list user certificates ✅
+- [x] Endpoint: `GET /api/v1/certificates/:id/download` — download PDF ✅
+- [x] Endpoint: `GET /api/v1/certificates/:number/verify` — verify certificate ✅
 
 ### 4.3 Video / Media Storage
 - [ ] Integrate cloud storage (S3/Cloudflare R2/Mux) for lesson videos

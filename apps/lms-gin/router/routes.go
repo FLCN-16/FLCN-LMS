@@ -38,6 +38,10 @@ func InitializeAllRoutes(
 	liveSessionHandler *handlers.LiveSessionHandler,
 	leaderboardHandler *handlers.LeaderboardHandler,
 	licenseHandler *handlers.LicenseHandler,
+	dppHandler *handlers.DPPHandler,
+	announcementHandler *handlers.AnnouncementHandler,
+	courseReviewHandler *handlers.CourseReviewHandler,
+	certificateHandler *handlers.CertificateHandler,
 	permissionDecorator *decorators.PermissionDecorator,
 	jwtSecret string,
 ) {
@@ -56,6 +60,10 @@ func InitializeAllRoutes(
 	InitEnrollmentRoutes(v1, enrollmentHandler, permissionDecorator)
 	InitLiveSessionRoutes(v1, liveSessionHandler, permissionDecorator)
 	InitLeaderboardRoutes(v1, leaderboardHandler, permissionDecorator)
+	InitDPPRoutes(v1, dppHandler, permissionDecorator)
+	InitAnnouncementRoutes(v1, announcementHandler, permissionDecorator)
+	InitCourseReviewRoutes(v1, courseReviewHandler, permissionDecorator)
+	InitCertificateRoutes(v1, certificateHandler, permissionDecorator)
 
 	log.Println("[Router] All API routes initialized successfully")
 }
@@ -160,4 +168,269 @@ func InitLicenseRoutes(v1 *gin.RouterGroup, licenseHandler *handlers.LicenseHand
 		// License system health check
 		license.GET("/health", licenseHandler.HealthCheck)
 	}
+}
+
+// InitDPPRoutes initializes daily practice paper routes with permission checks
+func InitDPPRoutes(
+	v1 *gin.RouterGroup,
+	dppHandler *handlers.DPPHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing DPP routes")
+
+	dpp := v1.Group("/dpp")
+	{
+		// Create DPP
+		dpp.POST(
+			"",
+			permDecorator.Required(dppHandler.CreateDPP, []rbac.Permission{rbac.DPPCreate}),
+		)
+
+		// Get specific DPP
+		dpp.GET(
+			"/:id",
+			permDecorator.Required(dppHandler.GetDPP, []rbac.Permission{rbac.DPPRead}),
+		)
+
+		// List active DPPs
+		dpp.GET(
+			"",
+			permDecorator.Required(dppHandler.ListActiveDPP, []rbac.Permission{rbac.DPPRead}),
+		)
+
+		// List DPPs by course
+		dpp.GET(
+			"/course/:courseId",
+			permDecorator.Required(dppHandler.ListDPPByCourse, []rbac.Permission{rbac.DPPRead}),
+		)
+
+		// Get upcoming DPPs
+		dpp.GET(
+			"/upcoming",
+			permDecorator.Required(dppHandler.GetUpcomingDPP, []rbac.Permission{rbac.DPPRead}),
+		)
+
+		// Update DPP
+		dpp.PUT(
+			"/:id",
+			permDecorator.Required(dppHandler.UpdateDPP, []rbac.Permission{rbac.DPPUpdate}),
+		)
+
+		// Publish DPP
+		dpp.PATCH(
+			"/:id/publish",
+			permDecorator.Required(dppHandler.PublishDPP, []rbac.Permission{rbac.DPPPublish}),
+		)
+
+		// Delete DPP
+		dpp.DELETE(
+			"/:id",
+			permDecorator.Required(dppHandler.DeleteDPP, []rbac.Permission{rbac.DPPDelete}),
+		)
+	}
+
+	log.Println("✓ DPP routes initialized successfully")
+}
+
+// InitAnnouncementRoutes initializes announcement routes with permission checks
+func InitAnnouncementRoutes(
+	v1 *gin.RouterGroup,
+	announcementHandler *handlers.AnnouncementHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing announcement routes")
+
+	announcements := v1.Group("/announcements")
+	{
+		// Create announcement
+		announcements.POST(
+			"",
+			permDecorator.Required(announcementHandler.CreateAnnouncement, []rbac.Permission{rbac.AnnouncementCreate}),
+		)
+
+		// Get specific announcement
+		announcements.GET(
+			"/:id",
+			permDecorator.Required(announcementHandler.GetAnnouncement, []rbac.Permission{rbac.AnnouncementRead}),
+		)
+
+		// List all announcements
+		announcements.GET(
+			"",
+			permDecorator.Required(announcementHandler.ListAnnouncements, []rbac.Permission{rbac.AnnouncementRead}),
+		)
+
+		// List announcements by course
+		announcements.GET(
+			"/course/:courseId",
+			permDecorator.Required(announcementHandler.ListAnnouncementsByCourse, []rbac.Permission{rbac.AnnouncementRead}),
+		)
+
+		// Get announcements for authenticated student
+		announcements.GET(
+			"/student",
+			permDecorator.Required(announcementHandler.GetAnnouncementsForStudent, []rbac.Permission{rbac.AnnouncementRead}),
+		)
+
+		// Update announcement
+		announcements.PUT(
+			"/:id",
+			permDecorator.Required(announcementHandler.UpdateAnnouncement, []rbac.Permission{rbac.AnnouncementUpdate}),
+		)
+
+		// Archive announcement
+		announcements.PATCH(
+			"/:id/archive",
+			permDecorator.Required(announcementHandler.ArchiveAnnouncement, []rbac.Permission{rbac.AnnouncementArchive}),
+		)
+
+		// Delete announcement
+		announcements.DELETE(
+			"/:id",
+			permDecorator.Required(announcementHandler.DeleteAnnouncement, []rbac.Permission{rbac.AnnouncementDelete}),
+		)
+	}
+
+	log.Println("✓ Announcement routes initialized successfully")
+}
+
+// InitCourseReviewRoutes initializes course review routes with permission checks
+func InitCourseReviewRoutes(
+	v1 *gin.RouterGroup,
+	courseReviewHandler *handlers.CourseReviewHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing course review routes")
+
+	reviews := v1.Group("/reviews")
+	{
+		// Get specific review
+		reviews.GET(
+			"/:id",
+			permDecorator.Required(courseReviewHandler.GetReview, []rbac.Permission{rbac.ReviewRead}),
+		)
+
+		// Update review
+		reviews.PUT(
+			"/:id",
+			permDecorator.Required(courseReviewHandler.UpdateReview, []rbac.Permission{rbac.ReviewUpdate}),
+		)
+
+		// Approve review (admin)
+		reviews.PATCH(
+			"/:id/approve",
+			permDecorator.Required(courseReviewHandler.ApproveReview, []rbac.Permission{rbac.ReviewApprove}),
+		)
+
+		// Reject review (admin)
+		reviews.PATCH(
+			"/:id/reject",
+			permDecorator.Required(courseReviewHandler.RejectReview, []rbac.Permission{rbac.ReviewReject}),
+		)
+
+		// Mark review as helpful
+		reviews.POST(
+			"/:id/helpful",
+			permDecorator.Required(courseReviewHandler.MarkHelpful, []rbac.Permission{rbac.ReviewRead}),
+		)
+
+		// Delete review
+		reviews.DELETE(
+			"/:id",
+			permDecorator.Required(courseReviewHandler.DeleteReview, []rbac.Permission{rbac.ReviewDelete}),
+		)
+	}
+
+	// Course-specific review routes
+	courses := v1.Group("/courses")
+	{
+		// Create review for course
+		courses.POST(
+			"/:courseId/reviews",
+			permDecorator.Required(courseReviewHandler.CreateReview, []rbac.Permission{rbac.ReviewCreate}),
+		)
+
+		// List reviews for course
+		courses.GET(
+			"/:courseId/reviews",
+			permDecorator.Required(courseReviewHandler.ListCourseReviews, []rbac.Permission{rbac.ReviewRead}),
+		)
+
+		// Get student's review for course
+		courses.GET(
+			"/:courseId/my-review",
+			permDecorator.Required(courseReviewHandler.GetStudentReview, []rbac.Permission{rbac.ReviewRead}),
+		)
+
+		// Get course review statistics
+		courses.GET(
+			"/:courseId/review-stats",
+			permDecorator.Required(courseReviewHandler.GetCourseStats, []rbac.Permission{rbac.ReviewRead}),
+		)
+	}
+
+	// User's reviews
+	v1.GET(
+		"/my-reviews",
+		permDecorator.Required(courseReviewHandler.ListMyReviews, []rbac.Permission{rbac.ReviewRead}),
+	)
+
+	log.Println("✓ Course review routes initialized successfully")
+}
+
+// InitCertificateRoutes initializes certificate routes with permission checks
+func InitCertificateRoutes(
+	v1 *gin.RouterGroup,
+	certificateHandler *handlers.CertificateHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing certificate routes")
+
+	// User certificate routes
+	v1.GET(
+		"/user/certificates",
+		permDecorator.Required(certificateHandler.ListUserCertificates, []rbac.Permission{rbac.CertificateRead}),
+	)
+
+	// Certificate endpoints
+	certificates := v1.Group("/certificates")
+	{
+		// List all certificates (admin)
+		certificates.GET(
+			"",
+			permDecorator.Required(certificateHandler.ListAllCertificates, []rbac.Permission{rbac.CertificateRead}),
+		)
+
+		// Issue certificate (admin)
+		certificates.POST(
+			"",
+			permDecorator.Required(certificateHandler.IssueCertificate, []rbac.Permission{rbac.CertificateCreate}),
+		)
+
+		// Get specific certificate
+		certificates.GET(
+			"/:id",
+			permDecorator.Required(certificateHandler.GetCertificate, []rbac.Permission{rbac.CertificateRead}),
+		)
+
+		// Download certificate PDF
+		certificates.GET(
+			"/:id/download",
+			permDecorator.Required(certificateHandler.DownloadCertificatePDF, []rbac.Permission{rbac.CertificateRead}),
+		)
+
+		// Verify certificate by number (public - no auth required)
+		certificates.GET(
+			"/:number/verify",
+			certificateHandler.VerifyCertificate,
+		)
+
+		// Check eligibility for certificate
+		certificates.GET(
+			"/eligibility",
+			permDecorator.Required(certificateHandler.CheckEligibility, []rbac.Permission{rbac.CertificateRead}),
+		)
+	}
+
+	log.Println("✓ Certificate routes initialized successfully")
 }

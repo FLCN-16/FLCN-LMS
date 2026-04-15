@@ -77,6 +77,9 @@ func main() {
 	questionOptionRepo := repository.NewQuestionOptionRepository(db.DB)
 	lessonProgressRepo := repository.NewLessonProgressRepository(db.DB)
 	liveSessionParticipantRepo := repository.NewLiveSessionParticipantRepository(db.DB)
+	dppRepo := repository.NewDPPRepository(db.DB)
+	announcementRepo := repository.NewAnnouncementRepository(db.DB)
+	courseReviewRepo := repository.NewCourseReviewRepository(db.DB)
 	log.Println("[Main] ✓ All repositories initialized")
 
 	// ==========================================
@@ -92,7 +95,10 @@ func main() {
 	enrollmentService := service.NewEnrollmentService(enrollmentRepo, courseRepo, userRepo)
 	attemptService := service.NewAttemptService(attemptRepo, testSeriesRepo, userRepo, attemptAnswerRepo, certificateRepo, questionRepo, questionOptionRepo)
 	liveSessionService := service.NewLiveSessionService(liveSessionRepo, userRepo, liveSessionParticipantRepo)
-	_ = service.NewCertificateService(certificateRepo, userRepo, courseRepo, testSeriesRepo, attemptRepo, enrollmentRepo)
+	certificateService := service.NewCertificateService(certificateRepo, userRepo, courseRepo, testSeriesRepo, attemptRepo, enrollmentRepo)
+	dppService := service.NewDPPService(dppRepo)
+	announcementService := service.NewAnnouncementService(announcementRepo)
+	courseReviewService := service.NewCourseReviewService(courseReviewRepo)
 	log.Println("[Main] ✓ All services initialized")
 
 	// Initialize license client with timeout
@@ -105,6 +111,9 @@ func main() {
 	if err := licenseService.LoadCacheFromDatabase(); err != nil {
 		log.Printf("[Main] Warning: Failed to load cached license: %v", err)
 	}
+
+	// Initialize certificate PDF generator
+	pdfGenerator := service.NewCertificatePDFGenerator(cfg.AppName, "https://certificates.example.com")
 
 	// ==========================================
 	// Initialize Permission Service
@@ -127,6 +136,10 @@ func main() {
 	liveSessionHandler := handlers.NewLiveSessionHandler(liveSessionService, userService)
 	leaderboardHandler := handlers.NewLeaderboardHandler(attemptService, enrollmentService, userService)
 	licenseHandler := handlers.NewLicenseHandler(licenseService)
+	dppHandler := handlers.NewDPPHandler(dppService)
+	announcementHandler := handlers.NewAnnouncementHandler(announcementService)
+	courseReviewHandler := handlers.NewCourseReviewHandler(courseReviewService)
+	certificateHandler := handlers.NewCertificateHandler(*certificateService, pdfGenerator)
 	log.Println("[Main] ✓ All handlers initialized")
 
 	// ==========================================
@@ -228,6 +241,10 @@ func main() {
 		liveSessionHandler,
 		leaderboardHandler,
 		licenseHandler,
+		dppHandler,
+		announcementHandler,
+		courseReviewHandler,
+		certificateHandler,
 		permissionDecorator,
 		cfg.JWTSecret,
 	)

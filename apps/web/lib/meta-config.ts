@@ -50,7 +50,7 @@ const metaObject = ({
   return {
     title: formattedTitle,
     description,
-    authors: siteConfig.authors,
+    authors: [...siteConfig.authors],
 
     // ✅ Canonical URL support for SEO
     ...(canonicalUrl && {

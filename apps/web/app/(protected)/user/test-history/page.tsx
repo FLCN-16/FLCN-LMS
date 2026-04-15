@@ -10,12 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@flcn-lms/ui/components/table"
+import type { AttemptStatus } from "@flcn-lms/types/attempts"
 
 import { getAllUserAttempts } from "@/fetchers/attempts"
 
 function getStatusColor(
-  status: "IN_PROGRESS" | "PAUSED" | "SUBMITTED"
-): "default" | "secondary" | "outline" {
+  status: AttemptStatus
+): "default" | "secondary" | "outline" | "destructive" {
   switch (status) {
     case "SUBMITTED":
       return "default"
@@ -23,6 +24,8 @@ function getStatusColor(
       return "secondary"
     case "PAUSED":
       return "outline"
+    case "TIMED_OUT":
+      return "destructive"
     default:
       return "default"
   }
@@ -36,9 +39,7 @@ function formatDate(dateString: string): string {
   })
 }
 
-function getStatusLabel(
-  status: "IN_PROGRESS" | "PAUSED" | "SUBMITTED"
-): string {
+function getStatusLabel(status: AttemptStatus): string {
   switch (status) {
     case "SUBMITTED":
       return "Submitted"
@@ -46,6 +47,8 @@ function getStatusLabel(
       return "In Progress"
     case "PAUSED":
       return "Paused"
+    case "TIMED_OUT":
+      return "Timed Out"
     default:
       return status
   }
@@ -60,7 +63,7 @@ export async function generateMetadata() {
 
 export default async function TestHistoryPage() {
   try {
-    const testAttempts = await getAllUserAttempts("")
+    const testAttempts = await getAllUserAttempts()
 
     return (
       <div className="space-y-6">

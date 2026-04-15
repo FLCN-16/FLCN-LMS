@@ -107,6 +107,9 @@ export interface TestSeries {
   isPaid: boolean
   price?: number
   totalTests: number
+  testCount?: number // alias for totalTests for UI consistency
+  totalQuestions?: number
+  category?: string
   validTill?: string
   isPublished: boolean
   createdBy?: string

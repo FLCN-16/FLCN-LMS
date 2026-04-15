@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ApiKeysController } from './api-keys.controller';
-import { ApiKeysService } from './api-keys.service';
+
 import { ApiKey } from '../master-entities/api-key.entity';
 import { Institute } from '../master-entities/institute.entity';
+import { ApiKeysController } from './api-keys.controller';
+import { ApiKeysService } from './api-keys.service';
 import { ApiKeyGuard } from './guards/api-key.guard';
 
 /**

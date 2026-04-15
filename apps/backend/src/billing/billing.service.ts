@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { InstituteBilling } from '../master-entities/institute-billing.entity';
 import { CreateBillingDto } from './dto/create-billing.dto';
 import { UpdateBillingDto } from './dto/update-billing.dto';
@@ -22,7 +23,9 @@ export class BillingService {
       relations: ['institute'],
     });
     if (!billing) {
-      throw new NotFoundException(`Billing record for institute ${instituteId} not found`);
+      throw new NotFoundException(
+        `Billing record for institute ${instituteId} not found`,
+      );
     }
     return billing;
   }

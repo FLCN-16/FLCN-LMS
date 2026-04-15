@@ -1,15 +1,20 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import * as crypto from 'crypto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as crypto from 'crypto';
+
 import { ApiKey } from '../master-entities/api-key.entity';
 import { Institute } from '../master-entities/institute.entity';
 import {
+  ApiKeyDetailDto,
+  ApiKeyResponseDto,
+  ApiKeyValidationResponseDto,
   CreateApiKeyDto,
   UpdateApiKeyDto,
-  ApiKeyResponseDto,
-  ApiKeyDetailDto,
-  ApiKeyValidationResponseDto,
 } from './dto/create-api-key.dto';
 
 /**
@@ -70,7 +75,9 @@ export class ApiKeysService {
     });
 
     if (existingKey) {
-      throw new BadRequestException('API key collision detected. Please try again.');
+      throw new BadRequestException(
+        'API key collision detected. Please try again.',
+      );
     }
 
     // Create and save the key
@@ -142,7 +149,8 @@ export class ApiKeysService {
 
     // Calculate remaining requests (per hour)
     // In production, this would integrate with a rate limiter (Redis)
-    const remainingRequests = apiKey.rateLimit - (apiKey.totalRequests % apiKey.rateLimit);
+    const remainingRequests =
+      apiKey.rateLimit - (apiKey.totalRequests % apiKey.rateLimit);
 
     return {
       isValid: true,
@@ -200,10 +208,7 @@ export class ApiKeysService {
   /**
    * Get a single API key by ID
    */
-  async findOne(
-    instituteId: string,
-    keyId: string,
-  ): Promise<ApiKeyDetailDto> {
+  async findOne(instituteId: string, keyId: string): Promise<ApiKeyDetailDto> {
     const apiKey = await this.apiKeyRepository.findOne({
       where: { id: keyId, instituteId },
     });
@@ -253,10 +258,7 @@ export class ApiKeysService {
   /**
    * Disable an API key
    */
-  async disable(
-    instituteId: string,
-    keyId: string,
-  ): Promise<ApiKeyDetailDto> {
+  async disable(instituteId: string, keyId: string): Promise<ApiKeyDetailDto> {
     const apiKey = await this.apiKeyRepository.findOne({
       where: { id: keyId, instituteId },
     });
@@ -274,10 +276,7 @@ export class ApiKeysService {
   /**
    * Re-enable an API key
    */
-  async enable(
-    instituteId: string,
-    keyId: string,
-  ): Promise<ApiKeyDetailDto> {
+  async enable(instituteId: string, keyId: string): Promise<ApiKeyDetailDto> {
     const apiKey = await this.apiKeyRepository.findOne({
       where: { id: keyId, instituteId },
     });

@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+
 import { License } from '../../master-entities/license.entity';
 
 export async function seedTestLicenses() {
@@ -32,10 +33,10 @@ export async function seedTestLicenses() {
       organizationName: 'Test Organization - Basic',
       status: 'active' as const,
       isValid: true,
-      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-      features: [
-        { name: 'live_sessions', enabled: true, limit: 100 },
-      ],
+      expiryDate: new Date(
+        new Date().setFullYear(new Date().getFullYear() + 1),
+      ),
+      features: [{ name: 'live_sessions', enabled: true, limit: 100 }],
       maxUsers: 500,
       notes: 'Basic plan',
     },

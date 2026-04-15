@@ -47,8 +47,12 @@ export class SaasAuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.authService.login(dto.email, dto.password, dto.remember);
-    
+    const result = await this.authService.login(
+      dto.email,
+      dto.password,
+      dto.remember,
+    );
+
     const expires = dto.remember ? 30 : undefined;
 
     res.cookie(ADMIN_AUTH_COOKIE_NAME, result.token, {

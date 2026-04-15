@@ -219,7 +219,8 @@ export const RateLimitSensitive = () =>
     limit: 10,
     windowMs: 60 * 1000,
     mode: 'ip',
-    message: 'Too many requests to this sensitive endpoint. Please try again later.',
+    message:
+      'Too many requests to this sensitive endpoint. Please try again later.',
   });
 
 /**
@@ -327,7 +328,9 @@ export const RateLimitCustom = (
     limit,
     windowMs: windowMinutes * 60 * 1000,
     mode,
-    message: message || `Rate limit of ${limit} requests per ${windowMinutes} minute(s) exceeded.`,
+    message:
+      message ||
+      `Rate limit of ${limit} requests per ${windowMinutes} minute(s) exceeded.`,
   });
 
 /**

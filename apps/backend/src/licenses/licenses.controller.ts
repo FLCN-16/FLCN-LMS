@@ -24,6 +24,7 @@ import {
 import { RateLimitGuard } from '../rate-limiting/guards/rate-limit.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import {
+  CheckFeatureDto,
   CheckFeatureResponseDto,
   FeatureDto,
   IssueLicenseDto,
@@ -86,9 +87,9 @@ export class LicensesController {
   @RateLimitFeatureCheck()
   @HttpCode(HttpStatus.OK)
   async checkFeature(
-    @Body() body: { licenseKey: string; featureName: string },
+    @Body() dto: CheckFeatureDto,
   ): Promise<CheckFeatureResponseDto> {
-    return this.licensesService.checkFeature(body.licenseKey, body.featureName);
+    return this.licensesService.checkFeature(dto.licenseKey, dto.featureName);
   }
 
   /**

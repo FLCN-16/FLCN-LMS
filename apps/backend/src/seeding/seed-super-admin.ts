@@ -1,16 +1,17 @@
 import 'reflect-metadata';
 
-import { createHmac, randomBytes } from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 
 import { License } from '../master-entities/license.entity';
 import { Plan } from '../master-entities/plan.entity';
 import { SuperAdmin } from '../master-entities/super-admin.entity';
 
-function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString('hex');
-  const hash = createHmac('sha256', salt).update(password).digest('hex');
-  return `${salt}:${hash}`;
+async function hashPassword(password: string): Promise<string> {
+  // Use bcrypt with 10 salt rounds (cost factor)
+  // This is a proper work factor-based password hashing algorithm
+  const hashedPassword = await bcrypt.hash(password, 10);
+  return hashedPassword;
 }
 
 async function seedSaasPlatform() {
@@ -95,7 +96,7 @@ async function seedSaasPlatform() {
     let planCount = 0;
     for (const planData of defaultPlans) {
       const existingPlan = await planRepository.findOne({
-        where: { slug: planData.slug },
+        where: { name: planData.name },
       });
 
       if (!existingPlan) {
@@ -122,7 +123,7 @@ async function seedSaasPlatform() {
     if (existingAdmin) {
       console.log('ℹ Super admin already exists\n');
     } else {
-      const hashedPassword = hashPassword(superAdminPassword);
+      const hashedPassword = await hashPassword(superAdminPassword);
       const superAdmin = superAdminRepository.create({
         email: superAdminEmail,
         name: superAdminName,
@@ -157,9 +158,9 @@ async function seedSaasPlatform() {
         },
         maxUsers: 50,
         verificationCount: 0,
-        lastVerifiedAt: null,
+        lastVerifiedAt: undefined,
         notes: 'Default trial license for testing',
-      });
+      } as any);
 
       await licenseRepository.save(trialLicense);
       console.log('✅ Created trial license: FLCN-TRIAL-001\n');

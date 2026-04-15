@@ -1,6 +1,6 @@
 import Image from "next/image"
 
-import type { CartItem } from "@flcn-lms/types"
+import type { CartItem } from "@flcn-lms/types/cart"
 import {
   Card,
   CardContent,
@@ -11,7 +11,8 @@ import { Text } from "@flcn-lms/ui/components/typography"
 
 import formatPrice from "@/lib/format-price"
 
-function CheckoutSummary({ id, title, price, imageUrl }: CartItem) {
+function CheckoutSummary(props?: Partial<CartItem>) {
+  const { id = "1", title = "Course Title", price = 0, imageUrl = "https://via.placeholder.com/240x120" } = props ?? {}
   return (
     <Card className="rounded-sm">
       <CardHeader>

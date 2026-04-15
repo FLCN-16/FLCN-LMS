@@ -20,7 +20,8 @@ export class SuperAdminsService {
   ) {}
 
   async findAll(): Promise<SuperAdmin[]> {
-    return this.repository.find();
+    const admins = await this.repository.find();
+    return admins.map((admin) => this.excludePassword(admin));
   }
 
   async findOne(id: string): Promise<SuperAdmin> {
@@ -28,7 +29,7 @@ export class SuperAdminsService {
     if (!admin) {
       throw new NotFoundException(`SuperAdmin with ID ${id} not found`);
     }
-    return admin;
+    return this.excludePassword(admin);
   }
 
   async create(dto: CreateSuperAdminDto): Promise<SuperAdmin> {
@@ -41,28 +42,45 @@ export class SuperAdminsService {
       );
     }
 
-    const hashedPassword = this.authService.hashPassword(dto.password);
+    const hashedPassword = await this.authService.hashPassword(dto.password);
     const admin = this.repository.create({
       ...dto,
       hashedPassword,
     });
 
-    return this.repository.save(admin);
+    const saved = await this.repository.save(admin);
+    return this.excludePassword(saved);
   }
 
   async update(id: string, dto: UpdateSuperAdminDto): Promise<SuperAdmin> {
-    const admin = await this.findOne(id);
+    const admin = await this.repository.findOne({ where: { id } });
+    if (!admin) {
+      throw new NotFoundException(`SuperAdmin with ID ${id} not found`);
+    }
 
     if (dto.password) {
-      admin.hashedPassword = this.authService.hashPassword(dto.password);
+      admin.hashedPassword = await this.authService.hashPassword(dto.password);
     }
 
     Object.assign(admin, dto);
-    return this.repository.save(admin);
+    const updated = await this.repository.save(admin);
+    return this.excludePassword(updated);
   }
 
   async remove(id: string): Promise<void> {
-    const admin = await this.findOne(id);
+    const admin = await this.repository.findOne({ where: { id } });
+    if (!admin) {
+      throw new NotFoundException(`SuperAdmin with ID ${id} not found`);
+    }
     await this.repository.remove(admin);
+  }
+
+  /**
+   * Remove sensitive password field from admin object before returning
+   */
+  private excludePassword(admin: SuperAdmin): SuperAdmin {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { hashedPassword, ...adminWithoutPassword } = admin;
+    return adminWithoutPassword as SuperAdmin;
   }
 }

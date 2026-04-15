@@ -13,17 +13,16 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 import { RequiredScopes } from '../api-keys/decorators/required-scopes.decorator';
-import { ApiKeyGuard } from '../api-keys/guards/api-key.guard';
 import { CurrentUser } from '../licenses/decorators/current-user.decorator';
-import { RateLimitApiKey } from '../rate-limiting/decorators/rate-limit.decorator';
 import { RateLimitGuard } from '../rate-limiting/guards/rate-limit.guard';
+import { CreateRefundDto } from './dto/create-refund.dto';
 import { RefundService } from './refund.service';
 
 @Controller('refunds')
-@UseGuards(ApiKeyGuard, RateLimitGuard)
-@RateLimitApiKey()
+@UseGuards(AuthGuard('jwt'), RateLimitGuard)
 export class RefundController {
   constructor(private readonly refundService: RefundService) {}
 
@@ -48,20 +47,9 @@ export class RefundController {
   @RequiredScopes('write:customers')
   @HttpCode(HttpStatus.CREATED)
   async createRefund(
-    @Body('invoiceId') invoiceId: string,
-    @Body('amount') amount: number,
-    @Body('reason') reason: string,
-    @Body('refundMethod') refundMethod?: string,
-    @Body('notes') notes?: string,
-    @Body('type') type?: 'full' | 'partial',
+    @Body() dto: CreateRefundDto,
     @CurrentUser() initiatedBy?: string,
   ) {
-    if (!invoiceId || !amount || !reason) {
-      throw new BadRequestException(
-        'invoiceId, amount, and reason are required',
-      );
-    }
-
     if (!initiatedBy) {
       throw new BadRequestException(
         'User authentication is required to initiate a refund',
@@ -69,13 +57,8 @@ export class RefundController {
     }
 
     return this.refundService.createRefund({
-      invoiceId,
-      amount,
-      reason,
-      refundMethod,
-      notes,
+      ...dto,
       initiatedBy,
-      type,
     });
   }
 

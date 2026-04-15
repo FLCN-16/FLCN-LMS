@@ -95,13 +95,13 @@ export class SeederService {
       const customer = this.instituteRepository.create({
         name,
         slug,
-        email,
-        industry,
-        maxLicenses,
+        maxUsers: maxLicenses,
         isActive: true,
-      });
+      } as any);
 
-      const savedCustomer = await this.instituteRepository.save(customer);
+      const savedCustomer = (await this.instituteRepository.save(
+        customer,
+      )) as unknown as Institute;
       this.logger.log(`Customer created: ${slug}`);
 
       return savedCustomer;
@@ -115,27 +115,27 @@ export class SeederService {
    * Seed a plan
    */
   async seedPlan(planData: Partial<Plan>): Promise<Plan> {
-    const { name, slug } = planData;
+    const { name } = planData;
 
     try {
-      if (!name || !slug) {
-        throw new Error('Plan name and slug are required');
+      if (!name) {
+        throw new Error('Plan name is required');
       }
 
       // Check if plan already exists
       const existingPlan = await this.planRepository.findOne({
-        where: { slug },
+        where: { name },
       });
 
       if (existingPlan) {
-        this.logger.warn(`Plan already exists: ${slug}`);
+        this.logger.warn(`Plan already exists: ${name}`);
         return existingPlan;
       }
 
       // Create plan
       const plan = this.planRepository.create(planData);
       const savedPlan = await this.planRepository.save(plan);
-      this.logger.log(`Plan created: ${slug}`);
+      this.logger.log(`Plan created: ${name}`);
 
       return savedPlan;
     } catch (error) {

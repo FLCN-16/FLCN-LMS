@@ -21,7 +21,8 @@ export const RATE_LIMIT_PRESETS = {
   PUBLIC_API: {
     windowMs: 60 * 1000, // 1 minute
     max: 100, // 100 requests per minute
-    message: 'License verification rate limit exceeded. Please try again in a moment.',
+    message:
+      'License verification rate limit exceeded. Please try again in a moment.',
   },
 
   // Authenticated endpoints (with JWT token)
@@ -56,7 +57,8 @@ export const RATE_LIMIT_PRESETS = {
   SENSITIVE: {
     windowMs: 60 * 1000, // 1 minute
     max: 10, // 10 requests per minute
-    message: 'Too many requests to this sensitive endpoint, please try again later.',
+    message:
+      'Too many requests to this sensitive endpoint, please try again later.',
   },
 };
 
@@ -107,7 +109,9 @@ export const RATE_LIMIT_SKIP_CONDITIONS = {
    * Skip rate limiting for health checks
    */
   healthCheck: (req: any) => {
-    return req.path === '/health' || req.path === '/healthz' || req.path === '/ping';
+    return (
+      req.path === '/health' || req.path === '/healthz' || req.path === '/ping'
+    );
   },
 
   /**
@@ -142,12 +146,14 @@ export const RATE_LIMIT_KEYS = {
   /**
    * Generate a rate limit key for user-based limiting
    */
-  byUser: (userId: string, endpoint: string) => `rate-limit:user:${userId}:${endpoint}`,
+  byUser: (userId: string, endpoint: string) =>
+    `rate-limit:user:${userId}:${endpoint}`,
 
   /**
    * Generate a rate limit key for API key-based limiting
    */
-  byApiKey: (keyId: string, endpoint: string) => `rate-limit:key:${keyId}:${endpoint}`,
+  byApiKey: (keyId: string, endpoint: string) =>
+    `rate-limit:key:${keyId}:${endpoint}`,
 
   /**
    * Generate a rate limit key for institute-based limiting
@@ -239,7 +245,10 @@ export function extractApiKeyFromHeader(req: any): string | null {
 /**
  * Calculate retry-after value in seconds
  */
-export function calculateRetryAfter(resetTime: number, currentTime: number): number {
+export function calculateRetryAfter(
+  resetTime: number,
+  currentTime: number,
+): number {
   return Math.ceil((resetTime - currentTime) / 1000);
 }
 
@@ -307,7 +316,9 @@ export function isRateLimitedEndpoint(method: string, path: string): boolean {
 export function getRateLimitForEndpoint(
   method: string,
   path: string,
-): (typeof RATE_LIMIT_PRESETS.PUBLIC) | null {
+): typeof RATE_LIMIT_PRESETS.PUBLIC | null {
   const endpoint = `${method} ${path}`;
-  return ENDPOINT_RATE_LIMITS[endpoint as keyof typeof ENDPOINT_RATE_LIMITS] || null;
+  return (
+    ENDPOINT_RATE_LIMITS[endpoint as keyof typeof ENDPOINT_RATE_LIMITS] || null
+  );
 }

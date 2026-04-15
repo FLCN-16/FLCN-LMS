@@ -20,7 +20,7 @@ import {
   normalizePermissions,
 } from '@flcn-lms/types/auth';
 
-import type { JwtPayload } from '../auth/jwt.strategy';
+import type { AuthenticatedUser, JwtPayload } from '../auth/jwt.strategy';
 
 export type AppAbility = MongoAbility<[AppAction, AppSubject]>;
 
@@ -84,8 +84,10 @@ export class CaslAbilityFactory {
   }
 }
 
-export function toAbilityUser(payload: JwtPayload): AbilityUser {
-  const userId = payload.sub ?? payload.id ?? payload.userId;
+export function toAbilityUser(
+  payload: JwtPayload | AuthenticatedUser,
+): AbilityUser {
+  const userId = (payload as any).sub ?? (payload as any).userId ?? payload.id;
 
   if (!userId || typeof payload.role !== 'string') {
     throw new ForbiddenException('Authenticated user payload is incomplete');
@@ -96,8 +98,8 @@ export function toAbilityUser(payload: JwtPayload): AbilityUser {
     role: payload.role as Role,
     instituteId:
       typeof payload.instituteId === 'string' ? payload.instituteId : undefined,
-    permissions: Array.isArray(payload.permissions)
-      ? payload.permissions.filter(
+    permissions: Array.isArray((payload as any).permissions)
+      ? (payload as any).permissions.filter(
           (permission): permission is string => typeof permission === 'string',
         )
       : undefined,

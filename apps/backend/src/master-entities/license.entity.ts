@@ -7,8 +7,9 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Plan } from './plan.entity';
+
 import { Institute } from './institute.entity';
+import { Plan } from './plan.entity';
 import { SuperAdmin } from './super-admin.entity';
 
 /**

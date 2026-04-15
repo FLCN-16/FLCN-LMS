@@ -1,11 +1,17 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  OnApplicationShutdown,
+} from '@nestjs/common';
+
+import {
+  calculateRetryAfter,
+  formatRateLimitResponse,
   RATE_LIMIT_KEYS,
   RATE_LIMIT_WINDOWS,
   RateLimitStrategy,
   windowMsToSeconds,
-  calculateRetryAfter,
-  formatRateLimitResponse,
 } from './rate-limiting.config';
 
 /**
@@ -37,9 +43,11 @@ interface RateLimitStore {
  * Future: Redis backend for production and horizontal scaling
  */
 @Injectable()
-export class RateLimitingService {
+export class RateLimitingService implements OnApplicationShutdown {
   private store: RateLimitStore = {};
-  private readonly strategy: RateLimitStrategy = RateLimitStrategy.SLIDING_WINDOW;
+  private readonly strategy: RateLimitStrategy =
+    RateLimitStrategy.SLIDING_WINDOW;
+  private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     // Clean up expired records every 5 minutes
@@ -101,7 +109,7 @@ export class RateLimitingService {
   /**
    * Core rate limit check using sliding window counter
    */
-  private async checkRateLimit(
+  async checkRateLimit(
     key: string,
     limit: number,
     windowMs: number,
@@ -281,9 +289,22 @@ export class RateLimitingService {
    * Runs periodically to prevent memory leaks
    */
   private startCleanupInterval(): void {
-    setInterval(() => {
-      this.cleanupExpiredRecords();
-    }, 5 * 60 * 1000); // Every 5 minutes
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanupExpiredRecords();
+      },
+      5 * 60 * 1000,
+    ); // Every 5 minutes
+  }
+
+  /**
+   * Clean up resources on application shutdown
+   */
+  onApplicationShutdown(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
   }
 
   /**
@@ -302,7 +323,9 @@ export class RateLimitingService {
     keysToDelete.forEach((key) => delete this.store[key]);
 
     if (keysToDelete.length > 0) {
-      console.log(`[RateLimiting] Cleaned up ${keysToDelete.length} expired records`);
+      console.log(
+        `[RateLimiting] Cleaned up ${keysToDelete.length} expired records`,
+      );
     }
   }
 
@@ -385,10 +408,16 @@ export class RateLimitingService {
   /**
    * Set counter value
    */
-  async setCounter(key: string, value: number, expiresIn?: number): Promise<void> {
+  async setCounter(
+    key: string,
+    value: number,
+    expiresIn?: number,
+  ): Promise<void> {
     this.store[key] = {
       count: value,
-      resetTime: expiresIn ? Date.now() + expiresIn : Date.now() + RATE_LIMIT_WINDOWS.HOUR,
+      resetTime: expiresIn
+        ? Date.now() + expiresIn
+        : Date.now() + RATE_LIMIT_WINDOWS.HOUR,
     };
   }
 

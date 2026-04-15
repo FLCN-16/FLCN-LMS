@@ -1,8 +1,14 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Refund } from '../master-entities/refund.entity';
+
 import { Invoice } from '../master-entities/invoice.entity';
+import { Refund } from '../master-entities/refund.entity';
 
 interface CreateRefundDto {
   invoiceId: string;
@@ -141,7 +147,7 @@ export class RefundService {
     }
 
     const [refunds, total] = await query
-      .relations(['invoice'])
+      .leftJoinAndSelect('refund.invoice', 'invoice')
       .orderBy('refund.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
@@ -209,7 +215,8 @@ export class RefundService {
       }
     } catch (error) {
       refund.status = 'failed';
-      refund.errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      refund.errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
 
       // Schedule retry if retries remaining
       if (refund.retryCount < refund.maxRetries) {
@@ -247,7 +254,7 @@ export class RefundService {
     }
 
     refund.status = 'pending';
-    refund.nextRetryAt = null;
+    refund.nextRetryAt = undefined;
     await this.refundRepository.save(refund);
 
     return this.processRefund(id);
@@ -315,7 +322,10 @@ export class RefundService {
       if (refund.status === 'completed') {
         stats.completedRefunds++;
         stats.completedAmount += Number(refund.amount);
-      } else if (refund.status === 'pending' || refund.status === 'processing') {
+      } else if (
+        refund.status === 'pending' ||
+        refund.status === 'processing'
+      ) {
         stats.pendingRefunds++;
       } else if (refund.status === 'failed') {
         stats.failedRefunds++;
@@ -344,10 +354,10 @@ export class RefundService {
 
     return this.refundRepository
       .createQueryBuilder('refund')
+      .leftJoinAndSelect('refund.invoice', 'invoice')
       .where('refund.status = :status', { status: 'failed' })
       .andWhere('refund.retryCount < refund.maxRetries', {})
       .andWhere('refund.nextRetryAt <= :now', { now })
-      .relations(['invoice'])
       .orderBy('refund.nextRetryAt', 'ASC')
       .getMany();
   }
@@ -355,7 +365,10 @@ export class RefundService {
   /**
    * Process all pending refunds
    */
-  async processPendingRefunds(): Promise<{ processed: number; successful: number }> {
+  async processPendingRefunds(): Promise<{
+    processed: number;
+    successful: number;
+  }> {
     const pendingRefunds = await this.getPendingRefunds();
 
     let successful = 0;

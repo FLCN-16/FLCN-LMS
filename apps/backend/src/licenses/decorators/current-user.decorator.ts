@@ -18,6 +18,6 @@ export const CurrentUser = createParamDecorator(
       return null;
     }
 
-    return request.user.sub || request.user.id || request.user.userId || null;
+    return request.user.userId || request.user.id || null;
   },
 );

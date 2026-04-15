@@ -1,6 +1,7 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 import { InstituteBilling } from '../master-entities/institute-billing.entity';
 
 interface StripeEvent {
@@ -81,7 +82,10 @@ export class StripeService {
           break;
 
         case 'customer.subscription.updated':
-          await this.handleSubscriptionUpdated(event.data.object, event.data.previous_attributes);
+          await this.handleSubscriptionUpdated(
+            event.data.object,
+            event.data.previous_attributes,
+          );
           break;
 
         case 'customer.subscription.deleted':
@@ -114,7 +118,9 @@ export class StripeService {
   /**
    * Handle subscription created event
    */
-  private async handleSubscriptionCreated(subscription: StripeSubscription): Promise<void> {
+  private async handleSubscriptionCreated(
+    subscription: StripeSubscription,
+  ): Promise<void> {
     const billing = await this.billingRepository.findOne({
       where: { stripeCustomerId: subscription.customer },
     });
@@ -128,7 +134,9 @@ export class StripeService {
 
     billing.subscriptionId = subscription.id;
     billing.status = subscription.status;
-    billing.currentPeriodStart = new Date(subscription.current_period_start * 1000);
+    billing.currentPeriodStart = new Date(
+      subscription.current_period_start * 1000,
+    );
     billing.currentPeriodEnd = new Date(subscription.current_period_end * 1000);
     billing.nextBillingDate = new Date(subscription.current_period_end * 1000);
 
@@ -150,17 +158,24 @@ export class StripeService {
     });
 
     if (!billing) {
-      this.logger.warn(`Billing record not found for subscription: ${subscription.id}`);
+      this.logger.warn(
+        `Billing record not found for subscription: ${subscription.id}`,
+      );
       return;
     }
 
     // Update period information
-    billing.currentPeriodStart = new Date(subscription.current_period_start * 1000);
+    billing.currentPeriodStart = new Date(
+      subscription.current_period_start * 1000,
+    );
     billing.currentPeriodEnd = new Date(subscription.current_period_end * 1000);
     billing.nextBillingDate = new Date(subscription.current_period_end * 1000);
 
     // Check if status changed
-    if (previousAttributes?.status && previousAttributes.status !== subscription.status) {
+    if (
+      previousAttributes?.status &&
+      previousAttributes.status !== subscription.status
+    ) {
       billing.status = subscription.status;
 
       if (subscription.status === 'past_due') {
@@ -181,19 +196,23 @@ export class StripeService {
   /**
    * Handle subscription deleted event
    */
-  private async handleSubscriptionDeleted(subscription: StripeSubscription): Promise<void> {
+  private async handleSubscriptionDeleted(
+    subscription: StripeSubscription,
+  ): Promise<void> {
     const billing = await this.billingRepository.findOne({
       where: { subscriptionId: subscription.id },
     });
 
     if (!billing) {
-      this.logger.warn(`Billing record not found for subscription: ${subscription.id}`);
+      this.logger.warn(
+        `Billing record not found for subscription: ${subscription.id}`,
+      );
       return;
     }
 
     billing.status = 'canceled';
-    billing.subscriptionId = null;
-    billing.nextBillingDate = null;
+    billing.subscriptionId = undefined;
+    billing.nextBillingDate = undefined;
 
     await this.billingRepository.save(billing);
     this.logger.log(`Subscription deleted for billing ID: ${billing.id}`);
@@ -202,7 +221,9 @@ export class StripeService {
   /**
    * Handle invoice payment succeeded event
    */
-  private async handleInvoicePaymentSucceeded(invoice: StripeInvoice): Promise<void> {
+  private async handleInvoicePaymentSucceeded(
+    invoice: StripeInvoice,
+  ): Promise<void> {
     const billing = await this.billingRepository.findOne({
       where: { subscriptionId: invoice.subscription },
     });
@@ -246,7 +267,9 @@ export class StripeService {
   /**
    * Handle invoice payment failed event
    */
-  private async handleInvoicePaymentFailed(invoice: StripeInvoice): Promise<void> {
+  private async handleInvoicePaymentFailed(
+    invoice: StripeInvoice,
+  ): Promise<void> {
     const billing = await this.billingRepository.findOne({
       where: { subscriptionId: invoice.subscription },
     });
@@ -315,7 +338,9 @@ export class StripeService {
   /**
    * Retrieve subscription from Stripe
    */
-  async getStripeSubscription(subscriptionId: string): Promise<StripeSubscription | null> {
+  async getStripeSubscription(
+    subscriptionId: string,
+  ): Promise<StripeSubscription | null> {
     // This would call Stripe API in a real implementation
     // For now, just return null as we're not calling Stripe directly
     this.logger.log(`Getting subscription: ${subscriptionId}`);
@@ -344,7 +369,9 @@ export class StripeService {
   /**
    * Get billing record by institute
    */
-  async getBillingByInstitute(instituteId: string): Promise<InstituteBilling | null> {
+  async getBillingByInstitute(
+    instituteId: string,
+  ): Promise<InstituteBilling | null> {
     return this.billingRepository.findOne({
       where: { instituteId },
       relations: ['institute'],

@@ -1,16 +1,16 @@
+import { Type } from 'class-transformer';
 import {
-  IsUUID,
+  IsArray,
+  IsDate,
+  IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
-  IsNumber,
-  IsDate,
-  IsArray,
-  IsEnum,
+  IsUUID,
   Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 export class LineItemDto {
   @IsString()

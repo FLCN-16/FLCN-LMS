@@ -1,21 +1,22 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
   HttpException,
   HttpStatus,
-  Reflector,
+  Injectable,
 } from '@nestjs/common';
-import { RateLimitingService } from '../rate-limiting.service';
+import { Reflector } from '@nestjs/core';
+
 import {
   RATE_LIMIT_KEY,
   RateLimitOptions,
 } from '../decorators/rate-limit.decorator';
 import {
-  getClientIp,
   extractApiKeyFromHeader,
+  getClientIp,
   RATE_LIMIT_HEADERS,
 } from '../rate-limiting.config';
+import { RateLimitingService } from '../rate-limiting.service';
 
 /**
  * Rate Limiting Guard

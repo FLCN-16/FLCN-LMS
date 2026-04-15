@@ -1,28 +1,29 @@
 import {
-  Injectable,
   BadRequestException,
+  Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, In } from 'typeorm';
+import { plainToClass } from 'class-transformer';
+import { In, Like, Repository } from 'typeorm';
+
+import { Institute } from '../master-entities/institute.entity';
 import { License } from '../master-entities/license.entity';
 import { Plan } from '../master-entities/plan.entity';
-import { Institute } from '../master-entities/institute.entity';
 import { SuperAdmin } from '../master-entities/super-admin.entity';
 import {
+  CheckFeatureResponseDto,
+  FeatureDto,
   IssueLicenseDto,
+  LicenseInfoDto,
+  LicenseListResponseDto,
+  ListLicensesQueryDto,
+  RevokeLicenseResponseDto,
   UpdateLicenseDto,
   VerifyLicenseDto,
   VerifyLicenseResponseDto,
-  LicenseInfoDto,
-  CheckFeatureResponseDto,
-  ListLicensesQueryDto,
-  LicenseListResponseDto,
-  RevokeLicenseResponseDto,
-  FeatureDto,
 } from './dto/verify-license.dto';
-import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class LicensesService {
@@ -41,7 +42,9 @@ export class LicensesService {
    * Verify a license key and return its details
    * Updates verification count and last verified timestamp
    */
-  async verifyLicense(dto: VerifyLicenseDto): Promise<VerifyLicenseResponseDto> {
+  async verifyLicense(
+    dto: VerifyLicenseDto,
+  ): Promise<VerifyLicenseResponseDto> {
     const license = await this.licenseRepository.findOne({
       where: { licenseKey: dto.licenseKey },
     });
@@ -51,6 +54,7 @@ export class LicensesService {
         valid: false,
         status: 'invalid',
         message: 'License key not found',
+        features: [],
       };
     }
 
@@ -60,14 +64,12 @@ export class LicensesService {
         valid: false,
         status: 'invalid',
         message: 'License is invalid',
+        features: [],
       };
     }
 
     // Check if license is expired
-    if (
-      license.expiryDate &&
-      new Date(license.expiryDate) < new Date()
-    ) {
+    if (license.expiryDate && new Date(license.expiryDate) < new Date()) {
       // Update status to expired
       await this.licenseRepository.update(license.id, {
         status: 'expired',
@@ -79,6 +81,7 @@ export class LicensesService {
         status: 'expired',
         expiryDate: license.expiryDate,
         message: 'License has expired',
+        features: [],
       };
     }
 
@@ -88,6 +91,7 @@ export class LicensesService {
         valid: false,
         status: 'error',
         message: 'License is suspended',
+        features: [],
       };
     }
 
@@ -162,7 +166,7 @@ export class LicensesService {
       organizationName: dto.organizationName,
       status: 'active',
       isValid: true,
-      expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
+      expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : undefined,
       features: features,
       maxUsers: dto.maxUsers || 0,
       planId: dto.planId,
@@ -171,10 +175,10 @@ export class LicensesService {
       notes: dto.notes,
       lastVerifiedAt: new Date(),
       verificationCount: 0,
-    });
+    } as any);
 
     const savedLicense = await this.licenseRepository.save(license);
-    return this.mapLicenseToDto(savedLicense);
+    return this.mapLicenseToDto(savedLicense as unknown as License);
   }
 
   /**
@@ -266,10 +270,7 @@ export class LicensesService {
       };
     }
 
-    if (
-      license.expiryDate &&
-      new Date(license.expiryDate) < new Date()
-    ) {
+    if (license.expiryDate && new Date(license.expiryDate) < new Date()) {
       return {
         enabled: false,
         message: 'License has expired',
@@ -316,7 +317,9 @@ export class LicensesService {
   /**
    * List licenses with filters
    */
-  async listLicenses(query: ListLicensesQueryDto): Promise<LicenseListResponseDto> {
+  async listLicenses(
+    query: ListLicensesQueryDto,
+  ): Promise<LicenseListResponseDto> {
     const skip = query.skip || 0;
     const take = query.take || 10;
 
@@ -445,6 +448,7 @@ export class LicensesService {
 
   /**
    * Get license statistics
+   * Uses a single aggregated query to ensure counts are consistent across concurrent writes
    */
   async getLicenseStats(): Promise<{
     total: number;
@@ -453,21 +457,31 @@ export class LicensesService {
     suspended: number;
     invalid: number;
   }> {
-    const total = await this.licenseRepository.count();
-    const active = await this.licenseRepository.count({
-      where: { status: 'active' },
-    });
-    const expired = await this.licenseRepository.count({
-      where: { status: 'expired' },
-    });
-    const suspended = await this.licenseRepository.count({
-      where: { status: 'suspended' },
-    });
-    const invalid = await this.licenseRepository.count({
-      where: { status: 'invalid' },
-    });
+    const result = await this.licenseRepository
+      .createQueryBuilder('license')
+      .select("COUNT(CASE WHEN license.status = 'active' THEN 1 END)", 'active')
+      .addSelect(
+        "COUNT(CASE WHEN license.status = 'expired' THEN 1 END)",
+        'expired',
+      )
+      .addSelect(
+        "COUNT(CASE WHEN license.status = 'suspended' THEN 1 END)",
+        'suspended',
+      )
+      .addSelect(
+        "COUNT(CASE WHEN license.status = 'invalid' THEN 1 END)",
+        'invalid',
+      )
+      .addSelect('COUNT(*)', 'total')
+      .getRawOne();
 
-    return { total, active, expired, suspended, invalid };
+    return {
+      total: parseInt(result?.total, 10) || 0,
+      active: parseInt(result?.active, 10) || 0,
+      expired: parseInt(result?.expired, 10) || 0,
+      suspended: parseInt(result?.suspended, 10) || 0,
+      invalid: parseInt(result?.invalid, 10) || 0,
+    };
   }
 
   /**

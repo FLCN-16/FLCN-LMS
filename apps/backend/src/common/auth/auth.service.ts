@@ -1,11 +1,16 @@
-import { createHash, createHmac, randomBytes, timingSafeEqual } from 'crypto';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
 import { SuperAdmin } from '../../master-entities/super-admin.entity';
 
+/**
+ * JWT Token Payload
+ * Structure of data encoded in JWT tokens
+ */
 export interface AuthTokenPayload {
   sub: string;
   id: string;
@@ -15,6 +20,10 @@ export interface AuthTokenPayload {
   exp: number;
 }
 
+/**
+ * Authenticated Session User
+ * User object stored in session/request context
+ */
 export interface AuthSessionUser {
   id: string;
   name: string;
@@ -25,19 +34,54 @@ export interface AuthSessionUser {
   updatedAt: Date;
 }
 
+/**
+ * Login Result
+ * Returned from login endpoint
+ */
 export interface LoginResult {
   user: AuthSessionUser;
   token: string;
 }
 
+/**
+ * Authentication Service
+ *
+ * Handles:
+ * - User login and token generation
+ * - Password hashing (bcrypt with work factor)
+ * - Session management
+ * - Token generation via Passport JWT module
+ *
+ * Security:
+ * - Bcrypt password hashing with 10 salt rounds (configurable)
+ * - Constant-time password comparison via bcrypt
+ * - JWT signature verification handled by passport-jwt
+ * - No timing attack vectors
+ *
+ * Future extensibility:
+ * - Refresh token support
+ * - Multi-factor authentication
+ * - OAuth2/Google login integration
+ */
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(SuperAdmin, 'master')
     private readonly superAdminRepository: Repository<SuperAdmin>,
+    private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * Authenticate user with email and password
+   * Generates JWT token on successful authentication
+   *
+   * @param email Super admin email
+   * @param password Plain text password
+   * @param remember If true, extends token expiration to 30 days
+   * @returns Login result with user data and JWT token
+   * @throws UnauthorizedException if credentials are invalid
+   */
   async login(
     email: string,
     password: string,
@@ -53,7 +97,7 @@ export class AuthService {
 
     if (
       !superAdmin.hashedPassword ||
-      !this.verifyPassword(password, superAdmin.hashedPassword)
+      !(await this.verifyPassword(password, superAdmin.hashedPassword))
     ) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -74,6 +118,14 @@ export class AuthService {
     };
   }
 
+  /**
+   * Retrieve current session user
+   * Used for session validation and refresh
+   *
+   * @param userId ID of user to retrieve
+   * @returns Session user data
+   * @throws UnauthorizedException if user not found or inactive
+   */
   async getSession(userId: string): Promise<AuthSessionUser> {
     const superAdmin = await this.superAdminRepository.findOne({
       where: { id: userId },
@@ -86,100 +138,85 @@ export class AuthService {
     return this.toSessionUser(superAdmin);
   }
 
+  /**
+   * Sign JWT token using Passport JWT module
+   * Delegates token generation to NestJS JwtService for consistency
+   *
+   * @param payload Token payload (sub, id, email, role)
+   * @param remember If true, extends expiration to 30 days instead of 24 hours
+   * @returns Signed JWT token
+   */
   signToken(
     payload: Omit<AuthTokenPayload, 'iat' | 'exp'>,
     remember = false,
   ): string {
-    const secret = this.getJwtSecret();
-    const issuedAt = Math.floor(Date.now() / 1000);
-    const expiresInSeconds = remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24;
+    // Determine expiration based on "remember me" flag
+    const expiresIn = remember ? '30d' : '24h';
 
-    const tokenPayload: AuthTokenPayload = {
-      ...payload,
-      iat: issuedAt,
-      exp: issuedAt + expiresInSeconds,
-    };
+    // JwtService handles all signing, including:
+    // - HS256 algorithm (configured in JwtModule)
+    // - JWT_SECRET (from environment)
+    // - iat and exp claims (added automatically)
+    const token = this.jwtService.sign(payload, { expiresIn });
 
-    const header = this.base64UrlEncode(
-      Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' }), 'utf8'),
-    );
-    const body = this.base64UrlEncode(
-      Buffer.from(JSON.stringify(tokenPayload), 'utf8'),
-    );
-    const signingInput = `${header}.${body}`;
-    const signature = this.base64UrlEncode(
-      createHmac('sha256', secret).update(signingInput).digest(),
-    );
-
-    return `${signingInput}.${signature}`;
+    return token;
   }
 
-  verifyToken(token: string): AuthTokenPayload {
-    const secret = this.getJwtSecret();
-    const parts = token.split('.');
-
-    if (parts.length !== 3) {
-      throw new UnauthorizedException('Invalid token');
-    }
-
-    const [encodedHeader, encodedPayload, encodedSignature] = parts;
-    const signingInput = `${encodedHeader}.${encodedPayload}`;
-    const expectedSignature = this.base64UrlEncode(
-      createHmac('sha256', secret).update(signingInput).digest(),
-    );
-
-    if (!this.safeEqual(encodedSignature, expectedSignature)) {
-      throw new UnauthorizedException('Invalid token signature');
-    }
-
-    const header = JSON.parse(this.base64UrlDecodeToString(encodedHeader)) as {
-      alg?: string;
-      typ?: string;
-    };
-
-    if (header.alg !== 'HS256') {
-      throw new UnauthorizedException('Unsupported token algorithm');
-    }
-
-    const payload = JSON.parse(
-      this.base64UrlDecodeToString(encodedPayload),
-    ) as AuthTokenPayload;
-
-    if (typeof payload.exp === 'number' && Date.now() >= payload.exp * 1000) {
-      throw new UnauthorizedException('Token has expired');
-    }
-
-    return payload;
+  /**
+   * Hash password using bcrypt
+   * Provides proper work factor-based hashing for security
+   *
+   * @param password Plain text password to hash
+   * @returns Bcrypt hash (includes salt)
+   *
+   * Security notes:
+   * - Uses 10 salt rounds (configurable cost factor)
+   * - Bcrypt automatically handles salt generation and storage
+   * - Resistant to rainbow table and brute force attacks
+   * - Takes ~100-200ms per hash (by design, to slow attackers)
+   */
+  async hashPassword(password: string): Promise<string> {
+    const saltRounds = 10; // Cost factor: higher = slower = more secure
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    return hashedPassword;
   }
 
-  hashPassword(password: string): string {
-    const salt = randomBytes(16).toString('hex');
-    const hash = createHmac('sha256', salt).update(password).digest('hex');
-    return `${salt}:${hash}`;
-  }
-
-  private verifyPassword(password: string, hashedPassword: string): boolean {
+  /**
+   * Verify password against bcrypt hash
+   * Uses constant-time comparison built into bcrypt.compare()
+   *
+   * @param password Plain text password to verify
+   * @param hashedPassword Bcrypt hash to compare against
+   * @returns True if password matches, false otherwise
+   *
+   * Security notes:
+   * - bcrypt.compare() performs constant-time comparison
+   * - No timing information leaks to attacker
+   * - Catches errors silently (returns false on invalid input)
+   */
+  private async verifyPassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
     try {
-      const [salt, hash] = hashedPassword.split(':');
-      if (!salt || !hash) return false;
-
-      const candidate = createHmac('sha256', salt).update(password).digest('hex');
-      return timingSafeEqual(Buffer.from(candidate), Buffer.from(hash));
+      // bcrypt.compare handles:
+      // - Constant-time comparison
+      // - Salt extraction from hash
+      // - Hash recalculation and comparison
+      return await bcrypt.compare(password, hashedPassword);
     } catch {
+      // Invalid hash format or other errors -> invalid
       return false;
     }
   }
 
-  private getJwtSecret(): string {
-    const secret = this.configService.get<string>('JWT_SECRET');
-
-    if (!secret) {
-      throw new UnauthorizedException('JWT secret is not configured');
-    }
-
-    return secret;
-  }
-
+  /**
+   * Transform SuperAdmin entity to session user object
+   * Excludes sensitive fields like hashedPassword
+   *
+   * @param superAdmin SuperAdmin entity
+   * @returns Session user object safe to send to client
+   */
   private toSessionUser(superAdmin: SuperAdmin): AuthSessionUser {
     return {
       id: superAdmin.id,
@@ -190,34 +227,5 @@ export class AuthService {
       createdAt: superAdmin.createdAt,
       updatedAt: superAdmin.updatedAt,
     };
-  }
-
-  private base64UrlEncode(buffer: Buffer): string {
-    return buffer
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/g, '');
-  }
-
-  private base64UrlDecodeToString(value: string): string {
-    const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized.padEnd(
-      normalized.length + ((4 - (normalized.length % 4)) % 4),
-      '=',
-    );
-
-    return Buffer.from(padded, 'base64').toString('utf8');
-  }
-
-  private safeEqual(left: string, right: string): boolean {
-    const leftBuffer = Buffer.from(left);
-    const rightBuffer = Buffer.from(right);
-
-    if (leftBuffer.length !== rightBuffer.length) {
-      return false;
-    }
-
-    return timingSafeEqual(leftBuffer, rightBuffer);
   }
 }

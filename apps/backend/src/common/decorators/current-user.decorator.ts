@@ -50,7 +50,9 @@ export const CurrentUser = createParamDecorator(
     return {
       id: extractUserId(payload),
       instituteId:
-        typeof payload.instituteId === 'string' ? payload.instituteId : undefined,
+        typeof payload.instituteId === 'string'
+          ? payload.instituteId
+          : undefined,
       email: typeof payload.email === 'string' ? payload.email : undefined,
       role: typeof payload.role === 'string' ? payload.role : undefined,
       payload,

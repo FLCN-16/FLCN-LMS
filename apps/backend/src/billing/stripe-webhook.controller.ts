@@ -1,7 +1,23 @@
-import { Controller, Post, Headers, RawBodyRequest, Req, Logger, HttpStatus, HttpCode } from '@nestjs/common';
+import { timingSafeEqual } from 'crypto';
+import {
+  BadRequestException,
+  Controller,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  InternalServerErrorException,
+  Logger,
+  Post,
+  Req,
+} from '@nestjs/common';
+import type { RawBodyRequest } from '@nestjs/common';
 import { Request } from 'express';
+
 import { StripeService } from './stripe.service';
 
+/**
+ * Stripe webhook event structure
+ */
 interface StripeEvent {
   id: string;
   object: string;
@@ -18,6 +34,7 @@ interface StripeEvent {
     idempotency_key: string | null;
   };
   type: string;
+  [key: string]: any;
 }
 
 @Controller('webhooks')
@@ -54,7 +71,9 @@ export class StripeWebhookController {
 
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      this.logger.error('STRIPE_WEBHOOK_SECRET environment variable not configured');
+      this.logger.error(
+        'STRIPE_WEBHOOK_SECRET environment variable not configured',
+      );
       return { received: false };
     }
 
@@ -64,7 +83,11 @@ export class StripeWebhookController {
       const body = typeof rawBody === 'string' ? rawBody : rawBody.toString();
 
       // Verify Stripe webhook signature
-      const isValid = this.verifyStripeSignature(body, signature, webhookSecret);
+      const isValid = this.verifyStripeSignature(
+        body,
+        signature,
+        webhookSecret,
+      );
       if (!isValid) {
         this.logger.error('Invalid Stripe webhook signature - rejecting event');
         return { received: false };
@@ -73,7 +96,9 @@ export class StripeWebhookController {
       // Parse event from body
       const event: StripeEvent = JSON.parse(body);
 
-      this.logger.log(`Received Stripe webhook event: ${event.type} (ID: ${event.id})`);
+      this.logger.log(
+        `Received Stripe webhook event: ${event.type} (ID: ${event.id})`,
+      );
 
       // Delegate event handling to service
       await this.stripeService.handleWebhookEvent(event);
@@ -82,8 +107,9 @@ export class StripeWebhookController {
       return { received: true };
     } catch (error) {
       this.logger.error('Error processing Stripe webhook:', error);
-      // Still return 200 to prevent Stripe from retrying
-      return { received: false };
+      throw new InternalServerErrorException(
+        'Failed to process Stripe webhook. Stripe will retry.',
+      );
     }
   }
 
@@ -132,7 +158,9 @@ export class StripeWebhookController {
       const timeDiff = Math.abs(now - eventTime);
 
       if (timeDiff > 300) {
-        this.logger.warn(`Stripe webhook timestamp too old: ${timeDiff} seconds ago`);
+        this.logger.warn(
+          `Stripe webhook timestamp too old: ${timeDiff} seconds ago`,
+        );
         return false;
       }
 
@@ -147,14 +175,22 @@ export class StripeWebhookController {
       // Check if computed signature matches any in the header (Stripe sends multiple for rotation)
       let isValid = false;
       for (const sig of signatures) {
-        if (sig && crypto.timingSafeEqual(sig, computedSignature)) {
+        if (
+          sig &&
+          crypto.timingSafeEqual(
+            Buffer.from(sig, 'hex'),
+            Buffer.from(computedSignature, 'hex'),
+          )
+        ) {
           isValid = true;
           break;
         }
       }
 
       if (!isValid) {
-        this.logger.warn('Stripe webhook signature verification failed - signature mismatch');
+        this.logger.warn(
+          'Stripe webhook signature verification failed - signature mismatch',
+        );
       }
 
       return isValid;

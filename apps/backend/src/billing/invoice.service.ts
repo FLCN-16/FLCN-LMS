@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Invoice } from '../master-entities/invoice.entity';
+
 import { InstituteBilling } from '../master-entities/institute-billing.entity';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { Invoice } from '../master-entities/invoice.entity';
+import { CreateInvoiceDto, LineItemDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
 @Injectable()
@@ -29,7 +35,9 @@ export class InvoiceService {
       throw new NotFoundException(`Billing record not found: ${dto.billingId}`);
     }
 
-    const lineItemsTotal = this.calculateLineItemsTotal(dto.lineItems || []);
+    const lineItemsTotal = this.calculateLineItemsTotal(
+      (dto.lineItems as any[]) || [],
+    );
     const amountDue = lineItemsTotal - (dto.amountPaid || 0);
 
     const invoice = this.invoiceRepository.create({
@@ -38,10 +46,14 @@ export class InvoiceService {
       amountDue: Math.max(0, amountDue),
       status: dto.status || 'open',
       currency: dto.currency || 'USD',
-    });
+    } as any);
 
-    const saved = await this.invoiceRepository.save(invoice);
-    this.logger.log(`Invoice created: ${saved.id} for billing: ${dto.billingId}`);
+    const saved = (await this.invoiceRepository.save(
+      invoice,
+    )) as unknown as Invoice;
+    this.logger.log(
+      `Invoice created: ${saved.id} for billing: ${dto.billingId}`,
+    );
     return saved;
   }
 
@@ -95,7 +107,7 @@ export class InvoiceService {
     }
 
     const [invoices, total] = await query
-      .relations(['billing'])
+      .leftJoinAndSelect('invoice.billing', 'billing')
       .orderBy('invoice.invoiceDate', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
@@ -111,13 +123,18 @@ export class InvoiceService {
     const invoice = await this.getInvoiceById(id);
 
     if (dto.status === 'paid' && !invoice.paidDate && !dto.paidDate) {
-      throw new BadRequestException('paidDate is required when marking invoice as paid');
+      throw new BadRequestException(
+        'paidDate is required when marking invoice as paid',
+      );
     }
 
     if (dto.lineItems) {
       const lineItemsTotal = this.calculateLineItemsTotal(dto.lineItems);
       invoice.amount = lineItemsTotal;
-      invoice.amountDue = Math.max(0, lineItemsTotal - (invoice.amountPaid || 0));
+      invoice.amountDue = Math.max(
+        0,
+        lineItemsTotal - (invoice.amountPaid || 0),
+      );
     }
 
     Object.assign(invoice, dto);
@@ -129,7 +146,11 @@ export class InvoiceService {
   /**
    * Mark invoice as paid
    */
-  async markAsPaid(id: string, paidDate?: Date, receiptId?: string): Promise<Invoice> {
+  async markAsPaid(
+    id: string,
+    paidDate?: Date,
+    receiptId?: string,
+  ): Promise<Invoice> {
     const invoice = await this.getInvoiceById(id);
 
     if (invoice.status === 'paid') {
@@ -247,7 +268,9 @@ export class InvoiceService {
   /**
    * Calculate total from line items
    */
-  private calculateLineItemsTotal(lineItems: Record<string, unknown>[]): number {
+  private calculateLineItemsTotal(
+    lineItems: (LineItemDto | Record<string, unknown>)[],
+  ): number {
     if (!lineItems || lineItems.length === 0) {
       return 0;
     }
@@ -277,9 +300,9 @@ export class InvoiceService {
     const now = new Date();
     return this.invoiceRepository
       .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.billing', 'billing')
       .where('invoice.status = :status', { status: 'open' })
       .andWhere('invoice.dueDate < :now', { now })
-      .relations(['billing'])
       .orderBy('invoice.dueDate', 'ASC')
       .getMany();
   }
@@ -309,7 +332,9 @@ export class InvoiceService {
     }
 
     if (invoice.status === 'void') {
-      throw new BadRequestException('Cannot record payment on cancelled invoice');
+      throw new BadRequestException(
+        'Cannot record payment on cancelled invoice',
+      );
     }
 
     if (amount <= 0) {
@@ -317,7 +342,10 @@ export class InvoiceService {
     }
 
     invoice.amountPaid = Number(invoice.amountPaid) + amount;
-    invoice.amountDue = Math.max(0, Number(invoice.amount) - Number(invoice.amountPaid));
+    invoice.amountDue = Math.max(
+      0,
+      Number(invoice.amount) - Number(invoice.amountPaid),
+    );
 
     if (invoice.amountDue === 0) {
       invoice.status = 'paid';
@@ -329,7 +357,9 @@ export class InvoiceService {
     }
 
     const updated = await this.invoiceRepository.save(invoice);
-    this.logger.log(`Partial payment recorded on invoice: ${id}, amount: ${amount}`);
+    this.logger.log(
+      `Partial payment recorded on invoice: ${id}, amount: ${amount}`,
+    );
     return updated;
   }
 
@@ -362,10 +392,14 @@ export class InvoiceService {
     });
 
     const filtered = invoices.filter(
-      (inv) => inv.paidDate && inv.paidDate >= startDate && inv.paidDate <= endDate,
+      (inv) =>
+        inv.paidDate && inv.paidDate >= startDate && inv.paidDate <= endDate,
     );
 
-    const totalRevenue = filtered.reduce((sum, inv) => sum + Number(inv.amountPaid), 0);
+    const totalRevenue = filtered.reduce(
+      (sum, inv) => sum + Number(inv.amountPaid),
+      0,
+    );
 
     return {
       totalRevenue,

@@ -1,4 +1,30 @@
-import { IsString, IsArray, IsNumber, IsOptional, IsDateString, Min, Max } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
+
+/**
+ * Allowed API key scopes
+ * Restrict scopes to this allowlist to prevent arbitrary scope injection
+ */
+export const ALLOWED_API_KEY_SCOPES = [
+  'read:licenses',
+  'write:licenses',
+  'read:features',
+  'write:features',
+  'read:customers',
+  'write:customers',
+  'read:analytics',
+  'write:analytics',
+  'read:invoices',
+  'write:invoices',
+] as const;
 
 /**
  * DTO for creating a new API key
@@ -14,9 +40,11 @@ export class CreateApiKeyDto {
   /**
    * Scopes/permissions this key has
    * Example: ['read:licenses', 'read:features', 'write:analytics']
+   * Must be from ALLOWED_API_KEY_SCOPES allowlist
    */
   @IsArray()
   @IsString({ each: true })
+  @IsIn(ALLOWED_API_KEY_SCOPES, { each: true })
   @IsOptional()
   scopes?: string[];
 
@@ -98,6 +126,7 @@ export class UpdateApiKeyDto {
 
   @IsArray()
   @IsString({ each: true })
+  @IsIn(ALLOWED_API_KEY_SCOPES, { each: true })
   @IsOptional()
   scopes?: string[];
 

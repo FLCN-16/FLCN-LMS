@@ -1,16 +1,16 @@
+import { Type } from 'class-transformer';
 import {
-  IsString,
-  IsOptional,
-  IsNumber,
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsDateString,
   IsEnum,
-  ValidateNested,
-  ArrayMinSize,
+  IsNumber,
+  IsOptional,
+  IsString,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 /**
  * Feature configuration DTO
@@ -175,11 +175,10 @@ export class UpdateLicenseDto {
  */
 export class CheckFeatureDto {
   @IsString()
-  featureName!: string;
+  licenseKey!: string;
 
-  @IsOptional()
   @IsString()
-  licenseKey?: string;
+  featureName!: string;
 }
 
 /**

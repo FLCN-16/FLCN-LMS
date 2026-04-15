@@ -1,26 +1,28 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Patch,
+  BadRequestException,
   Body,
-  Param,
-  Query,
+  Controller,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
   UseGuards,
-  BadRequestException,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+
 import { ApiKeysService } from './api-keys.service';
 import {
+  ApiKeyDetailDto,
+  ApiKeyResponseDto,
+  ApiKeyValidationResponseDto,
   CreateApiKeyDto,
   UpdateApiKeyDto,
-  ApiKeyResponseDto,
-  ApiKeyDetailDto,
   ValidateApiKeyDto,
-  ApiKeyValidationResponseDto,
 } from './dto/create-api-key.dto';
 
 /**
@@ -60,6 +62,7 @@ export class ApiKeysController {
    * Returns: ApiKeyResponseDto with raw key (shown only once)
    */
   @Post()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() createApiKeyDto: CreateApiKeyDto,
@@ -79,6 +82,7 @@ export class ApiKeysController {
    * Returns: { data: ApiKeyDetailDto[], total: number }
    */
   @Get()
+  @UseGuards(AuthGuard('jwt'))
   async findAll(
     @Query('instituteId') instituteId: string,
     @Query('page') page?: string,
@@ -106,6 +110,7 @@ export class ApiKeysController {
    * Returns: ApiKeyDetailDto (without the raw key)
    */
   @Get(':keyId')
+  @UseGuards(AuthGuard('jwt'))
   async findOne(
     @Param('keyId') keyId: string,
     @Query('instituteId') instituteId: string,
@@ -132,6 +137,7 @@ export class ApiKeysController {
    * Returns: Updated ApiKeyDetailDto
    */
   @Put(':keyId')
+  @UseGuards(AuthGuard('jwt'))
   async update(
     @Param('keyId') keyId: string,
     @Query('instituteId') instituteId: string,
@@ -151,6 +157,7 @@ export class ApiKeysController {
    * Returns: Updated ApiKeyDetailDto with isActive=false
    */
   @Patch(':keyId/disable')
+  @UseGuards(AuthGuard('jwt'))
   async disable(
     @Param('keyId') keyId: string,
     @Query('instituteId') instituteId: string,
@@ -169,6 +176,7 @@ export class ApiKeysController {
    * Returns: Updated ApiKeyDetailDto with isActive=true
    */
   @Patch(':keyId/enable')
+  @UseGuards(AuthGuard('jwt'))
   async enable(
     @Param('keyId') keyId: string,
     @Query('instituteId') instituteId: string,
@@ -187,6 +195,7 @@ export class ApiKeysController {
    * Returns: 204 No Content
    */
   @Delete(':keyId')
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
     @Param('keyId') keyId: string,
@@ -206,6 +215,7 @@ export class ApiKeysController {
    * Returns: { totalRequests, lastUsedAt, requestsThisHour }
    */
   @Get(':keyId/stats')
+  @UseGuards(AuthGuard('jwt'))
   async getStats(
     @Param('keyId') keyId: string,
     @Query('instituteId') instituteId: string,

@@ -8,8 +8,8 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 
+import { JwtStrategy } from '../common/auth/jwt.strategy';
 import { CreateSuperAdminDto } from './dto/create-super-admin.dto';
 import { UpdateSuperAdminDto } from './dto/update-super-admin.dto';
 import { SuperAdminsService } from './super-admins.service';
@@ -18,7 +18,7 @@ import { SuperAdminsService } from './super-admins.service';
   path: 'super-admins',
   version: '1',
 })
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtStrategy)
 export class SuperAdminsController {
   constructor(private readonly service: SuperAdminsService) {}
 

@@ -39,7 +39,9 @@ export class InvoiceController {
   @Post()
   @RequiredScopes('write:customers')
   @HttpCode(HttpStatus.CREATED)
-  async createInvoice(@Body() dto: CreateInvoiceDto): Promise<InvoiceResponseDto> {
+  async createInvoice(
+    @Body() dto: CreateInvoiceDto,
+  ): Promise<InvoiceResponseDto> {
     return this.invoiceService.createInvoice(dto);
   }
 
@@ -73,7 +75,11 @@ export class InvoiceController {
       throw new BadRequestException('Invalid pagination parameters');
     }
 
-    return this.invoiceService.getInvoicesByBilling(billingId, pageNum, limitNum);
+    return this.invoiceService.getInvoicesByBilling(
+      billingId,
+      pageNum,
+      limitNum,
+    );
   }
 
   /**
@@ -184,7 +190,9 @@ export class InvoiceController {
   @Get(':billingId/stats')
   @RequiredScopes('read:customers')
   @HttpCode(HttpStatus.OK)
-  async getInvoiceStats(@Param('billingId') billingId: string): Promise<InvoiceStatsDto> {
+  async getInvoiceStats(
+    @Param('billingId') billingId: string,
+  ): Promise<InvoiceStatsDto> {
     return this.invoiceService.getInvoiceStats(billingId);
   }
 
@@ -239,7 +247,9 @@ export class InvoiceController {
     @Query('endDate') endDateStr?: string,
   ) {
     if (!startDateStr || !endDateStr) {
-      throw new BadRequestException('startDate and endDate query parameters are required');
+      throw new BadRequestException(
+        'startDate and endDate query parameters are required',
+      );
     }
 
     try {

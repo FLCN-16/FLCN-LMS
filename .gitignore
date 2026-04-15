@@ -34,5 +34,19 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+*.bak
+*.tmp
+
+# Go
+go.sum
+/bin/
+*.exe
+*.dll
+*.dylib
+*.so
+
+# Compiled Go binaries
+flcn_lms_backend
+
 # Added by code-review-graph
 .code-review-graph/

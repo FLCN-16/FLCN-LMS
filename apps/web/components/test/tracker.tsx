@@ -1,7 +1,5 @@
 "use client"
 
-import { useTranslations } from "next-intl"
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,29 +56,27 @@ function QuestionIndex({
 }
 
 function TestTracker() {
-  const t = useTranslations("test.tracker")
-
   return (
     <Card className="px-4">
       <CardHeader className="grid grid-cols-2 gap-4 py-6 font-mono">
         <div className="flex items-center gap-x-3">
           <div className="size-4 rounded-xs bg-green-500" />
-          <Text>{t("answered")}</Text>
+          <Text>Answered</Text>
         </div>
 
         <div className="flex items-center gap-x-3">
           <div className="size-4 rounded-xs bg-gray-600" />
-          <Text>{t("unanswered")}</Text>
+          <Text>Unanswered</Text>
         </div>
 
         <div className="flex items-center gap-x-3">
           <div className="size-4 rounded-xs bg-blue-600" />
-          <Text>{t("forReview")}</Text>
+          <Text>For Review</Text>
         </div>
 
         <div className="flex items-center gap-x-3">
           <div className="size-4 rounded-xs border border-gray-600 bg-gray-200" />
-          <Text>{t("current")}</Text>
+          <Text>Current</Text>
         </div>
       </CardHeader>
 
@@ -105,22 +101,23 @@ function TestTracker() {
               size="xl"
               className="w-full rounded-xs font-mono"
             >
-              {t("submitFinalTest")}
+              Submit Final Test
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{t("confirmTitle")}</AlertDialogTitle>
+              <AlertDialogTitle>Submit Test?</AlertDialogTitle>
               <AlertDialogDescription>
-                {t("confirmDescription")}
+                Are you sure you want to submit your test? You cannot change
+                your answers after submission.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel variant="destructive" className="rounded-xs">
-                {t("cancel")}
+                Cancel
               </AlertDialogCancel>
               <AlertDialogAction className="rounded-xs">
-                {t("confirmSubmit")}
+                Confirm Submit
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

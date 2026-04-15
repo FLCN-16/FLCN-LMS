@@ -6,7 +6,6 @@
       "@flcn-lms/ui/*": ["../../packages/ui/src/*"],
       "@flcn-lms/types": ["../../packages/types/src/index.ts"],
       "@flcn-lms/types/*": ["../../packages/types/src/*"],
-      "@/i18n/*": ["./i18n/*"],
     },
     "plugins": [
       {

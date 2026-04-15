@@ -1,7 +1,5 @@
 "use client"
 
-import { useTranslations } from "next-intl"
-
 import { Button } from "@flcn-lms/ui/components/button"
 import {
   Field,
@@ -14,42 +12,40 @@ import { Input } from "@flcn-lms/ui/components/input"
 import { cn } from "@flcn-lms/ui/lib/utils"
 
 function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
-  const t = useTranslations("auth.login")
-
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <h1 className="text-2xl font-bold">Sign In</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            {t("subtitle")}
+            Enter your credentials to access your account
           </p>
         </div>
         <Field>
-          <FieldLabel htmlFor="email">{t("email")}</FieldLabel>
+          <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
             id="email"
             type="email"
-            placeholder={t("emailPlaceholder")}
+            placeholder="Enter your email"
             required
           />
         </Field>
         <Field>
           <div className="flex items-center">
-            <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
+            <FieldLabel htmlFor="password">Password</FieldLabel>
             <a
               href="#"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
-              {t("forgotPassword")}
+              Forgot password?
             </a>
           </div>
           <Input id="password" type="password" required />
         </Field>
         <Field>
-          <Button type="submit">{t("submit")}</Button>
+          <Button type="submit">Sign In</Button>
         </Field>
-        <FieldSeparator>{t("orContinueWith")}</FieldSeparator>
+        <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
           <Button variant="outline" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -58,12 +54,12 @@ function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
                 fill="currentColor"
               />
             </svg>
-            {t("loginWithGithub")}
+            Login with GitHub
           </Button>
           <FieldDescription className="text-center">
-            {t("noAccount")}{" "}
+            Don't have an account?{" "}
             <a href="#" className="underline underline-offset-4">
-              {t("signUp")}
+              Sign up
             </a>
           </FieldDescription>
         </Field>

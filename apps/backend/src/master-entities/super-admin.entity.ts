@@ -29,6 +29,9 @@ export class SuperAdmin {
   @Column({ type: 'boolean', default: true })
   isActive!: boolean;
 
+  @Column({ type: 'varchar', length: 50, default: 'super_admin' })
+  role!: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 

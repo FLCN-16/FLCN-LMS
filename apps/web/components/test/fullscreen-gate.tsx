@@ -2,7 +2,6 @@
 
 import { Alert01Icon, ArrowDiagonalIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { useTranslations } from "next-intl"
 
 import { Alert, AlertDescription } from "@flcn-lms/ui/components/alert"
 import { Badge } from "@flcn-lms/ui/components/badge"
@@ -27,7 +26,6 @@ interface FullscreenGateProps {
 }
 
 function FullscreenGate({ children }: FullscreenGateProps) {
-  const t = useTranslations("test.fullscreen")
   const { isFullscreen, hasExited, enterFullscreen } = useForceFullscreen({
     onEnter: () => {
       document.dispatchEvent(TestTimeResumeEvent)
@@ -37,7 +35,11 @@ function FullscreenGate({ children }: FullscreenGateProps) {
     },
   })
 
-  const rules = [t("ruleNoExit"), t("rulePressEsc"), t("ruleViolations")]
+  const rules = [
+    "Do not exit fullscreen mode during the test",
+    "Do not press Escape key to exit",
+    "Violations will be recorded and may impact your score",
+  ]
 
   return (
     <>
@@ -68,15 +70,17 @@ function FullscreenGate({ children }: FullscreenGateProps) {
               </div>
               <div className="flex-1">
                 <DialogTitle className="text-sm leading-none font-semibold">
-                  {hasExited ? t("exitedTitle") : t("requiredTitle")}
+                  {hasExited ? "Test Exited" : "Fullscreen Required"}
                 </DialogTitle>
                 <DialogDescription className="mt-1 text-xs">
-                  {hasExited ? t("exitedSubtitle") : t("requiredSubtitle")}
+                  {hasExited
+                    ? "You have exited fullscreen. Your test has been paused."
+                    : "Enter fullscreen mode to continue with the test."}
                 </DialogDescription>
               </div>
               {hasExited && (
                 <Badge variant="destructive" className="text-xs">
-                  {t("violation")}
+                  Violation
                 </Badge>
               )}
             </div>
@@ -91,7 +95,8 @@ function FullscreenGate({ children }: FullscreenGateProps) {
                 className="border-destructive/20 bg-destructive/5 py-2"
               >
                 <AlertDescription className="text-xs">
-                  {t("violationAlert")}
+                  A fullscreen violation has been recorded. Continuing will
+                  affect your score.
                 </AlertDescription>
               </Alert>
             ) : (
@@ -115,7 +120,7 @@ function FullscreenGate({ children }: FullscreenGateProps) {
                 color="currentColor"
                 strokeWidth={2}
               />
-              {hasExited ? t("reEnterAndResume") : t("enterAndStart")}
+              {hasExited ? "Re-enter & Resume" : "Enter & Start"}
             </Button>
           </div>
         </DialogContent>

@@ -1,35 +1,25 @@
-import { createHash, createHmac, timingSafeEqual } from 'crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'crypto';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
-import type { Role, UserPermissions } from '@flcn-lms/types/auth';
-import { getDefaultPermissionsForRole } from '@flcn-lms/types/auth';
-
-import { InstituteContext } from '../../institutes-admin/services/institute-context.service';
-import type { User } from '../../institutes/users/entities/user.entity';
-import { User as UserEntity } from '../../institutes/users/entities/user.entity';
+import { SuperAdmin } from '../../master-entities/super-admin.entity';
 
 export interface AuthTokenPayload {
   sub: string;
   id: string;
-  userId: string;
-  instituteId?: string;
   email: string;
   role: string;
-  permissions?: string[];
   iat: number;
   exp: number;
 }
 
 export interface AuthSessionUser {
   id: string;
-  instituteId?: string;
   name: string;
   email: string;
-  phone?: string | null;
-  avatarUrl?: string | null;
-  role: Role;
-  permissions: UserPermissions;
+  role: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -43,82 +33,59 @@ export interface LoginResult {
 @Injectable()
 export class AuthService {
   constructor(
-    private instituteContext: InstituteContext,
+    @InjectRepository(SuperAdmin, 'master')
+    private readonly superAdminRepository: Repository<SuperAdmin>,
     private readonly configService: ConfigService,
   ) {}
 
-  /**
-   * Authenticate a user with email and password
-   * @param username - User email
-   * @param password - User password (plain text)
-   * @param remember - Whether to extend token expiration (30 days vs 1 day)
-   * @returns LoginResult with user data and JWT token
-   */
   async login(
-    username: string,
+    email: string,
     password: string,
     remember = false,
   ): Promise<LoginResult> {
-    const userRepo = this.instituteContext.getRepository(UserEntity);
-
-    const user = await userRepo.findOne({
-      where: { email: username },
+    const superAdmin = await this.superAdminRepository.findOne({
+      where: { email },
     });
 
-    if (!user || !user.isActive) {
+    if (!superAdmin || !superAdmin.isActive) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     if (
-      !user.hashedPassword ||
-      !this.verifyPassword(password, user.hashedPassword)
+      !superAdmin.hashedPassword ||
+      !this.verifyPassword(password, superAdmin.hashedPassword)
     ) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const token = this.signToken(
       {
-        sub: user.id,
-        id: user.id,
-        userId: user.id,
-        instituteId: user.instituteId,
-        email: user.email,
-        role: user.role,
+        sub: superAdmin.id,
+        id: superAdmin.id,
+        email: superAdmin.email,
+        role: superAdmin.role || 'super_admin',
       },
       remember,
     );
 
     return {
-      user: this.toSessionUser(user),
+      user: this.toSessionUser(superAdmin),
       token,
     };
   }
 
-  /**
-   * Get the current user session
-   * @param userId - User ID
-   * @returns AuthSessionUser with user information
-   */
   async getSession(userId: string): Promise<AuthSessionUser> {
-    const userRepo = this.instituteContext.getRepository(UserEntity);
-
-    const user = await userRepo.findOne({
+    const superAdmin = await this.superAdminRepository.findOne({
       where: { id: userId },
     });
 
-    if (!user || !user.isActive) {
+    if (!superAdmin || !superAdmin.isActive) {
       throw new UnauthorizedException('Session is invalid');
     }
 
-    return this.toSessionUser(user);
+    return this.toSessionUser(superAdmin);
   }
 
-  /**
-   * Sign a JWT token
-   * @param payload - Token payload (without iat and exp)
-   * @param remember - Whether to extend expiration to 30 days
-   * @returns Signed JWT token
-   */
   signToken(
     payload: Omit<AuthTokenPayload, 'iat' | 'exp'>,
     remember = false,
@@ -147,12 +114,6 @@ export class AuthService {
     return `${signingInput}.${signature}`;
   }
 
-  /**
-   * Verify and decode a JWT token
-   * @param token - JWT token string
-   * @returns Decoded token payload
-   * @throws UnauthorizedException if token is invalid or expired
-   */
   verifyToken(token: string): AuthTokenPayload {
     const secret = this.getJwtSecret();
     const parts = token.split('.');
@@ -191,38 +152,24 @@ export class AuthService {
     return payload;
   }
 
-  /**
-   * Verify a password against its hash
-   * @param password - Plain text password
-   * @param hashedPassword - Hashed password from database
-   * @returns true if password matches, false otherwise
-   */
-  private verifyPassword(password: string, hashedPassword: string): boolean {
-    const candidate = this.hashPassword(password);
-    const left = Buffer.from(candidate);
-    const right = Buffer.from(hashedPassword);
+  hashPassword(password: string): string {
+    const salt = randomBytes(16).toString('hex');
+    const hash = createHmac('sha256', salt).update(password).digest('hex');
+    return `${salt}:${hash}`;
+  }
 
-    if (left.length !== right.length) {
+  private verifyPassword(password: string, hashedPassword: string): boolean {
+    try {
+      const [salt, hash] = hashedPassword.split(':');
+      if (!salt || !hash) return false;
+
+      const candidate = createHmac('sha256', salt).update(password).digest('hex');
+      return timingSafeEqual(Buffer.from(candidate), Buffer.from(hash));
+    } catch {
       return false;
     }
-
-    return timingSafeEqual(left, right);
   }
 
-  /**
-   * Hash a password using SHA256
-   * @param password - Plain text password
-   * @returns Hashed password as hex string
-   */
-  private hashPassword(password: string): string {
-    return createHash('sha256').update(password).digest('hex');
-  }
-
-  /**
-   * Get JWT secret from configuration
-   * @returns JWT secret string
-   * @throws UnauthorizedException if secret is not configured
-   */
   private getJwtSecret(): string {
     const secret = this.configService.get<string>('JWT_SECRET');
 
@@ -233,32 +180,18 @@ export class AuthService {
     return secret;
   }
 
-  /**
-   * Convert a User entity to AuthSessionUser format
-   * @param user - User entity
-   * @returns AuthSessionUser object
-   */
-  private toSessionUser(user: User): AuthSessionUser {
+  private toSessionUser(superAdmin: SuperAdmin): AuthSessionUser {
     return {
-      id: user.id,
-      instituteId: user.instituteId,
-      name: user.name,
-      email: user.email,
-      phone: user.phone ?? null,
-      avatarUrl: user.avatarUrl ?? null,
-      role: user.role as unknown as Role,
-      permissions: getDefaultPermissionsForRole(user.role as unknown as Role),
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      id: superAdmin.id,
+      name: superAdmin.name,
+      email: superAdmin.email,
+      role: superAdmin.role || 'super_admin',
+      isActive: superAdmin.isActive,
+      createdAt: superAdmin.createdAt,
+      updatedAt: superAdmin.updatedAt,
     };
   }
 
-  /**
-   * Base64 URL encode a buffer
-   * @param buffer - Buffer to encode
-   * @returns Base64 URL encoded string
-   */
   private base64UrlEncode(buffer: Buffer): string {
     return buffer
       .toString('base64')
@@ -267,11 +200,6 @@ export class AuthService {
       .replace(/=+$/g, '');
   }
 
-  /**
-   * Base64 URL decode to string
-   * @param value - Base64 URL encoded string
-   * @returns Decoded string
-   */
   private base64UrlDecodeToString(value: string): string {
     const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
     const padded = normalized.padEnd(
@@ -282,12 +210,6 @@ export class AuthService {
     return Buffer.from(padded, 'base64').toString('utf8');
   }
 
-  /**
-   * Safely compare two strings using timing-safe comparison
-   * @param left - First string
-   * @param right - Second string
-   * @returns true if strings are equal, false otherwise
-   */
   private safeEqual(left: string, right: string): boolean {
     const leftBuffer = Buffer.from(left);
     const rightBuffer = Buffer.from(right);

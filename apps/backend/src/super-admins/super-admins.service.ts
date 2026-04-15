@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
+import { AuthService } from '../common/auth/auth.service';
 import { SuperAdmin } from '../master-entities/super-admin.entity';
 import { CreateSuperAdminDto } from './dto/create-super-admin.dto';
 import { UpdateSuperAdminDto } from './dto/update-super-admin.dto';
@@ -14,6 +16,7 @@ export class SuperAdminsService {
   constructor(
     @InjectRepository(SuperAdmin, 'master')
     private readonly repository: Repository<SuperAdmin>,
+    private readonly authService: AuthService,
   ) {}
 
   async findAll(): Promise<SuperAdmin[]> {
@@ -33,12 +36,15 @@ export class SuperAdminsService {
       where: { email: dto.email },
     });
     if (existing) {
-      throw new ConflictException(`SuperAdmin with email ${dto.email} already exists`);
+      throw new ConflictException(
+        `SuperAdmin with email ${dto.email} already exists`,
+      );
     }
 
+    const hashedPassword = this.authService.hashPassword(dto.password);
     const admin = this.repository.create({
       ...dto,
-      hashedPassword: dto.password, // TODO: Add real hashing in a proper auth flow
+      hashedPassword,
     });
 
     return this.repository.save(admin);
@@ -48,7 +54,7 @@ export class SuperAdminsService {
     const admin = await this.findOne(id);
 
     if (dto.password) {
-      admin.hashedPassword = dto.password; // TODO: Add real hashing
+      admin.hashedPassword = this.authService.hashPassword(dto.password);
     }
 
     Object.assign(admin, dto);

@@ -1,6 +1,5 @@
 import { Cancel, Check } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { useTranslations } from "next-intl"
 
 import { Heading, Text } from "@flcn-lms/ui/components/typography"
 import { cn } from "@flcn-lms/ui/lib/utils"
@@ -35,8 +34,6 @@ function CoursePackage({
   validityMonths,
   features,
 }: CoursePackageProps) {
-  const t = useTranslations("course.packages")
-
   return (
     <div className="flex cursor-pointer flex-col overflow-hidden rounded">
       <div
@@ -49,18 +46,14 @@ function CoursePackage({
           {title}
         </Heading>
         <div className="flex items-center gap-x-2">
-          <Text className="text-md">
-            {price} {t("currency")}
-          </Text>
+          <Text className="text-md">{price} USD</Text>
         </div>
       </div>
 
       <div className="flex flex-col gap-y-3 rounded-b border border-t-0 px-3 py-4">
         <div className="flex flex-col">
-          <Text className="text-xs uppercase">{t("validity")}</Text>
-          <Text className="text-lg font-semibold">
-            {t("validityValue", { months: validityMonths })}
-          </Text>
+          <Text className="text-xs uppercase">Validity</Text>
+          <Text className="text-lg font-semibold">{validityMonths} Months</Text>
         </div>
 
         <div className="flex flex-col gap-y-1 rounded-b">

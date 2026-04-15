@@ -1,17 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { createHmac, randomBytes } from 'crypto';
 
-import { User, UserRole } from '../institutes/users/entities/user.entity';
 import { Institute } from '../master-entities/institute.entity';
+import { Plan } from '../master-entities/plan.entity';
+import { SuperAdmin } from '../master-entities/super-admin.entity';
 
 export interface SeederOptions {
-  instituteSlug?: string;
-  tenantName?: string;
   email: string;
-  password: string;
+  password?: string;
   name: string;
+  role?: string;
+}
+
+export interface CustomerSeederOptions {
+  name: string;
+  slug: string;
+  email: string;
+  industry?: string;
+  maxLicenses?: number;
 }
 
 @Injectable()
@@ -19,170 +26,145 @@ export class SeederService {
   private readonly logger = new Logger(SeederService.name);
 
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(SuperAdmin)
+    private readonly superAdminRepository: Repository<SuperAdmin>,
     @InjectRepository(Institute)
-    private readonly tenantRepository: Repository<Institute>,
+    private readonly instituteRepository: Repository<Institute>,
+    @InjectRepository(Plan)
+    private readonly planRepository: Repository<Plan>,
   ) {}
 
-  async seedSuperAdmin(options: SeederOptions): Promise<User> {
-    const {
-      instituteSlug = 'default',
-      tenantName = 'Default Tenant',
-      email,
-      password,
-      name,
-    } = options;
+  /**
+   * Seed a super admin user for the SaaS platform
+   */
+  async seedSuperAdmin(options: SeederOptions): Promise<SuperAdmin> {
+    const { email, name } = options;
 
     try {
-      // Check if tenant exists
-      let tenant = await this.tenantRepository.findOne({
-        where: { slug: instituteSlug },
-      });
-
-      if (!tenant) {
-        this.logger.log(`Creating tenant: ${instituteSlug}`);
-        tenant = this.tenantRepository.create({
-          slug: instituteSlug,
-          name: tenantName,
-          isActive: true,
-        });
-        tenant = await this.tenantRepository.save(tenant);
-        this.logger.log(`Tenant created with ID: ${tenant.id}`);
-      } else {
-        this.logger.log(`Tenant already exists: ${instituteSlug}`);
-      }
-
       // Check if super admin already exists
-      const existingUser = await this.userRepository.findOne({
-        where: { email, instituteId: tenant.id },
+      const existingAdmin = await this.superAdminRepository.findOne({
+        where: { email },
       });
 
-      if (existingUser) {
-        this.logger.warn(`Super admin user already exists: ${email}`);
-        return existingUser;
+      if (existingAdmin) {
+        this.logger.warn(`Super admin already exists: ${email}`);
+        return existingAdmin;
       }
 
-      // Create super admin user
-      const hashedPassword = this.hashPassword(password);
-      const superAdmin = this.userRepository.create({
-        instituteId: tenant.id,
-        name,
+      // Create super admin
+      const superAdmin = this.superAdminRepository.create({
         email,
-        hashedPassword,
-        role: UserRole.SUPER_ADMIN,
+        name,
         isActive: true,
       });
 
-      const savedUser = await this.userRepository.save(superAdmin);
-      this.logger.log(`Super admin user created: ${email}`);
+      const savedAdmin = await this.superAdminRepository.save(superAdmin);
+      this.logger.log(`Super admin created: ${email}`);
 
-      return savedUser;
+      return savedAdmin;
     } catch (error) {
       this.logger.error('Failed to seed super admin:', error);
       throw error;
     }
   }
 
-  async seedAdminUser(options: SeederOptions & { instituteId?: string }): Promise<User> {
-    const { instituteId, email, password, name } = options;
+  /**
+   * Seed a customer/institute in the platform
+   */
+  async seedCustomer(options: CustomerSeederOptions): Promise<Institute> {
+    const {
+      name,
+      slug,
+      email,
+      industry = 'education',
+      maxLicenses = 100,
+    } = options;
 
     try {
-      if (!instituteId) {
-        throw new Error('instituteId is required for admin user seeding');
-      }
-
-      // Verify tenant exists
-      const tenant = await this.tenantRepository.findOne({
-        where: { id: instituteId },
+      // Check if customer already exists
+      const existingCustomer = await this.instituteRepository.findOne({
+        where: { slug },
       });
 
-      if (!tenant) {
-        throw new Error(`Tenant not found: ${instituteId}`);
+      if (existingCustomer) {
+        this.logger.warn(`Customer already exists: ${slug}`);
+        return existingCustomer;
       }
 
-      // Check if admin already exists
-      const existingUser = await this.userRepository.findOne({
-        where: { email, instituteId },
-      });
-
-      if (existingUser) {
-        this.logger.warn(`Admin user already exists: ${email}`);
-        return existingUser;
-      }
-
-      // Create admin user
-      const hashedPassword = this.hashPassword(password);
-      const admin = this.userRepository.create({
-        instituteId,
+      // Create customer/institute
+      const customer = this.instituteRepository.create({
         name,
+        slug,
         email,
-        hashedPassword,
-        role: UserRole.ADMIN,
+        industry,
+        maxLicenses,
         isActive: true,
       });
 
-      const savedUser = await this.userRepository.save(admin);
-      this.logger.log(`Admin user created: ${email}`);
+      const savedCustomer = await this.instituteRepository.save(customer);
+      this.logger.log(`Customer created: ${slug}`);
 
-      return savedUser;
+      return savedCustomer;
     } catch (error) {
-      this.logger.error('Failed to seed admin user:', error);
+      this.logger.error('Failed to seed customer:', error);
       throw error;
     }
   }
 
-  async seedInstructor(options: SeederOptions & { instituteId?: string }): Promise<User> {
-    const { instituteId, email, password, name } = options;
+  /**
+   * Seed a plan
+   */
+  async seedPlan(planData: Partial<Plan>): Promise<Plan> {
+    const { name, slug } = planData;
 
     try {
-      if (!instituteId) {
-        throw new Error('instituteId is required for instructor seeding');
+      if (!name || !slug) {
+        throw new Error('Plan name and slug are required');
       }
 
-      // Verify tenant exists
-      const tenant = await this.tenantRepository.findOne({
-        where: { id: instituteId },
+      // Check if plan already exists
+      const existingPlan = await this.planRepository.findOne({
+        where: { slug },
       });
 
-      if (!tenant) {
-        throw new Error(`Tenant not found: ${instituteId}`);
+      if (existingPlan) {
+        this.logger.warn(`Plan already exists: ${slug}`);
+        return existingPlan;
       }
 
-      // Check if instructor already exists
-      const existingUser = await this.userRepository.findOne({
-        where: { email, instituteId },
-      });
+      // Create plan
+      const plan = this.planRepository.create(planData);
+      const savedPlan = await this.planRepository.save(plan);
+      this.logger.log(`Plan created: ${slug}`);
 
-      if (existingUser) {
-        this.logger.warn(`Instructor user already exists: ${email}`);
-        return existingUser;
-      }
-
-      // Create instructor user
-      const hashedPassword = this.hashPassword(password);
-      const instructor = this.userRepository.create({
-        instituteId,
-        name,
-        email,
-        hashedPassword,
-        role: UserRole.INSTRUCTOR,
-        isActive: true,
-      });
-
-      const savedUser = await this.userRepository.save(instructor);
-      this.logger.log(`Instructor user created: ${email}`);
-
-      return savedUser;
+      return savedPlan;
     } catch (error) {
-      this.logger.error('Failed to seed instructor user:', error);
+      this.logger.error('Failed to seed plan:', error);
       throw error;
     }
   }
 
-  private hashPassword(password: string): string {
-    const salt = randomBytes(16).toString('hex');
-    const hash = createHmac('sha256', salt).update(password).digest('hex');
-    return `${salt}:${hash}`;
+  /**
+   * Get seeding status
+   */
+  async getStatus(): Promise<{
+    superAdmins: number;
+    customers: number;
+    plans: number;
+  }> {
+    try {
+      const superAdminCount = await this.superAdminRepository.count();
+      const customerCount = await this.instituteRepository.count();
+      const planCount = await this.planRepository.count();
+
+      return {
+        superAdmins: superAdminCount,
+        customers: customerCount,
+        plans: planCount,
+      };
+    } catch (error) {
+      this.logger.error('Failed to get seeding status:', error);
+      throw error;
+    }
   }
 }

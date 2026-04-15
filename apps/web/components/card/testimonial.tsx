@@ -1,5 +1,3 @@
-import { useTranslations } from "next-intl"
-
 import { Avatar, AvatarFallback } from "@flcn-lms/ui/components/avatar"
 import {
   Card,
@@ -10,8 +8,6 @@ import {
 } from "@flcn-lms/ui/components/card"
 
 function TestimonialCard() {
-  const t = useTranslations("testimonial")
-
   return (
     <Card className="rounded-md">
       <CardHeader className="flex items-center gap-x-3">
@@ -20,11 +16,15 @@ function TestimonialCard() {
         </Avatar>
         <div className="flex flex-col">
           <CardTitle>Felipe M.</CardTitle>
-          <CardDescription>{t("learnerSince", { year: 2018 })}</CardDescription>
+          <CardDescription>A learner since 2018</CardDescription>
         </div>
       </CardHeader>
 
-      <CardContent>{t("quote")}</CardContent>
+      <CardContent>
+        This learning platform has transformed how I approach online education.
+        The courses are well-structured and the instructors are incredibly
+        knowledgeable. Highly recommend!
+      </CardContent>
     </Card>
   )
 }

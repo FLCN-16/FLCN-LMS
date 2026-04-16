@@ -27,6 +27,15 @@ out/
 build
 dist
 
+# TypeScript build artifacts (should not be committed to source control)
+*.d.ts
+*.d.ts.map
+
+# JavaScript transpile outputs (source files should be TypeScript only)
+!node_modules/**/*.js
+!packages/**/*.js
+!apps/**/dist/**/*.js
+
 
 # Debug
 npm-debug.log*

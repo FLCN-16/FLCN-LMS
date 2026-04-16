@@ -19,12 +19,12 @@ export class SuperAdminsService {
     private readonly authService: AuthService,
   ) {}
 
-  async findAll(): Promise<SuperAdmin[]> {
+  async findAll(): Promise<Omit<SuperAdmin, 'hashedPassword'>[]> {
     const admins = await this.repository.find();
     return admins.map((admin) => this.excludePassword(admin));
   }
 
-  async findOne(id: string): Promise<SuperAdmin> {
+  async findOne(id: string): Promise<Omit<SuperAdmin, 'hashedPassword'>> {
     const admin = await this.repository.findOne({ where: { id } });
     if (!admin) {
       throw new NotFoundException(`SuperAdmin with ID ${id} not found`);
@@ -32,7 +32,7 @@ export class SuperAdminsService {
     return this.excludePassword(admin);
   }
 
-  async create(dto: CreateSuperAdminDto): Promise<SuperAdmin> {
+  async create(dto: CreateSuperAdminDto): Promise<Omit<SuperAdmin, 'hashedPassword'>> {
     const existing = await this.repository.findOne({
       where: { email: dto.email },
     });
@@ -52,7 +52,7 @@ export class SuperAdminsService {
     return this.excludePassword(saved);
   }
 
-  async update(id: string, dto: UpdateSuperAdminDto): Promise<SuperAdmin> {
+  async update(id: string, dto: UpdateSuperAdminDto): Promise<Omit<SuperAdmin, 'hashedPassword'>> {
     const admin = await this.repository.findOne({ where: { id } });
     if (!admin) {
       throw new NotFoundException(`SuperAdmin with ID ${id} not found`);
@@ -78,9 +78,10 @@ export class SuperAdminsService {
   /**
    * Remove sensitive password field from admin object before returning
    */
-  private excludePassword(admin: SuperAdmin): SuperAdmin {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { hashedPassword, ...adminWithoutPassword } = admin;
-    return adminWithoutPassword as SuperAdmin;
+  private excludePassword(
+    admin: SuperAdmin,
+  ): Omit<SuperAdmin, 'hashedPassword'> {
+    const { hashedPassword: _, ...adminWithoutPassword } = admin;
+    return adminWithoutPassword;
   }
 }

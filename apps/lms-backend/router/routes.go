@@ -33,6 +33,7 @@ func InitializeAllRoutes(
 	instructorCourseHandler *handlers.InstructorCourseHandler,
 	moduleHandler *handlers.ModuleHandler,
 	lessonHandler *handlers.LessonHandler,
+	questionHandler *handlers.QuestionHandler,
 	testSeriesHandler *handlers.TestSeriesHandler,
 	attemptHandler *handlers.AttemptHandler,
 	userHandler *handlers.UserHandler,
@@ -58,6 +59,7 @@ func InitializeAllRoutes(
 	InitInstructorCourseRoutes(v1, instructorCourseHandler, permissionDecorator)
 	InitModuleRoutes(v1, moduleHandler, permissionDecorator)
 	InitLessonRoutes(v1, lessonHandler, permissionDecorator)
+	InitQuestionRoutes(v1, questionHandler, permissionDecorator)
 	InitTestSeriesRoutes(v1, testSeriesHandler, permissionDecorator)
 	InitAttemptRoutes(v1, attemptHandler, permissionDecorator)
 	InitUserRoutes(v1, userHandler, permissionDecorator)
@@ -569,4 +571,82 @@ func InitLessonRoutes(
 	}
 
 	log.Println("✓ Lesson routes initialized successfully")
+}
+
+// InitQuestionRoutes initializes question routes with permission checks
+func InitQuestionRoutes(
+	v1 *gin.RouterGroup,
+	questionHandler *handlers.QuestionHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing question routes")
+
+	questions := v1.Group("/questions")
+	{
+		// List all questions
+		questions.GET(
+			"",
+			questionHandler.ListQuestions,
+		)
+
+		// Get specific question
+		questions.GET(
+			"/:id",
+			questionHandler.GetQuestion,
+		)
+
+		// Validate question
+		questions.GET(
+			"/:id/validate",
+			questionHandler.ValidateQuestion,
+		)
+
+		// Create question (faculty/admin only)
+		questions.POST(
+			"",
+			permDecorator.Required(questionHandler.CreateQuestion, []rbac.Permission{rbac.QuestionCreate}),
+		)
+
+		// Bulk create questions (faculty/admin only)
+		questions.POST(
+			"/bulk",
+			permDecorator.Required(questionHandler.BulkCreateQuestions, []rbac.Permission{rbac.QuestionCreate}),
+		)
+
+		// Update question (faculty/admin only)
+		questions.PATCH(
+			"/:id",
+			permDecorator.Required(questionHandler.UpdateQuestion, []rbac.Permission{rbac.QuestionUpdate}),
+		)
+
+		// Update question options (faculty/admin only)
+		questions.PATCH(
+			"/:id/options",
+			permDecorator.Required(questionHandler.UpdateQuestionOptions, []rbac.Permission{rbac.QuestionUpdate}),
+		)
+
+		// Delete question (faculty/admin only)
+		questions.DELETE(
+			"/:id",
+			permDecorator.Required(questionHandler.DeleteQuestion, []rbac.Permission{rbac.QuestionDelete}),
+		)
+	}
+
+	// Test series specific question routes
+	testSeries := v1.Group("/test-series")
+	{
+		// Get questions for a test series
+		testSeries.GET(
+			"/:testSeriesId/questions",
+			questionHandler.GetQuestionsByTestSeries,
+		)
+
+		// Create question for a test series
+		testSeries.POST(
+			"/:testSeriesId/questions",
+			permDecorator.Required(questionHandler.CreateQuestion, []rbac.Permission{rbac.QuestionCreate}),
+		)
+	}
+
+	log.Println("✓ Question routes initialized successfully")
 }

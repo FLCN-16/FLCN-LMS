@@ -91,7 +91,7 @@ func main() {
 	moduleService := service.NewModuleService(moduleRepo, courseRepo)
 	lessonService := service.NewLessonService(lessonRepo, moduleRepo, lessonProgressRepo)
 	testSeriesService := service.NewTestSeriesService(testSeriesRepo, questionRepo)
-	_ = service.NewQuestionService(questionRepo, testSeriesRepo, questionOptionRepo)
+	questionService := service.NewQuestionService(questionRepo, testSeriesRepo, questionOptionRepo)
 	enrollmentService := service.NewEnrollmentService(enrollmentRepo, courseRepo, userRepo)
 	attemptService := service.NewAttemptService(attemptRepo, testSeriesRepo, userRepo, attemptAnswerRepo, certificateRepo, questionRepo, questionOptionRepo)
 	liveSessionService := service.NewLiveSessionService(liveSessionRepo, userRepo, liveSessionParticipantRepo)
@@ -131,6 +131,7 @@ func main() {
 	instructorCourseHandler := handlers.NewInstructorCourseHandler(courseService, userService)
 	moduleHandler := handlers.NewModuleHandler(moduleService)
 	lessonHandler := handlers.NewLessonHandler(lessonService)
+	questionHandler := handlers.NewQuestionHandler(questionService)
 	testSeriesHandler := handlers.NewTestSeriesHandler(testSeriesService, userService)
 	attemptHandler := handlers.NewAttemptHandler(attemptService)
 	userHandler := handlers.NewUserHandler(userService)
@@ -238,6 +239,7 @@ func main() {
 		instructorCourseHandler,
 		moduleHandler,
 		lessonHandler,
+		questionHandler,
 		testSeriesHandler,
 		attemptHandler,
 		userHandler,

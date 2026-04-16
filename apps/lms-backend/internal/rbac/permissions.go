@@ -119,6 +119,14 @@ const (
 	BatchUpdate Permission = "batches:update"
 	BatchDelete Permission = "batches:delete"
 	BatchEnroll Permission = "batches:enroll"
+
+	// ================================================
+	// ORDER PERMISSIONS
+	// ================================================
+	OrderCreate Permission = "orders:create"
+	OrderRead   Permission = "orders:read"
+	OrderUpdate Permission = "orders:update"
+	OrderDelete Permission = "orders:delete"
 )
 
 // RolePermissions maps roles to their permissions
@@ -168,6 +176,9 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== BATCH PERMISSIONS ======
 		BatchCreate, BatchRead, BatchUpdate, BatchDelete, BatchEnroll,
+
+		// ====== ORDER PERMISSIONS ======
+		OrderCreate, OrderRead, OrderUpdate, OrderDelete,
 	},
 
 	"faculty": {
@@ -213,6 +224,10 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== BATCH PERMISSIONS ======
 		// Faculty can create, read, update, delete, and enroll in batches
 		BatchCreate, BatchRead, BatchUpdate, BatchDelete, BatchEnroll,
+
+		// ====== ORDER PERMISSIONS ======
+		// Faculty can read and update orders
+		OrderRead, OrderUpdate,
 	},
 
 	"student": {
@@ -258,5 +273,9 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== BATCH PERMISSIONS ======
 		// Students can read batch information
 		BatchRead,
+
+		// ====== ORDER PERMISSIONS ======
+		// Students can create and read their own orders
+		OrderCreate, OrderRead,
 	},
 }

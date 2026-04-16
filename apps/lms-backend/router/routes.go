@@ -48,6 +48,7 @@ func InitializeAllRoutes(
 	certificateHandler *handlers.CertificateHandler,
 	notificationHandler *handlers.NotificationHandler,
 	batchHandler *handlers.BatchHandler,
+	orderHandler *handlers.OrderHandler,
 	permissionDecorator *decorators.PermissionDecorator,
 	jwtSecret string,
 ) {
@@ -76,6 +77,7 @@ func InitializeAllRoutes(
 	InitCertificateRoutes(v1, certificateHandler, permissionDecorator)
 	InitNotificationRoutes(v1, notificationHandler, permissionDecorator)
 	InitBatchRoutes(v1, batchHandler, permissionDecorator)
+	InitOrderRoutes(v1, orderHandler, permissionDecorator)
 
 	log.Println("[Router] All API routes initialized successfully")
 }
@@ -561,6 +563,76 @@ func InitBatchRoutes(
 	}
 
 	log.Println("✓ Batch routes initialized successfully")
+}
+
+// InitOrderRoutes initializes order routes with permission checks
+func InitOrderRoutes(
+	v1 *gin.RouterGroup,
+	orderHandler *handlers.OrderHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing order routes")
+
+	orders := v1.Group("/orders")
+	{
+		// List all orders (admin only)
+		orders.GET(
+			"",
+			permDecorator.Required(orderHandler.ListOrders, []rbac.Permission{rbac.OrderRead}),
+		)
+
+		// Get specific order
+		orders.GET(
+			"/:id",
+			permDecorator.Required(orderHandler.GetOrder, []rbac.Permission{rbac.OrderRead}),
+		)
+
+		// Create order (student)
+		orders.POST(
+			"",
+			permDecorator.Required(orderHandler.CreateOrder, []rbac.Permission{rbac.OrderCreate}),
+		)
+
+		// Update order status (admin only)
+		orders.PATCH(
+			"/:id/status",
+			permDecorator.Required(orderHandler.UpdateOrderStatus, []rbac.Permission{rbac.OrderUpdate}),
+		)
+
+		// Cancel order
+		orders.POST(
+			"/:id/cancel",
+			permDecorator.Required(orderHandler.CancelOrder, []rbac.Permission{rbac.OrderUpdate}),
+		)
+
+		// Delete order (admin only)
+		orders.DELETE(
+			"/:id",
+			permDecorator.Required(orderHandler.DeleteOrder, []rbac.Permission{rbac.OrderDelete}),
+		)
+	}
+
+	// Student-specific order routes
+	users := v1.Group("/users")
+	{
+		// List orders for a student
+		users.GET(
+			"/:studentId/orders",
+			orderHandler.ListStudentOrders,
+		)
+	}
+
+	// Course-specific order routes
+	courses := v1.Group("/courses")
+	{
+		// List orders for a course
+		courses.GET(
+			"/:courseId/orders",
+			permDecorator.Required(orderHandler.ListCourseOrders, []rbac.Permission{rbac.OrderRead}),
+		)
+	}
+
+	log.Println("✓ Order routes initialized successfully")
 }
 
 // InitModuleRoutes initializes module routes with permission checks

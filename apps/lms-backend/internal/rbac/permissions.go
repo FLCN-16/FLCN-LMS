@@ -110,6 +110,15 @@ const (
 	NotificationRead   Permission = "notifications:read"
 	NotificationUpdate Permission = "notifications:update"
 	NotificationDelete Permission = "notifications:delete"
+
+	// ================================================
+	// BATCH PERMISSIONS
+	// ================================================
+	BatchCreate Permission = "batches:create"
+	BatchRead   Permission = "batches:read"
+	BatchUpdate Permission = "batches:update"
+	BatchDelete Permission = "batches:delete"
+	BatchEnroll Permission = "batches:enroll"
 )
 
 // RolePermissions maps roles to their permissions
@@ -156,6 +165,9 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== NOTIFICATION PERMISSIONS ======
 		NotificationRead, NotificationUpdate, NotificationDelete,
+
+		// ====== BATCH PERMISSIONS ======
+		BatchCreate, BatchRead, BatchUpdate, BatchDelete, BatchEnroll,
 	},
 
 	"faculty": {
@@ -197,6 +209,10 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== NOTIFICATION PERMISSIONS ======
 		// Faculty can read and update their notifications
 		NotificationRead, NotificationUpdate,
+
+		// ====== BATCH PERMISSIONS ======
+		// Faculty can create, read, update, delete, and enroll in batches
+		BatchCreate, BatchRead, BatchUpdate, BatchDelete, BatchEnroll,
 	},
 
 	"student": {
@@ -238,5 +254,9 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== NOTIFICATION PERMISSIONS ======
 		// Students can read and update their notifications
 		NotificationRead, NotificationUpdate,
+
+		// ====== BATCH PERMISSIONS ======
+		// Students can read batch information
+		BatchRead,
 	},
 }

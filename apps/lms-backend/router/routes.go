@@ -47,6 +47,7 @@ func InitializeAllRoutes(
 	courseReviewHandler *handlers.CourseReviewHandler,
 	certificateHandler *handlers.CertificateHandler,
 	notificationHandler *handlers.NotificationHandler,
+	batchHandler *handlers.BatchHandler,
 	permissionDecorator *decorators.PermissionDecorator,
 	jwtSecret string,
 ) {
@@ -74,6 +75,7 @@ func InitializeAllRoutes(
 	InitCourseReviewRoutes(v1, courseReviewHandler, permissionDecorator)
 	InitCertificateRoutes(v1, certificateHandler, permissionDecorator)
 	InitNotificationRoutes(v1, notificationHandler, permissionDecorator)
+	InitBatchRoutes(v1, batchHandler, permissionDecorator)
 
 	log.Println("[Router] All API routes initialized successfully")
 }
@@ -493,6 +495,72 @@ func InitNotificationRoutes(
 	}
 
 	log.Println("✓ Notification routes initialized successfully")
+}
+
+// InitBatchRoutes initializes batch routes with permission checks
+func InitBatchRoutes(
+	v1 *gin.RouterGroup,
+	batchHandler *handlers.BatchHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing batch routes")
+
+	batches := v1.Group("/batches")
+	{
+		// List all batches
+		batches.GET(
+			"",
+			batchHandler.ListBatches,
+		)
+
+		// Get specific batch
+		batches.GET(
+			"/:id",
+			batchHandler.GetBatch,
+		)
+
+		// Create batch (faculty/admin only)
+		batches.POST(
+			"",
+			permDecorator.Required(batchHandler.CreateBatch, []rbac.Permission{rbac.BatchCreate}),
+		)
+
+		// Update batch (faculty/admin only)
+		batches.PATCH(
+			"/:id",
+			permDecorator.Required(batchHandler.UpdateBatch, []rbac.Permission{rbac.BatchUpdate}),
+		)
+
+		// Delete batch (faculty/admin only)
+		batches.DELETE(
+			"/:id",
+			permDecorator.Required(batchHandler.DeleteBatch, []rbac.Permission{rbac.BatchDelete}),
+		)
+
+		// Enroll student in batch
+		batches.POST(
+			"/:batchId/enroll",
+			permDecorator.Required(batchHandler.EnrollStudent, []rbac.Permission{rbac.BatchEnroll}),
+		)
+
+		// List students in batch
+		batches.GET(
+			"/:batchId/students",
+			batchHandler.ListBatchStudents,
+		)
+	}
+
+	// Instructor-specific batch routes
+	instructors := v1.Group("/instructors")
+	{
+		// List batches for an instructor
+		instructors.GET(
+			"/:instructorId/batches",
+			batchHandler.ListBatchesByInstructor,
+		)
+	}
+
+	log.Println("✓ Batch routes initialized successfully")
 }
 
 // InitModuleRoutes initializes module routes with permission checks

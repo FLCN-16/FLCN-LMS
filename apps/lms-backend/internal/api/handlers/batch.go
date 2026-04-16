@@ -265,7 +265,7 @@ func (bh *BatchHandler) DeleteBatch(c *gin.Context) {
 // @Failure 404 {object} response.Response
 // @Router /batches/{batchId}/enroll [post]
 func (bh *BatchHandler) EnrollStudent(c *gin.Context) {
-	batchIDStr := c.Param("batchId")
+	batchIDStr := c.Param("id")
 	batchID, err := uuid.Parse(batchIDStr)
 	if err != nil {
 		log.Printf("[Batch Handler] Invalid batch ID: %v", err)
@@ -303,7 +303,7 @@ func (bh *BatchHandler) EnrollStudent(c *gin.Context) {
 // @Failure 404 {object} response.Response
 // @Router /batches/{batchId}/students [get]
 func (bh *BatchHandler) ListBatchStudents(c *gin.Context) {
-	batchIDStr := c.Param("batchId")
+	batchIDStr := c.Param("id")
 	batchID, err := uuid.Parse(batchIDStr)
 	if err != nil {
 		log.Printf("[Batch Handler] Invalid batch ID: %v", err)

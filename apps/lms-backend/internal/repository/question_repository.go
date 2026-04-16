@@ -151,8 +151,38 @@ func (qr *QuestionRepository) GetByTestSeriesID(testSeriesID uuid.UUID, page, li
 	offset := (page - 1) * limit
 
 	// Get paginated results
-	if err := qr.db.Where("test_series_id = ?", testSeriesID).Offset(offset).Limit(limit).Order("sequence_number ASC").Find(&questions).Error; err != nil {
+	if err := qr.db.Where("test_series_id = ?", testSeriesID).Offset(offset).Limit(limit).Order("order_index ASC").Find(&questions).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to fetch questions by test series: %w", err)
+	}
+
+	return questions, total, nil
+}
+
+// GetByTestSeriesSectionID retrieves all questions for a specific test series section with pagination
+// Parameters:
+//   - sectionID: The test series section's UUID
+//   - page: Page number (1-based)
+//   - limit: Number of questions per page
+//
+// Returns:
+//   - []models.Question: Slice of questions
+//   - int64: Total count of questions for the section
+//   - error: Error if query fails
+func (qr *QuestionRepository) GetByTestSeriesSectionID(sectionID uuid.UUID, page, limit int) ([]models.Question, int64, error) {
+	var questions []models.Question
+	var total int64
+
+	// Get total count for section
+	if err := qr.db.Model(&models.Question{}).Where("test_series_section_id = ?", sectionID).Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count questions: %w", err)
+	}
+
+	// Calculate offset
+	offset := (page - 1) * limit
+
+	// Get paginated results
+	if err := qr.db.Where("test_series_section_id = ?", sectionID).Offset(offset).Limit(limit).Order("order_index ASC").Find(&questions).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch questions by section: %w", err)
 	}
 
 	return questions, total, nil
@@ -180,6 +210,21 @@ func (qr *QuestionRepository) GetQuestionCount() (int64, error) {
 func (qr *QuestionRepository) GetQuestionCountByTestSeries(testSeriesID uuid.UUID) (int64, error) {
 	var count int64
 	if err := qr.db.Model(&models.Question{}).Where("test_series_id = ?", testSeriesID).Count(&count).Error; err != nil {
+		return 0, fmt.Errorf("failed to count questions: %w", err)
+	}
+	return count, nil
+}
+
+// GetQuestionCountBySection returns the total number of questions in a test series section
+// Parameters:
+//   - sectionID: The test series section's UUID
+//
+// Returns:
+//   - int64: Total count of questions in the section
+//   - error: Error if query fails
+func (qr *QuestionRepository) GetQuestionCountBySection(sectionID uuid.UUID) (int64, error) {
+	var count int64
+	if err := qr.db.Model(&models.Question{}).Where("test_series_section_id = ?", sectionID).Count(&count).Error; err != nil {
 		return 0, fmt.Errorf("failed to count questions: %w", err)
 	}
 	return count, nil
@@ -233,7 +278,7 @@ func (qr *QuestionRepository) Search(query string, page, limit int) ([]models.Qu
 func (qr *QuestionRepository) GetNextQuestionOrder(testSeriesID uuid.UUID) (int, error) {
 	var maxOrder int
 	if err := qr.db.Model(&models.Question{}).Where("test_series_id = ?", testSeriesID).
-		Select("COALESCE(MAX(sequence_number), 0)").
+		Select("COALESCE(MAX(order_index), 0)").
 		Row().
 		Scan(&maxOrder); err != nil {
 		return 0, fmt.Errorf("failed to get next question order: %w", err)

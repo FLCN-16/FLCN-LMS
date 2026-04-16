@@ -187,16 +187,24 @@ func (smh *StudyMaterialHandler) CreateStudyMaterial(c *gin.Context) {
 	}
 
 	// Handle file upload
-	file, header, err := c.FormFile("file")
+	file, err := c.FormFile("file")
 	if err != nil {
 		log.Printf("[Study Material Handler] Failed to get file: %v", err)
 		response.BadRequest(c, "file is required")
 		return
 	}
-	defer file.Close()
+
+	// Open the file
+	fileContent, err := file.Open()
+	if err != nil {
+		log.Printf("[Study Material Handler] Failed to open file: %v", err)
+		response.BadRequest(c, "failed to read file")
+		return
+	}
+	defer fileContent.Close()
 
 	// Create material with file info
-	material, err := smh.studyMaterialService.CreateStudyMaterial(courseID, title, description, header.Filename, file)
+	material, err := smh.studyMaterialService.CreateStudyMaterial(courseID, title, description, file.Filename, fileContent)
 	if err != nil {
 		log.Printf("[Study Material Handler] Failed to create material: %v", err)
 		response.InternalServerError(c, err.Error())

@@ -115,7 +115,7 @@ func (oh *OrderHandler) GetOrder(c *gin.Context) {
 // @Failure 400 {object} response.Response
 // @Router /users/{studentId}/orders [get]
 func (oh *OrderHandler) ListStudentOrders(c *gin.Context) {
-	studentIDStr := c.Param("studentId")
+	studentIDStr := c.Param("id")
 	studentID, err := uuid.Parse(studentIDStr)
 	if err != nil {
 		log.Printf("[Order Handler] Invalid student ID: %v", err)
@@ -166,7 +166,7 @@ func (oh *OrderHandler) ListStudentOrders(c *gin.Context) {
 // @Failure 400 {object} response.Response
 // @Router /courses/{courseId}/orders [get]
 func (oh *OrderHandler) ListCourseOrders(c *gin.Context) {
-	courseIDStr := c.Param("courseId")
+	courseIDStr := c.Param("id")
 	courseID, err := uuid.Parse(courseIDStr)
 	if err != nil {
 		log.Printf("[Order Handler] Invalid course ID: %v", err)
@@ -191,6 +191,48 @@ func (oh *OrderHandler) ListCourseOrders(c *gin.Context) {
 	orders, total, err := oh.orderService.ListCourseOrders(courseID, page, limit)
 	if err != nil {
 		log.Printf("[Order Handler] Failed to list course orders: %v", err)
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"data":  orders,
+		"total": total,
+		"page":  page,
+		"limit": limit,
+	})
+}
+
+// GetMyOrders returns the authenticated student's order history
+// GET /my/orders
+func (oh *OrderHandler) GetMyOrders(c *gin.Context) {
+	studentID, exists := c.Get("user_id")
+	if !exists {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+	studentUUID, ok := studentID.(uuid.UUID)
+	if !ok {
+		response.BadRequest(c, "Invalid user ID format")
+		return
+	}
+
+	page := 1
+	if p := c.Query("page"); p != "" {
+		if pageNum, err := strconv.Atoi(p); err == nil && pageNum > 0 {
+			page = pageNum
+		}
+	}
+	limit := 10
+	if l := c.Query("limit"); l != "" {
+		if limitNum, err := strconv.Atoi(l); err == nil && limitNum > 0 && limitNum <= 100 {
+			limit = limitNum
+		}
+	}
+
+	orders, total, err := oh.orderService.ListStudentOrders(studentUUID, page, limit)
+	if err != nil {
+		log.Printf("[Order Handler] Failed to get my orders: %v", err)
 		response.InternalServerError(c, err.Error())
 		return
 	}

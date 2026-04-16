@@ -190,15 +190,15 @@ func (cr *CourseRepository) GetPublishedCourses(page, limit int) ([]models.Cours
 	var total int64
 
 	// Get total count of published courses
-	if err := cr.db.Model(&models.Course{}).Where("is_published = ?", true).Count(&total).Error; err != nil {
+	if err := cr.db.Model(&models.Course{}).Where("status = ?", "published").Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count published courses: %w", err)
 	}
 
 	// Calculate offset
 	offset := (page - 1) * limit
 
-	// Get paginated results
-	if err := cr.db.Where("is_published = ?", true).Offset(offset).Limit(limit).Order("created_at DESC").Find(&courses).Error; err != nil {
+	// Get paginated results with instructor
+	if err := cr.db.Preload("Instructor").Where("status = ?", "published").Offset(offset).Limit(limit).Order("created_at DESC").Find(&courses).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to fetch published courses: %w", err)
 	}
 
@@ -254,3 +254,32 @@ func (cr *CourseRepository) GetCourseCount() (int64, error) {
 	}
 	return count, nil
 }
+
+// GetChildCourses returns published child courses for a given parent course ID
+func (cr *CourseRepository) GetChildCourses(parentID uuid.UUID) ([]models.Course, error) {
+	var courses []models.Course
+	if err := cr.db.
+		Where("parent_course_id = ? AND status = 'published'", parentID).
+		Order("created_at ASC").
+		Find(&courses).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch child courses: %w", err)
+	}
+	return courses, nil
+}
+
+// GetBundles returns published courses that are bundles (is_bundle = true)
+func (cr *CourseRepository) GetBundles(page, limit int) ([]models.Course, int64, error) {
+	var courses []models.Course
+	var total int64
+	offset := (page - 1) * limit
+
+	query := cr.db.Model(&models.Course{}).Where("is_bundle = true AND status = 'published'")
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count bundles: %w", err)
+	}
+	if err := query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&courses).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch bundles: %w", err)
+	}
+	return courses, total, nil
+}
+

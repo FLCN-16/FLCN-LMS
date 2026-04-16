@@ -25,6 +25,7 @@ import (
 //   - liveSessionHandler: Handler for live sessions
 //   - leaderboardHandler: Handler for leaderboards
 //   - licenseHandler: Handler for license verification
+//   - marketingHandler: Handler for public storefront endpoints
 //   - jwtSecret: Secret key for JWT validation in middleware
 func InitializeAllRoutes(
 	v1 *gin.RouterGroup,
@@ -50,6 +51,11 @@ func InitializeAllRoutes(
 	batchHandler *handlers.BatchHandler,
 	orderHandler *handlers.OrderHandler,
 	couponHandler *handlers.CouponHandler,
+	marketingHandler *handlers.MarketingHandler,
+	packageHandler *handlers.CoursePackageHandler,
+	subscriptionHandler *handlers.SubscriptionHandler,
+	invoiceHandler *handlers.InvoiceHandler,
+	noteHandler *handlers.LessonNoteHandler,
 	permissionDecorator *decorators.PermissionDecorator,
 	jwtSecret string,
 ) {
@@ -58,17 +64,18 @@ func InitializeAllRoutes(
 	// Public routes (no authentication required)
 	InitAuthRoutes(v1, authHandler, jwtSecret)
 	InitLicenseRoutes(v1, licenseHandler)
+	InitMarketingRoutes(v1, marketingHandler)
 
 	// Protected routes (authentication required)
-	InitCourseRoutes(v1, courseHandler, permissionDecorator)
+	InitCourseRoutes(v1, courseHandler, studyMaterialHandler, courseReviewHandler, orderHandler, permissionDecorator)
 	InitInstructorCourseRoutes(v1, instructorCourseHandler, permissionDecorator)
 	InitModuleRoutes(v1, moduleHandler, permissionDecorator)
 	InitLessonRoutes(v1, lessonHandler, permissionDecorator)
 	InitStudyMaterialRoutes(v1, studyMaterialHandler, permissionDecorator)
 	InitQuestionRoutes(v1, questionHandler, permissionDecorator)
-	InitTestSeriesRoutes(v1, testSeriesHandler, permissionDecorator)
+	InitTestSeriesRoutes(v1, testSeriesHandler, questionHandler, permissionDecorator)
 	InitAttemptRoutes(v1, attemptHandler, permissionDecorator)
-	InitUserRoutes(v1, userHandler, permissionDecorator)
+	InitUserRoutes(v1, userHandler, orderHandler, permissionDecorator)
 	InitEnrollmentRoutes(v1, enrollmentHandler, permissionDecorator)
 	InitLiveSessionRoutes(v1, liveSessionHandler, permissionDecorator)
 	InitLeaderboardRoutes(v1, leaderboardHandler, permissionDecorator)
@@ -78,8 +85,12 @@ func InitializeAllRoutes(
 	InitCertificateRoutes(v1, certificateHandler, permissionDecorator)
 	InitNotificationRoutes(v1, notificationHandler, permissionDecorator)
 	InitBatchRoutes(v1, batchHandler, permissionDecorator)
-	InitOrderRoutes(v1, orderHandler, permissionDecorator)
+	InitOrderRoutes(v1, orderHandler, invoiceHandler, permissionDecorator)
 	InitCouponRoutes(v1, couponHandler, permissionDecorator)
+	InitPackageRoutes(v1, packageHandler, permissionDecorator)
+	InitSubscriptionRoutes(v1, subscriptionHandler, permissionDecorator)
+	InitInvoiceRoutes(v1, invoiceHandler, permissionDecorator)
+	InitLessonNoteRoutes(v1, noteHandler, permissionDecorator)
 
 	log.Println("[Router] All API routes initialized successfully")
 }
@@ -357,34 +368,6 @@ func InitCourseReviewRoutes(
 		)
 	}
 
-	// Course-specific review routes
-	courses := v1.Group("/courses")
-	{
-		// Create review for course
-		courses.POST(
-			"/:courseId/reviews",
-			permDecorator.Required(courseReviewHandler.CreateReview, []rbac.Permission{rbac.ReviewCreate}),
-		)
-
-		// List reviews for course
-		courses.GET(
-			"/:courseId/reviews",
-			permDecorator.Required(courseReviewHandler.ListCourseReviews, []rbac.Permission{rbac.ReviewRead}),
-		)
-
-		// Get student's review for course
-		courses.GET(
-			"/:courseId/my-review",
-			permDecorator.Required(courseReviewHandler.GetStudentReview, []rbac.Permission{rbac.ReviewRead}),
-		)
-
-		// Get course review statistics
-		courses.GET(
-			"/:courseId/review-stats",
-			permDecorator.Required(courseReviewHandler.GetCourseStats, []rbac.Permission{rbac.ReviewRead}),
-		)
-	}
-
 	// User's reviews
 	v1.GET(
 		"/my-reviews",
@@ -423,6 +406,18 @@ func InitCertificateRoutes(
 			permDecorator.Required(certificateHandler.IssueCertificate, []rbac.Permission{rbac.CertificateCreate}),
 		)
 
+		// Check eligibility for certificate
+		certificates.GET(
+			"/eligibility",
+			permDecorator.Required(certificateHandler.CheckEligibility, []rbac.Permission{rbac.CertificateRead}),
+		)
+
+		// Verify certificate by number (public - no auth required)
+		certificates.GET(
+			"/verify/:number",
+			certificateHandler.VerifyCertificate,
+		)
+
 		// Get specific certificate
 		certificates.GET(
 			"/:id",
@@ -433,18 +428,6 @@ func InitCertificateRoutes(
 		certificates.GET(
 			"/:id/download",
 			permDecorator.Required(certificateHandler.DownloadCertificatePDF, []rbac.Permission{rbac.CertificateRead}),
-		)
-
-		// Verify certificate by number (public - no auth required)
-		certificates.GET(
-			"/:number/verify",
-			certificateHandler.VerifyCertificate,
-		)
-
-		// Check eligibility for certificate
-		certificates.GET(
-			"/eligibility",
-			permDecorator.Required(certificateHandler.CheckEligibility, []rbac.Permission{rbac.CertificateRead}),
 		)
 	}
 
@@ -543,13 +526,13 @@ func InitBatchRoutes(
 
 		// Enroll student in batch
 		batches.POST(
-			"/:batchId/enroll",
+			"/:id/enroll",
 			permDecorator.Required(batchHandler.EnrollStudent, []rbac.Permission{rbac.BatchEnroll}),
 		)
 
 		// List students in batch
 		batches.GET(
-			"/:batchId/students",
+			"/:id/students",
 			batchHandler.ListBatchStudents,
 		)
 	}
@@ -571,9 +554,16 @@ func InitBatchRoutes(
 func InitOrderRoutes(
 	v1 *gin.RouterGroup,
 	orderHandler *handlers.OrderHandler,
+	invoiceHandler *handlers.InvoiceHandler,
 	permDecorator *decorators.PermissionDecorator,
 ) {
 	log.Println("Initializing order routes")
+
+	// Student purchase history
+	v1.GET(
+		"/my/orders",
+		permDecorator.Required(orderHandler.GetMyOrders, []rbac.Permission{rbac.OrderRead}),
+	)
 
 	orders := v1.Group("/orders")
 	{
@@ -612,29 +602,94 @@ func InitOrderRoutes(
 			"/:id",
 			permDecorator.Required(orderHandler.DeleteOrder, []rbac.Permission{rbac.OrderDelete}),
 		)
-	}
 
-	// Student-specific order routes
-	users := v1.Group("/users")
-	{
-		// List orders for a student
-		users.GET(
-			"/:studentId/orders",
-			orderHandler.ListStudentOrders,
-		)
-	}
-
-	// Course-specific order routes
-	courses := v1.Group("/courses")
-	{
-		// List orders for a course
-		courses.GET(
-			"/:courseId/orders",
-			permDecorator.Required(orderHandler.ListCourseOrders, []rbac.Permission{rbac.OrderRead}),
+		// Get invoice for an order
+		orders.GET(
+			"/:id/invoice",
+			permDecorator.Required(invoiceHandler.GetInvoiceByOrder, []rbac.Permission{rbac.InvoiceRead}),
 		)
 	}
 
 	log.Println("✓ Order routes initialized successfully")
+}
+
+// InitPackageRoutes initializes course package routes
+func InitPackageRoutes(
+	v1 *gin.RouterGroup,
+	packageHandler *handlers.CoursePackageHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing package routes")
+
+	packages := v1.Group("/packages")
+	{
+		packages.GET(
+			"/:id",
+			permDecorator.Required(packageHandler.GetPackage, []rbac.Permission{rbac.PackageRead}),
+		)
+		packages.POST(
+			"",
+			permDecorator.Required(packageHandler.CreatePackage, []rbac.Permission{rbac.PackageCreate}),
+		)
+		packages.PATCH(
+			"/:id",
+			permDecorator.Required(packageHandler.UpdatePackage, []rbac.Permission{rbac.PackageUpdate}),
+		)
+		packages.DELETE(
+			"/:id",
+			permDecorator.Required(packageHandler.DeletePackage, []rbac.Permission{rbac.PackageDelete}),
+		)
+	}
+
+	// Course-scoped packages (admin/faculty view, all packages including inactive)
+	v1.GET(
+		"/courses/:id/packages",
+		permDecorator.Required(packageHandler.ListPackagesByCourse, []rbac.Permission{rbac.PackageRead}),
+	)
+
+	log.Println("✓ Package routes initialized successfully")
+}
+
+// InitSubscriptionRoutes initializes subscription routes
+func InitSubscriptionRoutes(
+	v1 *gin.RouterGroup,
+	subscriptionHandler *handlers.SubscriptionHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing subscription routes")
+
+	v1.GET(
+		"/my/subscriptions",
+		permDecorator.Required(subscriptionHandler.GetMySubscriptions, []rbac.Permission{rbac.SubscriptionRead}),
+	)
+
+	v1.GET(
+		"/subscriptions/:id",
+		permDecorator.Required(subscriptionHandler.GetSubscription, []rbac.Permission{rbac.SubscriptionRead}),
+	)
+
+	log.Println("✓ Subscription routes initialized successfully")
+}
+
+// InitInvoiceRoutes initializes invoice routes
+func InitInvoiceRoutes(
+	v1 *gin.RouterGroup,
+	invoiceHandler *handlers.InvoiceHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing invoice routes")
+
+	v1.GET(
+		"/my/invoices",
+		permDecorator.Required(invoiceHandler.GetMyInvoices, []rbac.Permission{rbac.InvoiceRead}),
+	)
+
+	v1.GET(
+		"/invoices/:id",
+		permDecorator.Required(invoiceHandler.GetInvoice, []rbac.Permission{rbac.InvoiceRead}),
+	)
+
+	log.Println("✓ Invoice routes initialized successfully")
 }
 
 // InitCouponRoutes initializes coupon routes with permission checks
@@ -740,22 +795,6 @@ func InitModuleRoutes(
 		)
 	}
 
-	// Course-specific module routes
-	courses := v1.Group("/courses")
-	{
-		// Get modules for a course
-		courses.GET(
-			"/:courseId/modules",
-			moduleHandler.GetModulesByCourse,
-		)
-
-		// Create module for a course
-		courses.POST(
-			"/:courseId/modules",
-			permDecorator.Required(moduleHandler.CreateModule, []rbac.Permission{rbac.CourseCreate}),
-		)
-	}
-
 	log.Println("✓ Module routes initialized successfully")
 }
 
@@ -806,22 +845,6 @@ func InitLessonRoutes(
 		)
 	}
 
-	// Module-specific lesson routes
-	modules := v1.Group("/modules")
-	{
-		// Get lessons for a module
-		modules.GET(
-			"/:moduleId/lessons",
-			lessonHandler.GetLessonsByModule,
-		)
-
-		// Create lesson for a module
-		modules.POST(
-			"/:moduleId/lessons",
-			permDecorator.Required(lessonHandler.CreateLesson, []rbac.Permission{rbac.CourseCreate}),
-		)
-	}
-
 	log.Println("✓ Lesson routes initialized successfully")
 }
 
@@ -869,16 +892,6 @@ func InitStudyMaterialRoutes(
 		materials.DELETE(
 			"/:id",
 			permDecorator.Required(studyMaterialHandler.DeleteStudyMaterial, []rbac.Permission{rbac.CourseDelete}),
-		)
-	}
-
-	// Course-specific material routes
-	courses := v1.Group("/courses")
-	{
-		// Get materials for a course
-		courses.GET(
-			"/:courseId/materials",
-			studyMaterialHandler.GetMaterialsByCourse,
 		)
 	}
 
@@ -944,21 +957,48 @@ func InitQuestionRoutes(
 		)
 	}
 
-	// Test series specific question routes
-	testSeries := v1.Group("/test-series")
-	{
-		// Get questions for a test series
-		testSeries.GET(
-			"/:testSeriesId/questions",
-			questionHandler.GetQuestionsByTestSeries,
-		)
+	log.Println("✓ Question routes initialized successfully")
+}
 
-		// Create question for a test series
-		testSeries.POST(
-			"/:testSeriesId/questions",
-			permDecorator.Required(questionHandler.CreateQuestion, []rbac.Permission{rbac.QuestionCreate}),
+// InitLessonNoteRoutes initializes lesson note routes
+func InitLessonNoteRoutes(
+	v1 *gin.RouterGroup,
+	noteHandler *handlers.LessonNoteHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing lesson note routes")
+
+	// All notes for the authenticated student
+	v1.GET(
+		"/my/notes",
+		permDecorator.Required(noteHandler.GetMyNotes, []rbac.Permission{rbac.NoteRead}),
+	)
+
+	// Notes CRUD scoped to a lesson
+	lessons := v1.Group("/lessons")
+	{
+		lessons.GET(
+			"/:id/notes",
+			permDecorator.Required(noteHandler.GetLessonNotes, []rbac.Permission{rbac.NoteRead}),
+		)
+		lessons.POST(
+			"/:id/notes",
+			permDecorator.Required(noteHandler.CreateNote, []rbac.Permission{rbac.NoteCreate}),
 		)
 	}
 
-	log.Println("✓ Question routes initialized successfully")
+	// Individual note management
+	notes := v1.Group("/notes")
+	{
+		notes.PATCH(
+			"/:id",
+			permDecorator.Required(noteHandler.UpdateNote, []rbac.Permission{rbac.NoteUpdate}),
+		)
+		notes.DELETE(
+			"/:id",
+			permDecorator.Required(noteHandler.DeleteNote, []rbac.Permission{rbac.NoteDelete}),
+		)
+	}
+
+	log.Println("✓ Lesson note routes initialized successfully")
 }

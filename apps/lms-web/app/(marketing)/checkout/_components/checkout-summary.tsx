@@ -1,6 +1,9 @@
+"use client"
+
+import { Trash2 } from "lucide-react"
 import Image from "next/image"
 
-import type { CartItem } from "@flcn-lms/types/cart"
+import { Button } from "@flcn-lms/ui/components/button"
 import {
   Card,
   CardContent,
@@ -9,41 +12,93 @@ import {
 } from "@flcn-lms/ui/components/card"
 import { Text } from "@flcn-lms/ui/components/typography"
 
+import { useCart } from "@/lib/cart-store"
 import formatPrice from "@/lib/format-price"
 
-function CheckoutSummary(props?: Partial<CartItem>) {
-  const { id = "1", title = "Course Title", price = 0, imageUrl = "https://via.placeholder.com/240x120" } = props ?? {}
+function CheckoutSummary() {
+  const { items, removeItem } = useCart()
+
+  if (items.length === 0) {
+    return (
+      <Card className="rounded-sm">
+        <CardHeader>
+          <CardTitle>
+            <h2>Order Items</h2>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="py-8 text-center">
+            <Text className="text-muted-foreground">Your cart is empty</Text>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="rounded-sm">
       <CardHeader>
         <CardTitle>
-          <h2>Checkout Summary</h2>
+          <h2>Order Items ({items.length})</h2>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-x-2" data-item-id={id}>
-          <Image
-            src={imageUrl}
-            className="pointer-events-none rounded-sm"
-            alt="Course"
-            width={240}
-            height={120}
-          />
+        {items.map((item) => (
+          <div
+            key={item.id}
+            className="flex gap-4 rounded-lg border border-border p-4"
+          >
+            {/* Item Image */}
+            <div className="flex-shrink-0">
+              <Image
+                src={item.imageUrl}
+                alt={item.title}
+                width={96}
+                height={96}
+                className="rounded-md object-cover"
+              />
+            </div>
 
-          <div className="flex flex-col p-2">
-            <h3 className="line-clamp-2">{title}</h3>
-            <h6>Valid till: 23rd July 2028</h6>
+            {/* Item Details */}
+            <div className="flex-1 min-w-0">
+              <div className="space-y-2">
+                <div>
+                  <Text className="font-semibold line-clamp-2">
+                    {item.title}
+                  </Text>
+                  <Text className="text-xs text-muted-foreground capitalize">
+                    {item.type === "test_series" ? "Test Series" : "Course"}
+                  </Text>
+                </div>
 
-            <div className="flex items-center gap-x-2">
-              <Text className="text-lg font-semibold">
-                {price && formatPrice(price)}
-              </Text>
-              <Text className="text-sm line-through opacity-60">
-                {formatPrice(price)}
-              </Text>
+                <div className="flex items-center justify-between">
+                  <Text className="text-lg font-bold">
+                    {formatPrice(item.price)}
+                  </Text>
+                  <div className="flex items-center gap-2">
+                    {item.quantity > 1 && (
+                      <Text className="text-sm text-muted-foreground">
+                        x {item.quantity}
+                      </Text>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Remove Button */}
+            <div className="flex items-end">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => removeItem(item.id)}
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-        </div>
+        ))}
       </CardContent>
     </Card>
   )

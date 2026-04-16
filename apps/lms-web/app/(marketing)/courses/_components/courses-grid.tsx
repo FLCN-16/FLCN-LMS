@@ -11,6 +11,13 @@ interface Course {
   imageUrl: string
   category?: string
   level?: string
+  estimatedHours?: number
+  totalEnrolled?: number
+  averageRating?: number
+  reviewCount?: number
+  certificateIncluded?: boolean
+  instructorName?: string
+  isFeatured?: boolean
 }
 
 interface CoursesGridProps {
@@ -74,6 +81,14 @@ export default function CoursesGrid({ courses, isLoading }: CoursesGridProps) {
             price={course.price}
             discountPrice={course.discountPrice}
             imageUrl={course.imageUrl}
+            level={course.level}
+            estimatedHours={course.estimatedHours}
+            totalEnrolled={course.totalEnrolled}
+            averageRating={course.averageRating}
+            reviewCount={course.reviewCount}
+            certificateIncluded={course.certificateIncluded}
+            instructorName={course.instructorName}
+            isFeatured={course.isFeatured}
           />
         ))}
       </div>

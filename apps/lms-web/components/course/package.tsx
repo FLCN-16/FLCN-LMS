@@ -42,11 +42,11 @@ function CoursePackage({
           "bg-linear-to-r from-violet-700 to-orange-700 text-primary-foreground"
         )}
       >
-        <Heading variant="h5" className="uppercase">
+        <Heading variant="h5" className="line-clamp-1 uppercase">
           {title}
         </Heading>
         <div className="flex items-center gap-x-2">
-          <Text className="text-md">{price} USD</Text>
+          <Text className="text-md">{price}</Text>
         </div>
       </div>
 

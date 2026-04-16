@@ -1,13 +1,34 @@
+"use client"
+
+import { useState } from "react"
+
 import { Check } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
-export default function CourseLearningSection() {
-  const objectives = [
-    "Master core concepts and fundamentals",
-    "Build practical, real-world projects",
-    "Understand industry best practices",
-    "Develop problem-solving skills",
-  ]
+interface CourseLearningProps {
+  whatYouLearn?: string[]
+}
+
+const DEFAULT_OBJECTIVES = [
+  "Master core concepts and fundamentals",
+  "Build practical, real-world projects",
+  "Understand industry best practices",
+  "Develop problem-solving skills",
+]
+
+const SHOW_MORE_THRESHOLD = 6
+
+export default function CourseLearningSection({
+  whatYouLearn,
+}: CourseLearningProps) {
+  const [showAll, setShowAll] = useState(false)
+
+  const objectives =
+    whatYouLearn && whatYouLearn.length > 0 ? whatYouLearn : DEFAULT_OBJECTIVES
+
+  const hasMore = objectives.length > SHOW_MORE_THRESHOLD
+  const visibleObjectives =
+    hasMore && !showAll ? objectives.slice(0, SHOW_MORE_THRESHOLD) : objectives
 
   return (
     <div className="flex flex-col gap-6">
@@ -16,7 +37,7 @@ export default function CourseLearningSection() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {objectives.map((objective, index) => (
+        {visibleObjectives.map((objective, index) => (
           <div key={index} className="flex items-start gap-3">
             <HugeiconsIcon
               icon={Check}
@@ -26,6 +47,17 @@ export default function CourseLearningSection() {
           </div>
         ))}
       </div>
+
+      {hasMore && (
+        <button
+          onClick={() => setShowAll((prev) => !prev)}
+          className="self-start text-sm font-medium text-accent underline-offset-4 hover:underline"
+        >
+          {showAll
+            ? "Show less"
+            : `Show ${objectives.length - SHOW_MORE_THRESHOLD} more`}
+        </button>
+      )}
     </div>
   )
 }

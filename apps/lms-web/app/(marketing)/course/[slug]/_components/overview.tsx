@@ -1,12 +1,16 @@
-export default function CourseOverviewSection() {
+import { type MarketingCourseDetail } from "@/fetchers/marketing"
+
+interface CourseOverviewSectionProps {
+  course: MarketingCourseDetail
+}
+
+export default function CourseOverviewSection({ course }: CourseOverviewSectionProps) {
   return (
     <div className="flex flex-col gap-8">
       <div>
         <h2 className="mb-4 text-2xl font-bold">About This Course</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Course description and overview content will be displayed here. This section
-          provides students with a comprehensive understanding of what the course covers
-          and the key topics they'll explore.
+        <p className="leading-relaxed text-muted-foreground">
+          {course.description || "Course details coming soon."}
         </p>
       </div>
 

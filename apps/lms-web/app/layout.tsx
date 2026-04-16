@@ -7,7 +7,7 @@ import { cn } from "@flcn-lms/ui/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
 
 import "swiper/css"
-import "@flcn-lms/ui/globals.css"
+import "./globals.css"
 
 const spaceGroteskHeading = Space_Grotesk({
   subsets: ["latin"],

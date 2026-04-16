@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"flcn_lms_backend/internal/models"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -34,7 +35,7 @@ func (cr *CouponRepository) Create(coupon *models.Coupon) error {
 // GetByID retrieves a coupon by its UUID
 func (cr *CouponRepository) GetByID(id uuid.UUID) (*models.Coupon, error) {
 	var coupon models.Coupon
-	if err := cr.db.Preload("Course").Preload("CreatedBy").First(&coupon, "id = ?", id).Error; err != nil {
+	if err := cr.db.First(&coupon, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("coupon not found")
 		}
@@ -46,9 +47,9 @@ func (cr *CouponRepository) GetByID(id uuid.UUID) (*models.Coupon, error) {
 // GetByCode retrieves a coupon by its code
 func (cr *CouponRepository) GetByCode(code string) (*models.Coupon, error) {
 	var coupon models.Coupon
-	if err := cr.db.Preload("Course").Preload("CreatedBy").First(&coupon, "code = ?", code).Error; err != nil {
+	if err := cr.db.First(&coupon, "code = ?", code).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
+			return nil, fmt.Errorf("coupon not found")
 		}
 		return nil, fmt.Errorf("failed to fetch coupon: %w", err)
 	}
@@ -60,66 +61,33 @@ func (cr *CouponRepository) GetAll(page, limit int) ([]models.Coupon, int64, err
 	var coupons []models.Coupon
 	var total int64
 
-	// Get total count
 	if err := cr.db.Model(&models.Coupon{}).Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count coupons: %w", err)
 	}
 
-	// Calculate offset
 	offset := (page - 1) * limit
-
-	// Get paginated results
-	if err := cr.db.Preload("Course").Preload("CreatedBy").Offset(offset).Limit(limit).Order("created_at DESC").Find(&coupons).Error; err != nil {
+	if err := cr.db.Offset(offset).Limit(limit).Order("created_at DESC").Find(&coupons).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to fetch coupons: %w", err)
 	}
 
 	return coupons, total, nil
 }
 
-// GetActive retrieves active coupons
-func (cr *CouponRepository) GetActive(page, limit int) ([]models.Coupon, int64, error) {
+// GetActiveCoupons retrieves all active coupons
+func (cr *CouponRepository) GetActiveCoupons(page, limit int) ([]models.Coupon, int64, error) {
 	var coupons []models.Coupon
 	var total int64
 	now := time.Now()
 
-	// Get total count
-	if err := cr.db.Model(&models.Coupon{}).
-		Where("is_active = ? AND valid_from <= ? AND (valid_until IS NULL OR valid_until >= ?)", true, now, now).
-		Count(&total).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to count coupons: %w", err)
+	query := cr.db.Where("is_active = ? AND valid_from <= ? AND (valid_until IS NULL OR valid_until >= ?)", true, now, now)
+
+	if err := query.Model(&models.Coupon{}).Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count active coupons: %w", err)
 	}
 
-	// Calculate offset
 	offset := (page - 1) * limit
-
-	// Get paginated results
-	if err := cr.db.
-		Where("is_active = ? AND valid_from <= ? AND (valid_until IS NULL OR valid_until >= ?)", true, now, now).
-		Preload("Course").Preload("CreatedBy").
-		Offset(offset).Limit(limit).Order("created_at DESC").
-		Find(&coupons).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to fetch coupons: %w", err)
-	}
-
-	return coupons, total, nil
-}
-
-// GetByCourseID retrieves coupons for a specific course
-func (cr *CouponRepository) GetByCourseID(courseID uuid.UUID, page, limit int) ([]models.Coupon, int64, error) {
-	var coupons []models.Coupon
-	var total int64
-
-	// Get total count
-	if err := cr.db.Model(&models.Coupon{}).Where("course_id = ?", courseID).Count(&total).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to count coupons: %w", err)
-	}
-
-	// Calculate offset
-	offset := (page - 1) * limit
-
-	// Get paginated results
-	if err := cr.db.Where("course_id = ?", courseID).Preload("Course").Preload("CreatedBy").Offset(offset).Limit(limit).Order("created_at DESC").Find(&coupons).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to fetch coupons: %w", err)
+	if err := query.Offset(offset).Limit(limit).Order("created_at DESC").Find(&coupons).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch active coupons: %w", err)
 	}
 
 	return coupons, total, nil
@@ -133,6 +101,14 @@ func (cr *CouponRepository) Update(coupon *models.Coupon) error {
 	return nil
 }
 
+// UpdatePartial updates specific fields of a coupon
+func (cr *CouponRepository) UpdatePartial(id uuid.UUID, updates map[string]interface{}) error {
+	if err := cr.db.Model(&models.Coupon{}).Where("id = ?", id).Updates(updates).Error; err != nil {
+		return fmt.Errorf("failed to update coupon: %w", err)
+	}
+	return nil
+}
+
 // Delete removes a coupon from the database
 func (cr *CouponRepository) Delete(id uuid.UUID) error {
 	if err := cr.db.Delete(&models.Coupon{}, "id = ?", id).Error; err != nil {
@@ -141,61 +117,82 @@ func (cr *CouponRepository) Delete(id uuid.UUID) error {
 	return nil
 }
 
-// IncrementUsage increments the used count of a coupon
-func (cr *CouponRepository) IncrementUsage(id uuid.UUID) error {
-	if err := cr.db.Model(&models.Coupon{}).Where("id = ?", id).Update("used_count", gorm.Expr("used_count + ?", 1)).Error; err != nil {
-		return fmt.Errorf("failed to increment usage: %w", err)
+// ValidateCoupon checks if a coupon can be used
+func (cr *CouponRepository) ValidateCoupon(code string) (*models.Coupon, error) {
+	coupon, err := cr.GetByCode(code)
+	if err != nil {
+		return nil, err
 	}
-	return nil
-}
 
-// CanUseCoupon checks if a coupon can be used
-func (cr *CouponRepository) CanUseCoupon(id uuid.UUID) (bool, error) {
-	var coupon models.Coupon
 	now := time.Now()
-
-	if err := cr.db.First(&coupon, "id = ?", id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, nil
-		}
-		return false, fmt.Errorf("failed to fetch coupon: %w", err)
-	}
 
 	// Check if active
 	if !coupon.IsActive {
-		return false, nil
+		return nil, fmt.Errorf("coupon is not active")
 	}
 
-	// Check validity dates
+	// Check validity period
 	if coupon.ValidFrom.After(now) {
-		return false, nil
+		return nil, fmt.Errorf("coupon is not yet valid")
 	}
 
 	if coupon.ValidUntil != nil && coupon.ValidUntil.Before(now) {
-		return false, nil
+		return nil, fmt.Errorf("coupon has expired")
 	}
 
 	// Check usage limit
 	if coupon.UsageLimit != nil && coupon.UsedCount >= *coupon.UsageLimit {
-		return false, nil
+		return nil, fmt.Errorf("coupon usage limit exceeded")
 	}
 
-	return true, nil
+	return coupon, nil
 }
 
-// RecordCouponUsage records usage of a coupon
-func (cr *CouponRepository) RecordCouponUsage(couponID, userID uuid.UUID, orderID *uuid.UUID) error {
-	usage := &models.CouponUsage{
-		ID:       uuid.New(),
-		CouponID: couponID,
-		UserID:   userID,
-		OrderID:  orderID,
+// IncrementUsage increments the used count for a coupon
+func (cr *CouponRepository) IncrementUsage(id uuid.UUID) error {
+	if err := cr.db.Model(&models.Coupon{}).Where("id = ?", id).Update("used_count", gorm.Expr("used_count + ?", 1)).Error; err != nil {
+		return fmt.Errorf("failed to increment coupon usage: %w", err)
+	}
+	return nil
+}
+
+// GetCouponsByCreator retrieves all coupons created by a specific user
+func (cr *CouponRepository) GetCouponsByCreator(creatorID uuid.UUID, page, limit int) ([]models.Coupon, int64, error) {
+	var coupons []models.Coupon
+	var total int64
+
+	if err := cr.db.Model(&models.Coupon{}).Where("created_by_id = ?", creatorID).Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count coupons: %w", err)
 	}
 
-	if err := cr.db.Create(usage).Error; err != nil {
-		return fmt.Errorf("failed to record coupon usage: %w", err)
+	offset := (page - 1) * limit
+	if err := cr.db.Where("created_by_id = ?", creatorID).Offset(offset).Limit(limit).Order("created_at DESC").Find(&coupons).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch coupons: %w", err)
 	}
 
-	// Increment usage count
-	return cr.IncrementUsage(couponID)
+	return coupons, total, nil
+}
+
+// SearchCoupons searches for coupons by code or description
+func (cr *CouponRepository) SearchCoupons(query string, page, limit int) ([]models.Coupon, int64, error) {
+	var coupons []models.Coupon
+	var total int64
+
+	searchPattern := "%" + query + "%"
+
+	dbQuery := cr.db.Where(
+		cr.db.Where("code ILIKE ?", searchPattern).
+			Or("description ILIKE ?", searchPattern),
+	)
+
+	if err := dbQuery.Model(&models.Coupon{}).Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count coupons: %w", err)
+	}
+
+	offset := (page - 1) * limit
+	if err := dbQuery.Offset(offset).Limit(limit).Order("created_at DESC").Find(&coupons).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to search coupons: %w", err)
+	}
+
+	return coupons, total, nil
 }

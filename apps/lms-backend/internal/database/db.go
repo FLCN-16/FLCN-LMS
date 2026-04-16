@@ -91,8 +91,18 @@ func runMigrations(db *gorm.DB) error {
 	}
 
 	for _, table := range tables {
-		if err := db.AutoMigrate(table); err != nil {
-			return fmt.Errorf("failed to migrate %T: %w", table, err)
+		// Skip AutoMigrate for LicenseConfig and handle it manually to avoid constraint conflicts
+		if _, ok := table.(*models.LicenseConfig); ok {
+			// For LicenseConfig, just ensure the table exists without managing constraints
+			if !db.Migrator().HasTable(table) {
+				if err := db.Migrator().CreateTable(table); err != nil {
+					return fmt.Errorf("failed to create table for %T: %w", table, err)
+				}
+			}
+		} else {
+			if err := db.AutoMigrate(table); err != nil {
+				return fmt.Errorf("failed to migrate %T: %w", table, err)
+			}
 		}
 	}
 

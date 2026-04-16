@@ -12,8 +12,11 @@ import (
 
 // OrderService handles order business logic
 type OrderService struct {
-	orderRepo  repository.OrderRepository
-	courseRepo repository.CourseRepository
+	orderRepo   repository.OrderRepository
+	courseRepo  repository.CourseRepository
+	packageRepo *repository.CoursePackageRepository
+	subService  *SubscriptionService
+	invService  *InvoiceService
 }
 
 // NewOrderService creates a new order service instance
@@ -24,30 +27,40 @@ func NewOrderService(orderRepo repository.OrderRepository, courseRepo repository
 	}
 }
 
+// SetBillingServices wires in subscription and invoice services (called after init to avoid circular deps)
+func (os *OrderService) SetBillingServices(packageRepo *repository.CoursePackageRepository, subService *SubscriptionService, invService *InvoiceService) {
+	os.packageRepo = packageRepo
+	os.subService = subService
+	os.invService = invService
+}
+
 // OrderResponse represents an order in API responses
 type OrderResponse struct {
-	ID               uuid.UUID    `json:"id"`
-	StudentID        uuid.UUID    `json:"student_id"`
-	CourseID         uuid.UUID    `json:"course_id"`
-	Course           *CourseResponse `json:"course,omitempty"`
-	OriginalPrice    float64      `json:"original_price"`
-	DiscountAmount   float64      `json:"discount_amount"`
-	FinalAmount      float64      `json:"final_amount"`
-	CouponID         *uuid.UUID   `json:"coupon_id"`
-	Status           string       `json:"status"`
-	PaymentProvider  *string      `json:"payment_provider"`
-	ProviderOrderID  *string      `json:"provider_order_id"`
-	ProviderPaymentID *string     `json:"provider_payment_id"`
-	PaidAt           *time.Time   `json:"paid_at"`
-	CreatedAt        time.Time    `json:"created_at"`
-	UpdatedAt        time.Time    `json:"updated_at"`
+	ID                uuid.UUID              `json:"id"`
+	StudentID         uuid.UUID              `json:"student_id"`
+	CourseID          uuid.UUID              `json:"course_id"`
+	PackageID         *uuid.UUID             `json:"package_id"`
+	Course            *CourseResponse        `json:"course,omitempty"`
+	Package           *CoursePackageResponse `json:"package,omitempty"`
+	OriginalPrice     float64                `json:"original_price"`
+	DiscountAmount    float64                `json:"discount_amount"`
+	FinalAmount       float64                `json:"final_amount"`
+	CouponID          *uuid.UUID             `json:"coupon_id"`
+	Status            string                 `json:"status"`
+	PaymentProvider   *string                `json:"payment_provider"`
+	ProviderOrderID   *string                `json:"provider_order_id"`
+	ProviderPaymentID *string                `json:"provider_payment_id"`
+	PaidAt            *time.Time             `json:"paid_at"`
+	CreatedAt         time.Time              `json:"created_at"`
+	UpdatedAt         time.Time              `json:"updated_at"`
 }
 
 // CreateOrderRequest represents an order creation request
 type CreateOrderRequest struct {
-	CourseID      uuid.UUID `json:"course_id" binding:"required"`
-	DiscountAmount float64  `json:"discount_amount"`
-	CouponID      *uuid.UUID `json:"coupon_id"`
+	CourseID       uuid.UUID  `json:"course_id" binding:"required"`
+	PackageID      *uuid.UUID `json:"package_id"`
+	DiscountAmount float64    `json:"discount_amount"`
+	CouponID       *uuid.UUID `json:"coupon_id"`
 }
 
 // UpdateOrderStatusRequest represents a request to update order status
@@ -119,7 +132,7 @@ func (os *OrderService) ListCourseOrders(courseID uuid.UUID, page, limit int) ([
 	return responses, total, nil
 }
 
-// CreateOrder creates a new order for a course
+// CreateOrder creates a new order for a course (optionally with a package)
 func (os *OrderService) CreateOrder(studentID uuid.UUID, req *CreateOrderRequest) (*OrderResponse, error) {
 	log.Printf("[Order Service] Creating order for student %s, course %s", studentID, req.CourseID)
 
@@ -130,10 +143,20 @@ func (os *OrderService) CreateOrder(studentID uuid.UUID, req *CreateOrderRequest
 		return nil, fmt.Errorf("course not found: %w", err)
 	}
 
-	// Get original price (from course price field)
-	originalPrice := 0.0
-	if course.Price != nil {
-		originalPrice = *course.Price
+	// Determine original price — use package price when a package is selected
+	originalPrice := course.Price
+	if req.PackageID != nil && os.packageRepo != nil {
+		pkg, pkgErr := os.packageRepo.GetByID(*req.PackageID)
+		if pkgErr != nil {
+			return nil, fmt.Errorf("package not found: %w", pkgErr)
+		}
+		if pkg.CourseID != req.CourseID {
+			return nil, fmt.Errorf("package does not belong to the specified course")
+		}
+		if !pkg.IsActive {
+			return nil, fmt.Errorf("package is not active")
+		}
+		originalPrice = pkg.Price
 	}
 
 	// Calculate final amount
@@ -146,6 +169,7 @@ func (os *OrderService) CreateOrder(studentID uuid.UUID, req *CreateOrderRequest
 		ID:             uuid.New(),
 		StudentID:      studentID,
 		CourseID:       req.CourseID,
+		PackageID:      req.PackageID,
 		OriginalPrice:  originalPrice,
 		DiscountAmount: req.DiscountAmount,
 		FinalAmount:    finalAmount,
@@ -189,6 +213,38 @@ func (os *OrderService) UpdateOrderStatus(id uuid.UUID, req *UpdateOrderStatusRe
 	if err := os.orderRepo.Update(order); err != nil {
 		log.Printf("[Order Service] Failed to update order: %v", err)
 		return nil, fmt.Errorf("failed to update order: %w", err)
+	}
+
+	// Auto-create subscription and invoice when order is completed
+	if req.Status == "completed" && os.subService != nil && os.invService != nil {
+		validityDays := 0
+		if order.PackageID != nil && os.packageRepo != nil {
+			if pkg, pkgErr := os.packageRepo.GetByID(*order.PackageID); pkgErr == nil {
+				validityDays = pkg.ValidityDays
+			}
+		}
+
+		_, subErr := os.subService.CreateSubscription(order.StudentID, order.CourseID, order.ID, order.PackageID, validityDays)
+		if subErr != nil {
+			log.Printf("[Order Service] Warning: failed to create subscription for order %s: %v", id, subErr)
+		}
+
+		courseName := order.Course.Title
+		if courseName == "" {
+			courseName = "Course"
+		}
+		lineItems := []InvoiceLineItem{
+			{
+				Description: courseName,
+				Quantity:    1,
+				UnitPrice:   order.OriginalPrice,
+				Amount:      order.OriginalPrice,
+			},
+		}
+		_, invErr := os.invService.GenerateForOrder(order, lineItems)
+		if invErr != nil {
+			log.Printf("[Order Service] Warning: failed to generate invoice for order %s: %v", id, invErr)
+		}
 	}
 
 	log.Printf("[Order Service] Order updated successfully: %s", id)
@@ -241,6 +297,7 @@ func orderToResponse(order *models.Order) *OrderResponse {
 		ID:                order.ID,
 		StudentID:         order.StudentID,
 		CourseID:          order.CourseID,
+		PackageID:         order.PackageID,
 		OriginalPrice:     order.OriginalPrice,
 		DiscountAmount:    order.DiscountAmount,
 		FinalAmount:       order.FinalAmount,
@@ -254,9 +311,11 @@ func orderToResponse(order *models.Order) *OrderResponse {
 		UpdatedAt:         order.UpdatedAt,
 	}
 
-	// Include course details if available
-	if order.Course != nil {
+	if order.Course.ID != uuid.Nil {
 		resp.Course = courseToResponse(&order.Course)
+	}
+	if order.Package != nil {
+		resp.Package = packageToResponse(order.Package)
 	}
 
 	return resp

@@ -38,7 +38,6 @@ func NewTestSeriesService(testSeriesRepo *repository.TestSeriesRepository, quest
 type CreateTestSeriesRequest struct {
 	Title              string  `json:"title" binding:"required,min=3,max=255"`
 	Description        string  `json:"description" binding:"required,min=10"`
-	DurationMinutes    int     `json:"duration_minutes" binding:"required,min=1"`
 	PassingPercentage  float64 `json:"passing_percentage" binding:"required,min=0,max=100"`
 	ShuffleQuestions   bool    `json:"shuffle_questions"`
 	ShowCorrectAnswers bool    `json:"show_correct_answers"`
@@ -48,7 +47,6 @@ type CreateTestSeriesRequest struct {
 type UpdateTestSeriesRequest struct {
 	Title              string   `json:"title" binding:"omitempty,min=3,max=255"`
 	Description        string   `json:"description" binding:"omitempty,min=10"`
-	DurationMinutes    *int     `json:"duration_minutes" binding:"omitempty,min=1"`
 	PassingPercentage  *float64 `json:"passing_percentage" binding:"omitempty,min=0,max=100"`
 	ShuffleQuestions   *bool    `json:"shuffle_questions"`
 	ShowCorrectAnswers *bool    `json:"show_correct_answers"`
@@ -113,7 +111,8 @@ func (tss *TestSeriesService) CreateTestSeries(req *CreateTestSeriesRequest) (*T
 		Slug:               testSlug,
 		Description:        req.Description,
 		TotalQuestions:     0, // Will be updated when questions are added
-		DurationMinutes:    req.DurationMinutes,
+		PricingType:        models.PricingTypeFree,
+		Price:              0,
 		PassingPercentage:  int(req.PassingPercentage),
 		ShuffleQuestions:   req.ShuffleQuestions,
 		ShowCorrectAnswers: req.ShowCorrectAnswers,
@@ -185,7 +184,7 @@ func (tss *TestSeriesService) ListTestSeries(page, limit int) ([]TestSeriesListR
 			Slug:              ts.Slug,
 			Description:       ts.Description,
 			TotalQuestions:    ts.TotalQuestions,
-			DurationMinutes:   ts.DurationMinutes,
+			DurationMinutes:   0,
 			PassingPercentage: float64(ts.PassingPercentage),
 			IsPublished:       ts.IsPublished,
 			CreatedAt:         ts.CreatedAt,
@@ -219,7 +218,7 @@ func (tss *TestSeriesService) ListPublishedTestSeries(page, limit int) ([]TestSe
 			Slug:              ts.Slug,
 			Description:       ts.Description,
 			TotalQuestions:    ts.TotalQuestions,
-			DurationMinutes:   ts.DurationMinutes,
+			DurationMinutes:   0,
 			PassingPercentage: float64(ts.PassingPercentage),
 			IsPublished:       ts.IsPublished,
 			CreatedAt:         ts.CreatedAt,
@@ -254,9 +253,6 @@ func (tss *TestSeriesService) UpdateTestSeries(id uuid.UUID, req *UpdateTestSeri
 	}
 	if req.Description != "" {
 		testSeries.Description = req.Description
-	}
-	if req.DurationMinutes != nil {
-		testSeries.DurationMinutes = *req.DurationMinutes
 	}
 	if req.PassingPercentage != nil {
 		if *req.PassingPercentage < 0 || *req.PassingPercentage > 100 {
@@ -460,7 +456,7 @@ func (tss *TestSeriesService) SearchTestSeries(query string, page, limit int) ([
 			Slug:              ts.Slug,
 			Description:       ts.Description,
 			TotalQuestions:    ts.TotalQuestions,
-			DurationMinutes:   ts.DurationMinutes,
+			DurationMinutes:   0,
 			PassingPercentage: float64(ts.PassingPercentage),
 			IsPublished:       ts.IsPublished,
 			CreatedAt:         ts.CreatedAt,
@@ -493,7 +489,7 @@ func testSeriesToResponse(testSeries *models.TestSeries) *TestSeriesResponse {
 		Slug:               testSeries.Slug,
 		Description:        testSeries.Description,
 		TotalQuestions:     testSeries.TotalQuestions,
-		DurationMinutes:    testSeries.DurationMinutes,
+		DurationMinutes:    0,
 		PassingPercentage:  float64(testSeries.PassingPercentage),
 		ShuffleQuestions:   testSeries.ShuffleQuestions,
 		ShowCorrectAnswers: testSeries.ShowCorrectAnswers,
@@ -551,7 +547,7 @@ func (tss *TestSeriesService) GetTestSeriesStats(testSeriesID uuid.UUID) (map[st
 		"id":                   ts.ID,
 		"title":                ts.Title,
 		"total_questions":      ts.TotalQuestions,
-		"duration_minutes":     ts.DurationMinutes,
+		"duration_minutes":     0,
 		"passing_percentage":   float64(ts.PassingPercentage),
 		"is_published":         ts.IsPublished,
 		"shuffle_questions":    ts.ShuffleQuestions,
@@ -582,7 +578,8 @@ func (tss *TestSeriesService) DuplicateTestSeries(sourceID uuid.UUID, newTitle s
 		Slug:               slug.Make(newTitle),
 		Description:        source.Description,
 		TotalQuestions:     source.TotalQuestions,
-		DurationMinutes:    source.DurationMinutes,
+		PricingType:        source.PricingType,
+		Price:              source.Price,
 		PassingPercentage:  source.PassingPercentage,
 		ShuffleQuestions:   source.ShuffleQuestions,
 		ShowCorrectAnswers: source.ShowCorrectAnswers,

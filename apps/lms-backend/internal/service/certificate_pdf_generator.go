@@ -68,7 +68,7 @@ func (g *CertificatePDFGenerator) GeneratePDF(certResponse *CertificateResponse)
 
 	// Title
 	pdf.SetXY(20, 30)
-	pdf.Cell(0, 10, "Certificate of Completion", "", 1, "C", false)
+	pdf.CellFormat(0, 10, "Certificate of Completion", "", 1, "C", false, 0, "")
 
 	// Reset color for body text
 	pdf.SetTextColor(0, 0, 0)
@@ -94,12 +94,12 @@ func (g *CertificatePDFGenerator) GeneratePDF(certResponse *CertificateResponse)
 	// Date issued
 	pdf.SetFont("Arial", "", 11)
 	pdf.SetXY(20, 105)
-	pdf.Cell(0, 5, fmt.Sprintf("Date Issued: %s", certResponse.IssuedAt), "", 1, "C", false)
+	pdf.CellFormat(0, 5, fmt.Sprintf("Date Issued: %s", certResponse.IssuedAt), "", 1, "C", false, 0, "")
 
 	// Certificate number
 	pdf.SetFont("Arial", "", 10)
 	pdf.SetXY(20, 115)
-	pdf.Cell(0, 5, fmt.Sprintf("Certificate No: %s", certResponse.CertificateNumber), "", 1, "C", false)
+	pdf.CellFormat(0, 5, fmt.Sprintf("Certificate No: %s", certResponse.CertificateNumber), "", 1, "C", false, 0, "")
 
 	// Verification info
 	pdf.SetFont("Arial", "", 9)
@@ -111,15 +111,15 @@ func (g *CertificatePDFGenerator) GeneratePDF(certResponse *CertificateResponse)
 	pdf.SetTextColor(0, 0, 0)
 	pdf.SetFont("Arial", "", 10)
 	pdf.SetXY(40, 155)
-	pdf.Cell(0, 5, "_____________________", "", 0, "C", false)
+	pdf.CellFormat(0, 5, "_____________________", "", 0, "C", false, 0, "")
 	pdf.SetXY(160, 155)
-	pdf.Cell(0, 5, "_____________________", "", 1, "C", false)
+	pdf.CellFormat(0, 5, "_____________________", "", 1, "C", false, 0, "")
 
 	pdf.SetFont("Arial", "", 9)
 	pdf.SetXY(40, 162)
-	pdf.Cell(0, 5, "Director", "", 0, "C", false)
+	pdf.CellFormat(0, 5, "Director", "", 0, "C", false, 0, "")
 	pdf.SetXY(160, 162)
-	pdf.Cell(0, 5, "Institute Head", "", 1, "C", false)
+	pdf.CellFormat(0, 5, "Institute Head", "", 1, "C", false, 0, "")
 
 	// Generate PDF to buffer
 	buf := new(bytes.Buffer)
@@ -161,7 +161,7 @@ func (g *CertificatePDFGenerator) GeneratePDFFromData(data *CertificateData) ([]
 
 	// Title
 	pdf.SetXY(20, 30)
-	pdf.Cell(0, 10, "Certificate of Completion", "", 1, "C", false)
+	pdf.CellFormat(0, 10, "Certificate of Completion", "", 1, "C", false, 0, "")
 
 	// Reset color for body text
 	pdf.SetTextColor(0, 0, 0)
@@ -187,12 +187,12 @@ func (g *CertificatePDFGenerator) GeneratePDFFromData(data *CertificateData) ([]
 	// Date issued
 	pdf.SetFont("Arial", "", 11)
 	pdf.SetXY(20, 105)
-	pdf.Cell(0, 5, fmt.Sprintf("Date Issued: %s", data.IssuedAt), "", 1, "C", false)
+	pdf.CellFormat(0, 5, fmt.Sprintf("Date Issued: %s", data.IssuedAt), "", 1, "C", false, 0, "")
 
 	// Certificate number
 	pdf.SetFont("Arial", "", 10)
 	pdf.SetXY(20, 115)
-	pdf.Cell(0, 5, fmt.Sprintf("Certificate No: %s", data.CertificateNumber), "", 1, "C", false)
+	pdf.CellFormat(0, 5, fmt.Sprintf("Certificate No: %s", data.CertificateNumber), "", 1, "C", false, 0, "")
 
 	// Verification info
 	pdf.SetFont("Arial", "", 9)
@@ -204,15 +204,15 @@ func (g *CertificatePDFGenerator) GeneratePDFFromData(data *CertificateData) ([]
 	pdf.SetTextColor(0, 0, 0)
 	pdf.SetFont("Arial", "", 10)
 	pdf.SetXY(40, 155)
-	pdf.Cell(0, 5, "_____________________", "", 0, "C", false)
+	pdf.CellFormat(0, 5, "_____________________", "", 0, "C", false, 0, "")
 	pdf.SetXY(160, 155)
-	pdf.Cell(0, 5, "_____________________", "", 1, "C", false)
+	pdf.CellFormat(0, 5, "_____________________", "", 1, "C", false, 0, "")
 
 	pdf.SetFont("Arial", "", 9)
 	pdf.SetXY(40, 162)
-	pdf.Cell(0, 5, "Director", "", 0, "C", false)
+	pdf.CellFormat(0, 5, "Director", "", 0, "C", false, 0, "")
 	pdf.SetXY(160, 162)
-	pdf.Cell(0, 5, "Institute Head", "", 1, "C", false)
+	pdf.CellFormat(0, 5, "Institute Head", "", 1, "C", false, 0, "")
 
 	// Generate PDF to buffer
 	buf := new(bytes.Buffer)

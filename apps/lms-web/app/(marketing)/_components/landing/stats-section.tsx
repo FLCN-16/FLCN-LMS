@@ -1,9 +1,4 @@
-const STATS = [
-  { value: "10K+", label: "Learners" },
-  { value: "200+", label: "Courses" },
-  { value: "50+", label: "Instructors" },
-  { value: "95%", label: "Completion Rate" },
-]
+import { getMarketingStats } from "@/fetchers/marketing"
 
 function StatItem({ value, label }: { value: string; label: string }) {
   return (
@@ -14,12 +9,32 @@ function StatItem({ value, label }: { value: string; label: string }) {
   )
 }
 
-function StatsSection() {
+function formatCount(n: number): string {
+  if (n >= 1000) return `${Math.floor(n / 1000)}K+`
+  return n > 0 ? `${n}+` : "0"
+}
+
+async function StatsSection() {
+  let stats = { published_courses: 0, published_test_series: 0, students: 0, instructors: 0 }
+
+  try {
+    stats = await getMarketingStats()
+  } catch {
+    // Keep zero defaults — section still renders
+  }
+
+  const items = [
+    { value: formatCount(stats.students), label: "Learners" },
+    { value: formatCount(stats.published_courses), label: "Courses" },
+    { value: formatCount(stats.instructors), label: "Instructors" },
+    { value: formatCount(stats.published_test_series), label: "Test Series" },
+  ]
+
   return (
     <section className="bg-muted/30 py-14">
       <div className="container mx-auto px-4">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
-          {STATS.map((stat) => (
+          {items.map((stat) => (
             <StatItem key={stat.label} value={stat.value} label={stat.label} />
           ))}
         </div>

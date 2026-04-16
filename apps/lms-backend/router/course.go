@@ -14,6 +14,9 @@ import (
 func InitCourseRoutes(
 	v1 *gin.RouterGroup,
 	courseHandler *handlers.CourseHandler,
+	studyMaterialHandler *handlers.StudyMaterialHandler,
+	courseReviewHandler *handlers.CourseReviewHandler,
+	orderHandler *handlers.OrderHandler,
 	permDecorator *decorators.PermissionDecorator,
 ) {
 	log.Println("Initializing course routes")
@@ -91,6 +94,43 @@ func InitCourseRoutes(
 		courses.GET(
 			"/:id/enrolled-students",
 			permDecorator.Required(courseHandler.GetEnrolledStudents, []rbac.Permission{rbac.CourseRead}),
+		)
+
+		// Get materials for a course
+		courses.GET(
+			"/:id/materials",
+			studyMaterialHandler.GetMaterialsByCourse,
+		)
+
+		// Course reviews
+		// Create review for course
+		courses.POST(
+			"/:id/reviews",
+			permDecorator.Required(courseReviewHandler.CreateReview, []rbac.Permission{rbac.ReviewCreate}),
+		)
+
+		// List reviews for course
+		courses.GET(
+			"/:id/reviews",
+			permDecorator.Required(courseReviewHandler.ListCourseReviews, []rbac.Permission{rbac.ReviewRead}),
+		)
+
+		// Get student's review for course
+		courses.GET(
+			"/:id/my-review",
+			permDecorator.Required(courseReviewHandler.GetStudentReview, []rbac.Permission{rbac.ReviewRead}),
+		)
+
+		// Get course review statistics
+		courses.GET(
+			"/:id/review-stats",
+			permDecorator.Required(courseReviewHandler.GetCourseStats, []rbac.Permission{rbac.ReviewRead}),
+		)
+
+		// List orders for a course
+		courses.GET(
+			"/:id/orders",
+			permDecorator.Required(orderHandler.ListCourseOrders, []rbac.Permission{rbac.OrderRead}),
 		)
 
 		// Get course count

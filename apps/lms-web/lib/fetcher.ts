@@ -15,7 +15,7 @@ import {
 
 import { COOKIES } from "./cookies"
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 
 // Fetch timeout in milliseconds (30 seconds)
 const FETCH_TIMEOUT = 30000

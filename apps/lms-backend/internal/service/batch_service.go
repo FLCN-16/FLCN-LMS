@@ -70,8 +70,6 @@ type EnrollStudentRequest struct {
 
 // ListBatches retrieves paginated list of all batches
 func (bs *BatchService) ListBatches(page, limit int) ([]BatchResponse, int64, error) {
-	offset := (page - 1) * limit
-
 	batches, total, err := bs.batchRepo.GetAll(page, limit)
 	if err != nil {
 		log.Printf("[Batch Service] Failed to list batches: %v", err)

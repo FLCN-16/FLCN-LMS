@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"flcn_lms_backend/internal/api/middleware"
 	"flcn_lms_backend/internal/api/response"
 	"flcn_lms_backend/internal/service"
 

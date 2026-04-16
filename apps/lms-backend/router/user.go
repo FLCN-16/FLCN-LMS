@@ -14,6 +14,7 @@ import (
 func InitUserRoutes(
 	v1 *gin.RouterGroup,
 	userHandler *handlers.UserHandler,
+	orderHandler *handlers.OrderHandler,
 	permDecorator *decorators.PermissionDecorator,
 ) {
 	log.Println("Initializing user management routes")
@@ -64,6 +65,16 @@ func InitUserRoutes(
 		users.DELETE(
 			"/:id",
 			permDecorator.Required(userHandler.DeleteUser, []rbac.Permission{rbac.UserDelete, rbac.AdminAccess}),
+		)
+
+		// ================================================
+		// USER ORDER ROUTES
+		// ================================================
+
+		// List orders for a student
+		users.GET(
+			"/:id/orders",
+			orderHandler.ListStudentOrders,
 		)
 	}
 

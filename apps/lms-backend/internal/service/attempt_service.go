@@ -564,7 +564,7 @@ func (as *AttemptService) attemptToResponse(attempt *models.Attempt, includeDeta
 				Slug:               testSeries.Slug,
 				Description:        testSeries.Description,
 				TotalQuestions:     testSeries.TotalQuestions,
-				DurationMinutes:    testSeries.DurationMinutes,
+				DurationMinutes:    0,
 				PassingPercentage:  float64(testSeries.PassingPercentage),
 				ShuffleQuestions:   testSeries.ShuffleQuestions,
 				ShowCorrectAnswers: testSeries.ShowCorrectAnswers,

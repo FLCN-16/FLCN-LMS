@@ -3,43 +3,19 @@ import Link from "next/link"
 import { Button } from "@flcn-lms/ui/components/button"
 
 import CourseCard from "@/components/card/course"
+import { getFeaturedCourses } from "@/fetchers/marketing"
 
-const COURSES = [
-  {
-    id: "1",
-    title: "Complete Web Development Bootcamp",
-    slug: "web-dev-bootcamp",
-    price: 9999,
-    discountPrice: 4999,
-    imageUrl: "https://placehold.co/320x180/18181b/ffffff?text=Web+Dev",
-  },
-  {
-    id: "2",
-    title: "Data Science with Python",
-    slug: "data-science-python",
-    price: 8999,
-    discountPrice: 3999,
-    imageUrl: "https://placehold.co/320x180/18181b/ffffff?text=Data+Science",
-  },
-  {
-    id: "3",
-    title: "UI/UX Design Fundamentals",
-    slug: "ui-ux-design",
-    price: 7999,
-    discountPrice: 2999,
-    imageUrl: "https://placehold.co/320x180/18181b/ffffff?text=UI%2FUX",
-  },
-  {
-    id: "4",
-    title: "Financial Markets Mastery",
-    slug: "financial-markets",
-    price: 9999,
-    discountPrice: 999,
-    imageUrl: "https://placehold.co/320x180/18181b/ffffff?text=Finance",
-  },
-]
+async function FeaturedCoursesSection() {
+  let courses: Awaited<ReturnType<typeof getFeaturedCourses>> = []
 
-function FeaturedCoursesSection() {
+  try {
+    courses = await getFeaturedCourses(4)
+  } catch {
+    // Fall back to empty — section still renders without courses
+  }
+
+  if (courses.length === 0) return null
+
   return (
     <section className="py-20">
       <div className="container mx-auto px-4">
@@ -54,8 +30,23 @@ function FeaturedCoursesSection() {
           </div>
 
           <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {COURSES.map((course) => (
-              <CourseCard key={course.id} {...course} />
+            {courses.map((course) => (
+              <CourseCard
+                key={course.id}
+                id={course.id}
+                title={course.title}
+                slug={course.slug}
+                price={course.price}
+                imageUrl={course.thumbnail_url || "https://placehold.co/320x180/18181b/ffffff?text=Course"}
+                level={course.level}
+                estimatedHours={course.estimated_hours}
+                totalEnrolled={course.total_enrolled}
+                averageRating={course.average_rating}
+                reviewCount={course.review_count}
+                certificateIncluded={course.certificate_included}
+                instructorName={course.instructor ? `${course.instructor.first_name} ${course.instructor.last_name}` : undefined}
+                isFeatured={course.is_featured}
+              />
             ))}
           </div>
 

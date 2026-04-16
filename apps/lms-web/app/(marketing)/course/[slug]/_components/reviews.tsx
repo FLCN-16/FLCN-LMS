@@ -1,7 +1,17 @@
 import { Star } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
-export default function CourseReviewsSection() {
+interface CourseReviewsProps {
+  averageRating?: number
+  reviewCount?: number
+}
+
+export default function CourseReviewsSection({
+  averageRating,
+  reviewCount,
+}: CourseReviewsProps) {
+  const filledStars = Math.round(averageRating ?? 0)
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -11,17 +21,25 @@ export default function CourseReviewsSection() {
       <div className="grid gap-8 md:grid-cols-3">
         {/* Overall Rating */}
         <div className="flex flex-col items-center gap-4 rounded-lg border border-border/40 p-6">
-          <div className="text-5xl font-bold text-accent">4.9</div>
+          <div className="text-5xl font-bold text-accent">
+            {averageRating != null ? averageRating.toFixed(1) : "—"}
+          </div>
           <div className="flex gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
               <HugeiconsIcon
                 key={i}
                 icon={Star}
-                className="h-5 w-5 fill-accent text-accent"
+                className={
+                  i < filledStars
+                    ? "h-5 w-5 fill-accent text-accent"
+                    : "h-5 w-5 text-muted-foreground"
+                }
               />
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">Based on 2,450 reviews</p>
+          <p className="text-sm text-muted-foreground">
+            Based on {reviewCount?.toLocaleString() ?? 0} reviews
+          </p>
         </div>
 
         {/* Rating Distribution */}
@@ -48,25 +66,27 @@ export default function CourseReviewsSection() {
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border border-border/40 p-4">
-          <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">
+          <div className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
             Completion Rate
           </div>
           <div className="text-2xl font-bold text-foreground">95%</div>
         </div>
         <div className="rounded-lg border border-border/40 p-4">
-          <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">
+          <div className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
             Students
           </div>
-          <div className="text-2xl font-bold text-foreground">10k+</div>
+          <div className="text-2xl font-bold text-foreground">
+            {reviewCount != null ? reviewCount.toLocaleString() : "—"}
+          </div>
         </div>
         <div className="rounded-lg border border-border/40 p-4">
-          <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">
+          <div className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
             Job Placements
           </div>
           <div className="text-2xl font-bold text-foreground">78%</div>
         </div>
         <div className="rounded-lg border border-border/40 p-4">
-          <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">
+          <div className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
             Certificate Value
           </div>
           <div className="text-2xl font-bold text-foreground">★★★★★</div>

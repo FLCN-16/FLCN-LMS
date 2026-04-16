@@ -151,7 +151,7 @@ func (mr *ModuleRepository) GetByCourseID(courseID uuid.UUID, page, limit int) (
 	offset := (page - 1) * limit
 
 	// Get paginated results
-	if err := mr.db.Where("course_id = ?", courseID).Offset(offset).Limit(limit).Order("sequence_number ASC").Find(&modules).Error; err != nil {
+	if err := mr.db.Where("course_id = ?", courseID).Offset(offset).Limit(limit).Order("order_index ASC").Find(&modules).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to fetch modules by course: %w", err)
 	}
 

@@ -651,3 +651,19 @@ func (us *UserService) ResetPassword(id uuid.UUID, newPassword string) error {
 	user.PasswordHash = string(passwordHash)
 	return us.userRepo.Update(user)
 }
+
+// GenerateTokensForUser generates JWT tokens for a user given their ID and role
+// Used for impersonation and other scenarios where tokens are generated without password verification
+func (us *UserService) GenerateTokensForUser(userID uuid.UUID, role string) (interface{}, error) {
+	user, err := us.userRepo.GetByID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %w", err)
+	}
+
+	tokenPair, err := us.jwtManager.GenerateTokenPair(user.ID, user.Email, role)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate tokens: %w", err)
+	}
+
+	return tokenPair, nil
+}

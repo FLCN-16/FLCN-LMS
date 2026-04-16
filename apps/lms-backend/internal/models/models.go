@@ -55,21 +55,57 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+// PricingType represents the pricing model
+type PricingType string
+
+const (
+	PricingTypeFree PricingType = "free"
+	PricingTypePaid PricingType = "paid"
+)
+
 // Course represents a course
 type Course struct {
-	ID           uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
-	Title        string     `gorm:"not null" json:"title"`
-	Slug         string     `gorm:"uniqueIndex;not null" json:"slug"`
-	Description  string     `gorm:"type:text" json:"description"`
-	ThumbnailURL string     `json:"thumbnail_url"`
-	InstructorID uuid.UUID  `gorm:"type:uuid;not null" json:"instructor_id"`
-	MaxStudents  int        `json:"max_students"`
-	Price        float64    `gorm:"type:decimal(10,2)" json:"price"`
-	Status       string     `gorm:"type:varchar(50);default:'draft'" json:"status"`
-	IsFeatured   bool       `gorm:"default:false" json:"is_featured"`
-	CategoryID   *uuid.UUID `gorm:"type:uuid;index" json:"category_id"`
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
+	ID             uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
+	Title          string     `gorm:"not null" json:"title"`
+	Slug           string     `gorm:"uniqueIndex;not null" json:"slug"`
+	Description    string     `gorm:"type:text" json:"description"`
+	ThumbnailURL   string     `json:"thumbnail_url"`
+	InstructorID   uuid.UUID  `gorm:"type:uuid;not null" json:"instructor_id"`
+	MaxStudents    int        `json:"max_students"`
+	Price          float64    `gorm:"type:decimal(10,2)" json:"price"`
+	PricingType    PricingType `gorm:"type:varchar(50);default:'paid'" json:"pricing_type"`
+	Status         string     `gorm:"type:varchar(50);default:'draft'" json:"status"`
+	IsFeatured     bool       `gorm:"default:false" json:"is_featured"`
+	CategoryID     *uuid.UUID `gorm:"type:uuid;index" json:"category_id"`
+	ParentCourseID *uuid.UUID `gorm:"type:uuid;index" json:"parent_course_id"`
+	IsBundle       bool       `gorm:"default:false" json:"is_bundle"`
+
+	// Discovery & SEO
+	ShortDescription     string         `gorm:"type:varchar(300)" json:"short_description"`
+	Language             string         `gorm:"type:varchar(50);default:'English'" json:"language"`
+	Level                string         `gorm:"type:varchar(50);default:'beginner'" json:"level"`
+	Tags                 datatypes.JSON `gorm:"type:jsonb" json:"tags"`
+
+	// Content metadata
+	WhatYouLearn         datatypes.JSON `gorm:"type:jsonb" json:"what_you_learn"`
+	Requirements         datatypes.JSON `gorm:"type:jsonb" json:"requirements"`
+	TargetAudience       datatypes.JSON `gorm:"type:jsonb" json:"target_audience"`
+	Highlights           datatypes.JSON `gorm:"type:jsonb" json:"highlights"`
+	CareerOutcomes       datatypes.JSON `gorm:"type:jsonb" json:"career_outcomes"`
+	Companies            datatypes.JSON `gorm:"type:jsonb" json:"companies"`
+	FAQ                  datatypes.JSON `gorm:"type:jsonb" json:"faq"`
+	EstimatedHours       int            `json:"estimated_hours"`
+	PreviewVideoURL      string         `gorm:"type:text" json:"preview_video_url"`
+	CertificateIncluded  bool           `gorm:"default:false" json:"certificate_included"`
+	LastContentUpdatedAt *time.Time     `json:"last_content_updated_at"`
+
+	// Social proof (denormalized)
+	TotalEnrolled  int     `gorm:"default:0" json:"total_enrolled"`
+	AverageRating  float64 `gorm:"type:decimal(3,2);default:0" json:"average_rating"`
+	ReviewCount    int     `gorm:"default:0" json:"review_count"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 
 	// Relationships
 	Instructor   User          `gorm:"foreignKey:InstructorID" json:"instructor,omitempty"`
@@ -77,6 +113,9 @@ type Course struct {
 	Modules      []Module      `gorm:"foreignKey:CourseID" json:"-"`
 	Enrollments  []Enrollment  `gorm:"foreignKey:CourseID" json:"-"`
 	Certificates []Certificate `gorm:"foreignKey:CourseID" json:"-"`
+	// Bundle relations
+	ParentCourse *Course  `gorm:"foreignKey:ParentCourseID" json:"-"`
+	ChildCourses []Course `gorm:"foreignKey:ParentCourseID" json:"-"`
 }
 
 // TableName specifies the table name for Course
@@ -159,7 +198,8 @@ type TestSeries struct {
 	Slug               string    `gorm:"uniqueIndex;not null" json:"slug"`
 	Description        string    `gorm:"type:text" json:"description"`
 	TotalQuestions     int       `json:"total_questions"`
-	DurationMinutes    int       `json:"duration_minutes"`
+	PricingType        PricingType `gorm:"type:varchar(50);default:'free'" json:"pricing_type"`
+	Price              float64   `gorm:"type:decimal(10,2)" json:"price"`
 	PassingPercentage  int       `gorm:"default:40" json:"passing_percentage"`
 	ShuffleQuestions   bool      `gorm:"default:false" json:"shuffle_questions"`
 	ShowCorrectAnswers bool      `gorm:"default:true" json:"show_correct_answers"`
@@ -168,9 +208,9 @@ type TestSeries struct {
 	UpdatedAt          time.Time `json:"updated_at"`
 
 	// Relationships
-	Questions    []Question    `gorm:"foreignKey:TestSeriesID" json:"-"`
-	Attempts     []Attempt     `gorm:"foreignKey:TestSeriesID" json:"-"`
-	Certificates []Certificate `gorm:"foreignKey:TestSeriesID" json:"-"`
+	Sections     []TestSeriesSection `gorm:"foreignKey:TestSeriesID" json:"-"`
+	Attempts     []Attempt           `gorm:"foreignKey:TestSeriesID" json:"-"`
+	Certificates []Certificate       `gorm:"foreignKey:TestSeriesID" json:"-"`
 }
 
 // TableName specifies the table name for TestSeries
@@ -186,22 +226,53 @@ func (ts *TestSeries) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// Question represents a test question
-type Question struct {
+// TestSeriesSection represents a section within a test series with separate timing
+type TestSeriesSection struct {
 	ID              uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	TestSeriesID    uuid.UUID `gorm:"type:uuid;not null" json:"test_series_id"`
-	QuestionText    string    `gorm:"type:text;not null" json:"question_text"`
-	QuestionType    string    `gorm:"type:varchar(50);default:'mcq'" json:"question_type"`
-	DifficultyLevel string    `gorm:"type:varchar(50);default:'medium'" json:"difficulty_level"`
-	Marks           int       `gorm:"default:1" json:"marks"`
+	Title           string    `gorm:"not null" json:"title"`
+	Description     string    `gorm:"type:text" json:"description"`
+	DurationMinutes int       `json:"duration_minutes"`
 	OrderIndex      int       `json:"order_index"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 
 	// Relationships
-	TestSeries     TestSeries       `gorm:"foreignKey:TestSeriesID" json:"test_series,omitempty"`
-	Options        []QuestionOption `gorm:"foreignKey:QuestionID" json:"-"`
-	AttemptAnswers []AttemptAnswer  `gorm:"foreignKey:QuestionID" json:"-"`
+	TestSeries TestSeries `gorm:"foreignKey:TestSeriesID" json:"test_series,omitempty"`
+	Questions  []Question `gorm:"foreignKey:TestSeriesSectionID" json:"-"`
+}
+
+// TableName specifies the table name for TestSeriesSection
+func (TestSeriesSection) TableName() string {
+	return "test_series_sections"
+}
+
+// BeforeCreate generates UUID before creating
+func (tss *TestSeriesSection) BeforeCreate(tx *gorm.DB) error {
+	if tss.ID == uuid.Nil {
+		tss.ID = uuid.New()
+	}
+	return nil
+}
+
+// Question represents a test question
+type Question struct {
+	ID                  uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
+	TestSeriesID        uuid.UUID  `gorm:"type:uuid;not null" json:"test_series_id"`
+	TestSeriesSectionID *uuid.UUID `gorm:"type:uuid" json:"test_series_section_id"`
+	QuestionText        string     `gorm:"type:text;not null" json:"question_text"`
+	QuestionType        string     `gorm:"type:varchar(50);default:'mcq'" json:"question_type"`
+	DifficultyLevel     string     `gorm:"type:varchar(50);default:'medium'" json:"difficulty_level"`
+	Marks               int        `gorm:"default:1" json:"marks"`
+	OrderIndex          int        `json:"order_index"`
+	CreatedAt           time.Time  `json:"created_at"`
+	UpdatedAt           time.Time  `json:"updated_at"`
+
+	// Relationships
+	TestSeries    TestSeries          `gorm:"foreignKey:TestSeriesID" json:"test_series,omitempty"`
+	Section       *TestSeriesSection  `gorm:"foreignKey:TestSeriesSectionID" json:"section,omitempty"`
+	Options       []QuestionOption    `gorm:"foreignKey:QuestionID" json:"-"`
+	AttemptAnswers []AttemptAnswer    `gorm:"foreignKey:QuestionID" json:"-"`
 }
 
 // TableName specifies the table name for Question
@@ -448,7 +519,7 @@ func (lsp *LiveSessionParticipant) BeforeCreate(tx *gorm.DB) error {
 // LicenseConfig stores local license information
 type LicenseConfig struct {
 	ID               uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
-	LicenseKey       string         `gorm:"uniqueIndex;not null" json:"license_key"`
+	LicenseKey       string         `gorm:"not null" json:"license_key"`
 	OrganizationName string         `json:"organization_name"`
 	MaxUsers         int64          `json:"max_users"`
 	Features         datatypes.JSON `gorm:"type:jsonb" json:"features"`
@@ -768,25 +839,27 @@ func (cu *CouponUsage) BeforeCreate(tx *gorm.DB) error {
 
 // Order represents a student course purchase
 type Order struct {
-	ID               uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
-	StudentID        uuid.UUID  `gorm:"type:uuid;index;not null" json:"student_id"`
-	CourseID         uuid.UUID  `gorm:"type:uuid;index;not null" json:"course_id"`
-	OriginalPrice    float64    `json:"original_price"`
-	DiscountAmount   float64    `gorm:"default:0" json:"discount_amount"`
-	FinalAmount      float64    `json:"final_amount"`
-	CouponID         *uuid.UUID `gorm:"type:uuid;index" json:"coupon_id"`
-	Status           string     `gorm:"type:varchar(20);default:'pending'" json:"status"`
-	PaymentProvider  *string    `json:"payment_provider"`
-	ProviderOrderID  *string    `json:"provider_order_id"`
-	ProviderPaymentID *string   `json:"provider_payment_id"`
-	PaidAt           *time.Time `json:"paid_at"`
-	CreatedAt        time.Time  `json:"created_at"`
-	UpdatedAt        time.Time  `json:"updated_at"`
+	ID                uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
+	StudentID         uuid.UUID  `gorm:"type:uuid;index;not null" json:"student_id"`
+	CourseID          uuid.UUID  `gorm:"type:uuid;index;not null" json:"course_id"`
+	PackageID         *uuid.UUID `gorm:"type:uuid;index" json:"package_id"`
+	OriginalPrice     float64    `json:"original_price"`
+	DiscountAmount    float64    `gorm:"default:0" json:"discount_amount"`
+	FinalAmount       float64    `json:"final_amount"`
+	CouponID          *uuid.UUID `gorm:"type:uuid;index" json:"coupon_id"`
+	Status            string     `gorm:"type:varchar(20);default:'pending'" json:"status"`
+	PaymentProvider   *string    `json:"payment_provider"`
+	ProviderOrderID   *string    `json:"provider_order_id"`
+	ProviderPaymentID *string    `json:"provider_payment_id"`
+	PaidAt            *time.Time `json:"paid_at"`
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
 
 	// Relationships
-	Student User    `gorm:"foreignKey:StudentID" json:"student,omitempty"`
-	Course  Course  `gorm:"foreignKey:CourseID" json:"course,omitempty"`
-	Coupon  *Coupon `gorm:"foreignKey:CouponID" json:"coupon,omitempty"`
+	Student *User          `gorm:"foreignKey:StudentID" json:"student,omitempty"`
+	Course  Course         `gorm:"foreignKey:CourseID" json:"course,omitempty"`
+	Package *CoursePackage `gorm:"foreignKey:PackageID" json:"package,omitempty"`
+	Coupon  *Coupon        `gorm:"foreignKey:CouponID" json:"coupon,omitempty"`
 }
 
 // TableName specifies the table name for Order
@@ -861,6 +934,175 @@ func (StudyMaterial) TableName() string {
 func (sm *StudyMaterial) BeforeCreate(tx *gorm.DB) error {
 	if sm.ID == uuid.Nil {
 		sm.ID = uuid.New()
+	}
+	return nil
+}
+
+// ============================================================
+// COURSE PACKAGE / PURCHASE / BILLING MODELS
+// ============================================================
+
+// PackageFeature represents a single feature entry in a course package
+type PackageFeature struct {
+	Title      string `json:"title"`
+	IsIncluded bool   `json:"is_included"`
+}
+
+// CoursePackage represents a pricing tier for a course
+type CoursePackage struct {
+	ID             uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
+	CourseID       uuid.UUID      `gorm:"type:uuid;index;not null" json:"course_id"`
+	Name           string         `gorm:"type:varchar(100);not null" json:"name"`
+	Price          float64        `gorm:"not null" json:"price"`
+	OriginalPrice  *float64       `json:"original_price"`
+	ValidityDays   int            `gorm:"not null" json:"validity_days"`
+	Features       datatypes.JSON `gorm:"type:jsonb" json:"features"`
+	IsActive       bool           `gorm:"default:true" json:"is_active"`
+	SortOrder      int            `gorm:"default:0" json:"sort_order"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+
+	// Relationships
+	Course Course `gorm:"foreignKey:CourseID" json:"course,omitempty"`
+}
+
+// TableName specifies the table name for CoursePackage
+func (CoursePackage) TableName() string {
+	return "course_packages"
+}
+
+// BeforeCreate generates UUID before creating
+func (cp *CoursePackage) BeforeCreate(tx *gorm.DB) error {
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	return nil
+}
+
+// Transaction represents a payment ledger entry
+type Transaction struct {
+	ID                  uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
+	OrderID             uuid.UUID  `gorm:"type:uuid;index;not null" json:"order_id"`
+	StudentID           uuid.UUID  `gorm:"type:uuid;index;not null" json:"student_id"`
+	Amount              float64    `gorm:"not null" json:"amount"`
+	Currency            string     `gorm:"type:varchar(10);default:'INR'" json:"currency"`
+	Provider            string     `gorm:"type:varchar(50);not null" json:"provider"`
+	ProviderTransactionID *string  `gorm:"type:varchar(255)" json:"provider_transaction_id"`
+	Status              string     `gorm:"type:varchar(20);default:'pending'" json:"status"`
+	Type                string     `gorm:"type:varchar(20);default:'payment'" json:"type"`
+	Metadata            datatypes.JSON `gorm:"type:jsonb" json:"metadata"`
+	CreatedAt           time.Time  `json:"created_at"`
+	UpdatedAt           time.Time  `json:"updated_at"`
+
+	// Relationships
+	Order   Order `gorm:"foreignKey:OrderID" json:"order,omitempty"`
+	Student User  `gorm:"foreignKey:StudentID" json:"student,omitempty"`
+}
+
+// TableName specifies the table name for Transaction
+func (Transaction) TableName() string {
+	return "transactions"
+}
+
+// BeforeCreate generates UUID before creating
+func (t *Transaction) BeforeCreate(tx *gorm.DB) error {
+	if t.ID == uuid.Nil {
+		t.ID = uuid.New()
+	}
+	return nil
+}
+
+// Invoice represents a billing invoice for an order
+type Invoice struct {
+	ID             uuid.UUID      `gorm:"type:uuid;primaryKey" json:"id"`
+	InvoiceNumber  string         `gorm:"type:varchar(100);uniqueIndex;not null" json:"invoice_number"`
+	StudentID      uuid.UUID      `gorm:"type:uuid;index;not null" json:"student_id"`
+	OrderID        uuid.UUID      `gorm:"type:uuid;index;not null" json:"order_id"`
+	LineItems      datatypes.JSON `gorm:"type:jsonb" json:"line_items"`
+	Subtotal       float64        `gorm:"not null" json:"subtotal"`
+	TaxAmount      float64        `gorm:"default:0" json:"tax_amount"`
+	DiscountAmount float64        `gorm:"default:0" json:"discount_amount"`
+	TotalAmount    float64        `gorm:"not null" json:"total_amount"`
+	Status         string         `gorm:"type:varchar(20);default:'issued'" json:"status"`
+	IssuedAt       time.Time      `json:"issued_at"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+
+	// Relationships
+	Student User  `gorm:"foreignKey:StudentID" json:"student,omitempty"`
+	Order   Order `gorm:"foreignKey:OrderID" json:"order,omitempty"`
+}
+
+// TableName specifies the table name for Invoice
+func (Invoice) TableName() string {
+	return "invoices"
+}
+
+// BeforeCreate generates UUID before creating
+func (inv *Invoice) BeforeCreate(tx *gorm.DB) error {
+	if inv.ID == uuid.Nil {
+		inv.ID = uuid.New()
+	}
+	return nil
+}
+
+// Subscription represents a student's active access to a course via a package
+type Subscription struct {
+	ID         uuid.UUID  `gorm:"type:uuid;primaryKey" json:"id"`
+	StudentID  uuid.UUID  `gorm:"type:uuid;index;not null" json:"student_id"`
+	CourseID   uuid.UUID  `gorm:"type:uuid;index;not null" json:"course_id"`
+	PackageID  *uuid.UUID `gorm:"type:uuid;index" json:"package_id"`
+	OrderID    uuid.UUID  `gorm:"type:uuid;index;not null" json:"order_id"`
+	Status     string     `gorm:"type:varchar(20);default:'active'" json:"status"`
+	StartsAt   time.Time  `json:"starts_at"`
+	ExpiresAt  *time.Time `json:"expires_at"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+
+	// Relationships
+	Student  User           `gorm:"foreignKey:StudentID" json:"student,omitempty"`
+	Course   Course         `gorm:"foreignKey:CourseID" json:"course,omitempty"`
+	Package  *CoursePackage `gorm:"foreignKey:PackageID" json:"package,omitempty"`
+	Order    Order          `gorm:"foreignKey:OrderID" json:"order,omitempty"`
+}
+
+// TableName specifies the table name for Subscription
+func (Subscription) TableName() string {
+	return "subscriptions"
+}
+
+// BeforeCreate generates UUID before creating
+func (s *Subscription) BeforeCreate(tx *gorm.DB) error {
+	if s.ID == uuid.Nil {
+		s.ID = uuid.New()
+	}
+	return nil
+}
+
+// LessonNote represents a student's note on a lesson, optionally anchored to a video timestamp
+type LessonNote struct {
+	ID               uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	StudentID        uuid.UUID `gorm:"type:uuid;index;not null" json:"student_id"`
+	LessonID         uuid.UUID `gorm:"type:uuid;index;not null" json:"lesson_id"`
+	Content          string    `gorm:"type:text;not null" json:"content"`
+	TimestampSeconds *int      `json:"timestamp_seconds"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+
+	// Relationships
+	Student User   `gorm:"foreignKey:StudentID" json:"student,omitempty"`
+	Lesson  Lesson `gorm:"foreignKey:LessonID" json:"lesson,omitempty"`
+}
+
+// TableName specifies the table name for LessonNote
+func (LessonNote) TableName() string {
+	return "lesson_notes"
+}
+
+// BeforeCreate generates UUID before creating
+func (ln *LessonNote) BeforeCreate(tx *gorm.DB) error {
+	if ln.ID == uuid.Nil {
+		ln.ID = uuid.New()
 	}
 	return nil
 }

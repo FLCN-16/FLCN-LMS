@@ -81,7 +81,7 @@ func (lr *LessonRepository) GetAll(page, limit int) ([]models.Lesson, int64, err
 	offset := (page - 1) * limit
 
 	// Get paginated results
-	if err := lr.db.Offset(offset).Limit(limit).Order("sequence_number ASC").Find(&lessons).Error; err != nil {
+	if err := lr.db.Offset(offset).Limit(limit).Order("order_index ASC").Find(&lessons).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to fetch lessons: %w", err)
 	}
 
@@ -151,7 +151,7 @@ func (lr *LessonRepository) GetByModuleID(moduleID uuid.UUID, page, limit int) (
 	offset := (page - 1) * limit
 
 	// Get paginated results
-	if err := lr.db.Where("module_id = ?", moduleID).Offset(offset).Limit(limit).Order("sequence_number ASC").Find(&lessons).Error; err != nil {
+	if err := lr.db.Where("module_id = ?", moduleID).Offset(offset).Limit(limit).Order("order_index ASC").Find(&lessons).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to fetch lessons by module: %w", err)
 	}
 
@@ -216,7 +216,7 @@ func (lr *LessonRepository) Search(query string, page, limit int) ([]models.Less
 	if err := lr.db.Where(
 		lr.db.Where("title ILIKE ?", searchPattern).
 			Or("description ILIKE ?", searchPattern),
-	).Offset(offset).Limit(limit).Order("sequence_number ASC").Find(&lessons).Error; err != nil {
+	).Offset(offset).Limit(limit).Order("order_index ASC").Find(&lessons).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to search lessons: %w", err)
 	}
 
@@ -233,7 +233,7 @@ func (lr *LessonRepository) Search(query string, page, limit int) ([]models.Less
 func (lr *LessonRepository) GetNextLessonOrder(moduleID uuid.UUID) (int, error) {
 	var maxOrder int
 	if err := lr.db.Model(&models.Lesson{}).Where("module_id = ?", moduleID).
-		Select("COALESCE(MAX(sequence_number), 0)").
+		Select("COALESCE(MAX(order_index), 0)").
 		Row().
 		Scan(&maxOrder); err != nil {
 		return 0, fmt.Errorf("failed to get next lesson order: %w", err)

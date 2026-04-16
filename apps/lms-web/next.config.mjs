@@ -6,6 +6,9 @@ const nextConfig = {
         hostname: "placehold.co",
       },
       {
+        hostname: "via.placeholder.com",
+      },
+      {
         hostname: "d3njjcbhbojbot.cloudfront.net",
       },
       {

@@ -65,7 +65,7 @@ func (sms *StudyMaterialService) GetStudyMaterial(id uuid.UUID) (*StudyMaterialR
 		log.Printf("[Study Material Service] Failed to get material %s: %v", id, err)
 		return nil, err
 	}
-	return materialToResponse(&material), nil
+	return materialToResponse(material), nil
 }
 
 // GetMaterialsByCourse retrieves all materials for a specific course
@@ -135,13 +135,14 @@ func (sms *StudyMaterialService) CreateStudyMaterial(
 	}
 
 	// Create material record
+	fileSizeKB := int(fileSize / 1024)
 	material := &models.StudyMaterial{
 		ID:          uuid.New(),
 		CourseID:    courseID,
 		Title:       title,
-		Description: description,
+		Description: &description,
 		FileURL:     fmt.Sprintf("/uploads/study-materials/%s", savedFilename),
-		FileSize:    fileSize,
+		FileSizeKB:  &fileSizeKB,
 		FileType:    filepath.Ext(filename),
 	}
 
@@ -171,16 +172,16 @@ func (sms *StudyMaterialService) UpdateStudyMaterial(id uuid.UUID, updateData ma
 		material.Title = title
 	}
 	if description, ok := updateData["description"].(string); ok {
-		material.Description = description
+		material.Description = &description
 	}
 
-	if err := sms.materialRepo.Update(&material); err != nil {
+	if err := sms.materialRepo.Update(material); err != nil {
 		log.Printf("[Study Material Service] Failed to update material: %v", err)
 		return nil, fmt.Errorf("failed to update material: %w", err)
 	}
 
 	log.Printf("[Study Material Service] Material updated successfully: %s", id)
-	return materialToResponse(&material), nil
+	return materialToResponse(material), nil
 }
 
 // DeleteStudyMaterial deletes a study material and its file
@@ -230,13 +231,21 @@ func (sms *StudyMaterialService) SearchStudyMaterials(query string, page, limit 
 
 // Helper function to convert model to response
 func materialToResponse(material *models.StudyMaterial) *StudyMaterialResponse {
+	description := ""
+	if material.Description != nil {
+		description = *material.Description
+	}
+	fileSize := int64(0)
+	if material.FileSizeKB != nil {
+		fileSize = int64(*material.FileSizeKB)
+	}
 	return &StudyMaterialResponse{
 		ID:          material.ID,
 		CourseID:    material.CourseID,
 		Title:       material.Title,
-		Description: material.Description,
+		Description: description,
 		FileURL:     material.FileURL,
-		FileSize:    material.FileSize,
+		FileSize:    fileSize,
 		FileType:    material.FileType,
 		CreatedAt:   material.CreatedAt,
 		UpdatedAt:   material.UpdatedAt,

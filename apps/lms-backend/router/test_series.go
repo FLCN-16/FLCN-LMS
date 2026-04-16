@@ -14,6 +14,7 @@ import (
 func InitTestSeriesRoutes(
 	v1 *gin.RouterGroup,
 	testSeriesHandler *handlers.TestSeriesHandler,
+	questionHandler *handlers.QuestionHandler,
 	permDecorator *decorators.PermissionDecorator,
 ) {
 	log.Println("Initializing test series routes")
@@ -40,6 +41,11 @@ func InitTestSeriesRoutes(
 		tests.GET(
 			"/:id/questions",
 			permDecorator.Required(testSeriesHandler.GetQuestions, []rbac.Permission{rbac.TestRead}),
+		)
+
+		tests.POST(
+			"/:id/questions",
+			permDecorator.Required(questionHandler.CreateQuestion, []rbac.Permission{rbac.QuestionCreate}),
 		)
 
 		tests.GET(

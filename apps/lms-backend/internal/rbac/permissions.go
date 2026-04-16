@@ -40,6 +40,14 @@ const (
 	TestDelete Permission = "tests:delete"
 
 	// ================================================
+	// QUESTION PERMISSIONS
+	// ================================================
+	QuestionCreate Permission = "questions:create"
+	QuestionRead   Permission = "questions:read"
+	QuestionUpdate Permission = "questions:update"
+	QuestionDelete Permission = "questions:delete"
+
+	// ================================================
 	// USER MANAGEMENT PERMISSIONS
 	// ================================================
 	UserList   Permission = "users:list"
@@ -135,6 +143,38 @@ const (
 	CouponRead   Permission = "coupons:read"
 	CouponUpdate Permission = "coupons:update"
 	CouponDelete Permission = "coupons:delete"
+
+	// ================================================
+	// COURSE PACKAGE PERMISSIONS
+	// ================================================
+	PackageCreate Permission = "packages:create"
+	PackageRead   Permission = "packages:read"
+	PackageUpdate Permission = "packages:update"
+	PackageDelete Permission = "packages:delete"
+
+	// ================================================
+	// SUBSCRIPTION PERMISSIONS
+	// ================================================
+	SubscriptionRead   Permission = "subscriptions:read"
+	SubscriptionUpdate Permission = "subscriptions:update"
+
+	// ================================================
+	// INVOICE PERMISSIONS
+	// ================================================
+	InvoiceRead Permission = "invoices:read"
+
+	// ================================================
+	// TRANSACTION PERMISSIONS
+	// ================================================
+	TransactionRead Permission = "transactions:read"
+
+	// ================================================
+	// LESSON NOTE PERMISSIONS
+	// ================================================
+	NoteCreate Permission = "notes:create"
+	NoteRead   Permission = "notes:read"
+	NoteUpdate Permission = "notes:update"
+	NoteDelete Permission = "notes:delete"
 )
 
 // RolePermissions maps roles to their permissions
@@ -154,6 +194,9 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== TEST PERMISSIONS ======
 		TestCreate, TestRead, TestUpdate, TestDelete,
+
+		// ====== QUESTION PERMISSIONS ======
+		QuestionCreate, QuestionRead, QuestionUpdate, QuestionDelete,
 
 		// ====== USER MANAGEMENT ======
 		UserList, UserCreate, UserRead, UserUpdate, UserDelete,
@@ -190,6 +233,21 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== COUPON PERMISSIONS ======
 		CouponCreate, CouponRead, CouponUpdate, CouponDelete,
+
+		// ====== PACKAGE PERMISSIONS ======
+		PackageCreate, PackageRead, PackageUpdate, PackageDelete,
+
+		// ====== SUBSCRIPTION PERMISSIONS ======
+		SubscriptionRead, SubscriptionUpdate,
+
+		// ====== INVOICE PERMISSIONS ======
+		InvoiceRead,
+
+		// ====== TRANSACTION PERMISSIONS ======
+		TransactionRead,
+
+		// ====== NOTE PERMISSIONS ======
+		NoteCreate, NoteRead, NoteUpdate, NoteDelete,
 	},
 
 	"faculty": {
@@ -205,6 +263,9 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== TEST PERMISSIONS ======
 		TestCreate, TestRead, TestUpdate, TestDelete,
+
+		// ====== QUESTION PERMISSIONS ======
+		QuestionCreate, QuestionRead, QuestionUpdate, QuestionDelete,
 
 		// ====== ENROLLMENT PERMISSIONS ======
 		EnrollmentCreate, EnrollmentRead,
@@ -243,6 +304,19 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== COUPON PERMISSIONS ======
 		// Faculty can read and update coupons
 		CouponRead, CouponUpdate,
+
+		// ====== PACKAGE PERMISSIONS ======
+		// Faculty can manage packages for their courses
+		PackageCreate, PackageRead, PackageUpdate, PackageDelete,
+
+		// ====== SUBSCRIPTION PERMISSIONS ======
+		SubscriptionRead,
+
+		// ====== INVOICE PERMISSIONS ======
+		InvoiceRead,
+
+		// ====== TRANSACTION PERMISSIONS ======
+		TransactionRead,
 	},
 
 	"student": {
@@ -296,5 +370,25 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== COUPON PERMISSIONS ======
 		// Students can only read active coupons
 		CouponRead,
+
+		// ====== PACKAGE PERMISSIONS ======
+		// Students can read packages
+		PackageRead,
+
+		// ====== SUBSCRIPTION PERMISSIONS ======
+		// Students can read their own subscriptions
+		SubscriptionRead,
+
+		// ====== INVOICE PERMISSIONS ======
+		// Students can read their own invoices
+		InvoiceRead,
+
+		// ====== TRANSACTION PERMISSIONS ======
+		// Students can read their own transactions
+		TransactionRead,
+
+		// ====== NOTE PERMISSIONS ======
+		// Students can fully manage their own notes
+		NoteCreate, NoteRead, NoteUpdate, NoteDelete,
 	},
 }

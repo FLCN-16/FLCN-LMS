@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -319,14 +320,14 @@ func (qh *QuestionHandler) ValidateQuestion(c *gin.Context) {
 		return
 	}
 
-	validationResult, err := qh.questionService.ValidateQuestion(id)
+	question, err := qh.questionService.GetQuestion(id)
 	if err != nil {
-		log.Printf("[Question Handler] Failed to validate question: %v", err)
-		response.InternalServerError(c, err.Error())
+		log.Printf("[Question Handler] Failed to get question: %v", err)
+		response.NotFound(c, "Question not found")
 		return
 	}
 
-	response.Success(c, http.StatusOK, validationResult)
+	response.Success(c, http.StatusOK, question)
 }
 
 // BulkCreateQuestions godoc
@@ -356,11 +357,15 @@ func (qh *QuestionHandler) BulkCreateQuestions(c *gin.Context) {
 		return
 	}
 
-	questions, err := qh.questionService.BulkCreateQuestions(requests)
-	if err != nil {
-		log.Printf("[Question Handler] Failed to bulk create questions: %v", err)
-		response.InternalServerError(c, err.Error())
-		return
+	var questions []interface{}
+	for i, req := range requests {
+		question, err := qh.questionService.CreateQuestion(&req)
+		if err != nil {
+			log.Printf("[Question Handler] Failed to create question %d: %v", i, err)
+			response.BadRequest(c, fmt.Sprintf("Failed to create question %d: %v", i, err.Error()))
+			return
+		}
+		questions = append(questions, question)
 	}
 
 	response.Success(c, http.StatusCreated, gin.H{

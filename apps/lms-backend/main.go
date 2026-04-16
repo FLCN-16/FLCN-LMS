@@ -85,6 +85,13 @@ func main() {
 	batchRepo := repository.NewBatchRepository(db.DB)
 	orderRepo := repository.NewOrderRepository(db.DB)
 	couponRepo := repository.NewCouponRepository(db.DB)
+	couponUsageRepo := repository.NewCouponUsageRepository(db.DB)
+	coursePackageRepo := repository.NewCoursePackageRepository(db.DB)
+	transactionRepo := repository.NewTransactionRepository(db.DB)
+	invoiceRepo := repository.NewInvoiceRepository(db.DB)
+	subscriptionRepo := repository.NewSubscriptionRepository(db.DB)
+	lessonNoteRepo := repository.NewLessonNoteRepository(db.DB)
+	_ = transactionRepo // available for future direct use
 	log.Println("[Main] ✓ All repositories initialized")
 
 	// ==========================================
@@ -107,8 +114,14 @@ func main() {
 	courseReviewService := service.NewCourseReviewService(courseReviewRepo)
 	notificationService := service.NewNotificationService(notificationRepo)
 	batchService := service.NewBatchService(*batchRepo)
-	orderService := service.NewOrderService(*orderRepo, courseRepo)
-	couponService := service.NewCouponService(*couponRepo)
+	orderService := service.NewOrderService(*orderRepo, *courseRepo)
+	couponService := service.NewCouponService(couponRepo, couponUsageRepo)
+	coursePackageService := service.NewCoursePackageService(coursePackageRepo)
+	invoiceService := service.NewInvoiceService(invoiceRepo)
+	subscriptionService := service.NewSubscriptionService(subscriptionRepo, coursePackageRepo, courseRepo)
+	lessonNoteService := service.NewLessonNoteService(lessonNoteRepo)
+	// Wire billing services into order service for auto-create on payment completion
+	orderService.SetBillingServices(coursePackageRepo, subscriptionService, invoiceService)
 	log.Println("[Main] ✓ All services initialized")
 
 	// Initialize license client with timeout
@@ -158,6 +171,11 @@ func main() {
 	batchHandler := handlers.NewBatchHandler(batchService)
 	orderHandler := handlers.NewOrderHandler(orderService)
 	couponHandler := handlers.NewCouponHandler(couponService)
+	coursePackageHandler := handlers.NewCoursePackageHandler(coursePackageService)
+	subscriptionHandler := handlers.NewSubscriptionHandler(subscriptionService)
+	invoiceHandler := handlers.NewInvoiceHandler(invoiceService)
+	noteHandler := handlers.NewLessonNoteHandler(lessonNoteService)
+	marketingHandler := handlers.NewMarketingHandler(courseService, testSeriesService, userService, moduleService, lessonService, coursePackageService, db.DB)
 	log.Println("[Main] ✓ All handlers initialized")
 
 	// ==========================================
@@ -271,6 +289,11 @@ func main() {
 		batchHandler,
 		orderHandler,
 		couponHandler,
+		marketingHandler,
+		coursePackageHandler,
+		subscriptionHandler,
+		invoiceHandler,
+		noteHandler,
 		permissionDecorator,
 		cfg.JWTSecret,
 	)

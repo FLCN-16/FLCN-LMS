@@ -9,6 +9,7 @@ import (
 	"flcn_lms_backend/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // AuthHandler handles all authentication-related HTTP requests
@@ -334,9 +335,15 @@ func (ah *AuthHandler) ImpersonateStudent(c *gin.Context) {
 		return
 	}
 
-	studentID, ok := req["student_id"]
-	if !ok || studentID == "" {
+	studentIDStr, ok := req["student_id"]
+	if !ok || studentIDStr == "" {
 		response.BadRequest(c, "student_id is required")
+		return
+	}
+
+	studentID, err := uuid.Parse(studentIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid student_id format")
 		return
 	}
 

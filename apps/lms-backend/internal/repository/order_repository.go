@@ -33,7 +33,7 @@ func (or *OrderRepository) Create(order *models.Order) error {
 // GetByID retrieves an order by its UUID
 func (or *OrderRepository) GetByID(id uuid.UUID) (*models.Order, error) {
 	var order models.Order
-	if err := or.db.Preload("Student").Preload("Course").Preload("Coupon").First(&order, "id = ?", id).Error; err != nil {
+	if err := or.db.Preload("Student").Preload("Course").Preload("Package").Preload("Coupon").First(&order, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("order not found")
 		}

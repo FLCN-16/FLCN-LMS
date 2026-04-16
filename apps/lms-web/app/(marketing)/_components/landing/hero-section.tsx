@@ -10,7 +10,7 @@ function HeroSection() {
   return (
     <section className="bg-gradient-to-b from-primary/5 to-background py-24 md:py-32">
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-3xl space-y-6 text-center">
+        <div className="mx-auto max-w-3xl space-y-6 text-center" data-scroll>
           <Badge variant="outline" className="gap-1.5 px-3 py-1 text-sm">
             <HugeiconsIcon icon={UserGroupIcon} className="size-4" />
             Trusted by 10,000+ learners

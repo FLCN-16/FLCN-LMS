@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -22,8 +23,25 @@ func SeedDatabase(db *gorm.DB) error {
 		return fmt.Errorf("failed to check existing users: %w", err)
 	}
 
+	// If users exist, skip user/course seeding but ensure packages are seeded
 	if userCount > 0 {
-		log.Println("[Seeder] Database already seeded, skipping...")
+		log.Println("[Seeder] Database already seeded, skipping user/course setup...")
+
+		// Get existing courses for package seeding
+		var courses []models.Course
+		if err := db.Find(&courses).Error; err != nil {
+			return fmt.Errorf("failed to fetch courses: %w", err)
+		}
+
+		log.Printf("[Seeder] Found %d courses for package seeding", len(courses))
+		if len(courses) > 0 {
+			_, err := seedCoursePackages(db, courses)
+			if err != nil {
+				log.Printf("[Seeder] Error seeding packages: %v", err)
+				return fmt.Errorf("failed to seed course packages: %w", err)
+			}
+			log.Println("[Seeder] ✓ Seeded course packages")
+		}
 		return nil
 	}
 
@@ -62,8 +80,15 @@ func SeedDatabase(db *gorm.DB) error {
 	}
 	log.Printf("[Seeder] ✓ Seeded %d test series", len(testSeries))
 
+	// Seed test series sections
+	sections, err := seedTestSeriesSections(db, testSeries)
+	if err != nil {
+		return fmt.Errorf("failed to seed test series sections: %w", err)
+	}
+	log.Printf("[Seeder] ✓ Seeded %d test series sections", len(sections))
+
 	// Seed questions and options
-	_, err = seedQuestions(db, testSeries)
+	_, err = seedQuestions(db, testSeries, sections)
 	if err != nil {
 		return fmt.Errorf("failed to seed questions: %w", err)
 	}
@@ -103,6 +128,13 @@ func SeedDatabase(db *gorm.DB) error {
 		return fmt.Errorf("failed to seed live sessions: %w", err)
 	}
 	log.Println("[Seeder] ✓ Seeded live sessions")
+
+	// Seed course packages
+	_, err = seedCoursePackages(db, courses)
+	if err != nil {
+		return fmt.Errorf("failed to seed course packages: %w", err)
+	}
+	log.Println("[Seeder] ✓ Seeded course packages")
 
 	log.Println("[Seeder] ✓ Database seeding completed successfully")
 	return nil
@@ -198,46 +230,70 @@ func seedCourses(db *gorm.DB, users []models.User) ([]models.Course, error) {
 
 	courses := []models.Course{
 		{
-			ID:           uuid.New(),
-			Title:        "Go Programming Fundamentals",
-			Slug:         "go-programming-fundamentals",
-			Description:  "Learn Go from basics to advanced concepts. This comprehensive course covers all aspects of Go programming language.",
-			ThumbnailURL: "https://via.placeholder.com/400x300?text=Go+Programming",
-			InstructorID: instructor1.ID,
-			MaxStudents:  50,
-			Price:        49.99,
-			Status:       "published",
-			IsFeatured:   true,
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
+			ID:                uuid.New(),
+			Title:             "Go Programming Fundamentals",
+			Slug:              "go-programming-fundamentals",
+			Description:       "Learn Go from basics to advanced concepts. This comprehensive course covers all aspects of Go programming language.",
+			ThumbnailURL:      "https://via.placeholder.com/400x300?text=Go+Programming",
+			InstructorID:      instructor1.ID,
+			MaxStudents:       50,
+			Price:             49.99,
+			PricingType:       models.PricingTypePaid,
+			Status:            "published",
+			IsFeatured:        true,
+			Level:             "beginner",
+			Language:          "English",
+			EstimatedHours:    24,
+			CertificateIncluded: true,
+			TotalEnrolled:     124,
+			AverageRating:     4.8,
+			ReviewCount:       45,
+			CreatedAt:         time.Now(),
+			UpdatedAt:         time.Now(),
 		},
 		{
-			ID:           uuid.New(),
-			Title:        "Web Development with React",
-			Slug:         "web-development-with-react",
-			Description:  "Master React and build modern, interactive web applications. Learn hooks, context, and state management.",
-			ThumbnailURL: "https://via.placeholder.com/400x300?text=React",
-			InstructorID: instructor2.ID,
-			MaxStudents:  75,
-			Price:        59.99,
-			Status:       "published",
-			IsFeatured:   true,
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
+			ID:                uuid.New(),
+			Title:             "Web Development with React",
+			Slug:              "web-development-with-react",
+			Description:       "Master React and build modern, interactive web applications. Learn hooks, context, and state management.",
+			ThumbnailURL:      "https://via.placeholder.com/400x300?text=React",
+			InstructorID:      instructor2.ID,
+			MaxStudents:       75,
+			Price:             59.99,
+			PricingType:       models.PricingTypePaid,
+			Status:            "published",
+			IsFeatured:        true,
+			Level:             "intermediate",
+			Language:          "English",
+			EstimatedHours:    36,
+			CertificateIncluded: true,
+			TotalEnrolled:      287,
+			AverageRating:      4.9,
+			ReviewCount:        92,
+			CreatedAt:          time.Now(),
+			UpdatedAt:          time.Now(),
 		},
 		{
-			ID:           uuid.New(),
-			Title:        "Database Design & SQL",
-			Slug:         "database-design-sql",
-			Description:  "Deep dive into database design principles and SQL optimization. Understand normalization, indexing, and query performance.",
-			ThumbnailURL: "https://via.placeholder.com/400x300?text=Databases",
-			InstructorID: instructor1.ID,
-			MaxStudents:  40,
-			Price:        44.99,
-			Status:       "published",
-			IsFeatured:   false,
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
+			ID:                uuid.New(),
+			Title:             "Database Design & SQL",
+			Slug:              "database-design-sql",
+			Description:       "Deep dive into database design principles and SQL optimization. Understand normalization, indexing, and query performance.",
+			ThumbnailURL:      "https://via.placeholder.com/400x300?text=Databases",
+			InstructorID:      instructor1.ID,
+			MaxStudents:       40,
+			Price:             44.99,
+			PricingType:       models.PricingTypeFree,
+			Status:            "published",
+			IsFeatured:        false,
+			Level:             "intermediate",
+			Language:          "English",
+			EstimatedHours:    20,
+			CertificateIncluded: false,
+			TotalEnrolled:      67,
+			AverageRating:      4.6,
+			ReviewCount:        28,
+			CreatedAt:          time.Now(),
+			UpdatedAt:          time.Now(),
 		},
 	}
 
@@ -369,7 +425,8 @@ func seedTestSeries(db *gorm.DB) ([]models.TestSeries, error) {
 			Slug:               "go-fundamentals-quiz",
 			Description:        "Test your knowledge of Go basics",
 			TotalQuestions:     10,
-			DurationMinutes:    30,
+			PricingType:        models.PricingTypeFree,
+			Price:              0,
 			PassingPercentage:  70,
 			ShuffleQuestions:   true,
 			ShowCorrectAnswers: true,
@@ -383,7 +440,8 @@ func seedTestSeries(db *gorm.DB) ([]models.TestSeries, error) {
 			Slug:               "react-concepts-assessment",
 			Description:        "Assess your understanding of React",
 			TotalQuestions:     15,
-			DurationMinutes:    45,
+			PricingType:        models.PricingTypePaid,
+			Price:              9.99,
 			PassingPercentage:  75,
 			ShuffleQuestions:   true,
 			ShowCorrectAnswers: false,
@@ -400,18 +458,17 @@ func seedTestSeries(db *gorm.DB) ([]models.TestSeries, error) {
 	return testSeries, nil
 }
 
-func seedQuestions(db *gorm.DB, testSeries []models.TestSeries) ([]models.Question, error) {
+func seedTestSeriesSections(db *gorm.DB, testSeries []models.TestSeries) ([]models.TestSeriesSection, error) {
 	now := time.Now()
 
-	questions := []models.Question{
-		// Go Fundamentals Quiz
+	sections := []models.TestSeriesSection{
+		// Go Fundamentals Quiz - Sections
 		{
 			ID:              uuid.New(),
 			TestSeriesID:    testSeries[0].ID,
-			QuestionText:    "What is the correct way to declare a variable in Go?",
-			QuestionType:    "multiple_choice",
-			DifficultyLevel: "easy",
-			Marks:           1,
+			Title:           "Basics and Variables",
+			Description:     "Questions about Go basics and variable declaration",
+			DurationMinutes: 15,
 			OrderIndex:      1,
 			CreatedAt:       now,
 			UpdatedAt:       now,
@@ -419,25 +476,87 @@ func seedQuestions(db *gorm.DB, testSeries []models.TestSeries) ([]models.Questi
 		{
 			ID:              uuid.New(),
 			TestSeriesID:    testSeries[0].ID,
-			QuestionText:    "What is the zero value of a string in Go?",
-			QuestionType:    "multiple_choice",
-			DifficultyLevel: "easy",
-			Marks:           1,
+			Title:           "Functions and Methods",
+			Description:     "Questions about functions, methods, and interfaces",
+			DurationMinutes: 15,
 			OrderIndex:      2,
 			CreatedAt:       now,
 			UpdatedAt:       now,
 		},
-		// React Assessment
+		// React Concepts Assessment - Sections
 		{
 			ID:              uuid.New(),
 			TestSeriesID:    testSeries[1].ID,
-			QuestionText:    "What is a React component?",
-			QuestionType:    "multiple_choice",
-			DifficultyLevel: "medium",
-			Marks:           2,
+			Title:           "Component Fundamentals",
+			Description:     "Understanding React components and JSX",
+			DurationMinutes: 25,
 			OrderIndex:      1,
 			CreatedAt:       now,
 			UpdatedAt:       now,
+		},
+		{
+			ID:              uuid.New(),
+			TestSeriesID:    testSeries[1].ID,
+			Title:           "Hooks and State Management",
+			Description:     "useState, useEffect, custom hooks, and state",
+			DurationMinutes: 20,
+			OrderIndex:      2,
+			CreatedAt:       now,
+			UpdatedAt:       now,
+		},
+	}
+
+	if err := db.Create(&sections).Error; err != nil {
+		return nil, err
+	}
+
+	return sections, nil
+}
+
+func seedQuestions(db *gorm.DB, testSeries []models.TestSeries, sections []models.TestSeriesSection) ([]models.Question, error) {
+	now := time.Now()
+
+	sectionID0 := sections[0].ID
+	sectionID2 := sections[2].ID
+
+	questions := []models.Question{
+		// Go Fundamentals Quiz - Basics Section
+		{
+			ID:                  uuid.New(),
+			TestSeriesID:        testSeries[0].ID,
+			TestSeriesSectionID: &sectionID0,
+			QuestionText:        "What is the correct way to declare a variable in Go?",
+			QuestionType:        "multiple_choice",
+			DifficultyLevel:     "easy",
+			Marks:               1,
+			OrderIndex:          1,
+			CreatedAt:           now,
+			UpdatedAt:           now,
+		},
+		{
+			ID:                  uuid.New(),
+			TestSeriesID:        testSeries[0].ID,
+			TestSeriesSectionID: &sectionID0,
+			QuestionText:        "What is the zero value of a string in Go?",
+			QuestionType:        "multiple_choice",
+			DifficultyLevel:     "easy",
+			Marks:               1,
+			OrderIndex:          2,
+			CreatedAt:           now,
+			UpdatedAt:           now,
+		},
+		// React Assessment - Components Section
+		{
+			ID:                  uuid.New(),
+			TestSeriesID:        testSeries[1].ID,
+			TestSeriesSectionID: &sectionID2,
+			QuestionText:        "What is a React component?",
+			QuestionType:        "multiple_choice",
+			DifficultyLevel:     "medium",
+			Marks:               2,
+			OrderIndex:          1,
+			CreatedAt:           now,
+			UpdatedAt:           now,
 		},
 	}
 
@@ -695,4 +814,113 @@ func seedLiveSessions(db *gorm.DB, users []models.User) ([]models.LiveSession, e
 	}
 
 	return sessions, nil
+}
+
+func seedCoursePackages(db *gorm.DB, courses []models.Course) ([]models.CoursePackage, error) {
+	now := time.Now()
+	price99 := 99.99
+	price149 := 149.99
+
+	packages := []models.CoursePackage{
+		// Go Programming Fundamentals packages
+		{
+			ID:            uuid.New(),
+			CourseID:      courses[0].ID,
+			Name:          "Beginner Bundle",
+			Price:         49.99,
+			OriginalPrice: nil,
+			ValidityDays:  90,
+			Features:      datatypes.JSON(`[{"title":"Video Lectures","is_included":true},{"title":"Code Exercises","is_included":true},{"title":"Certificate","is_included":false}]`),
+			IsActive:      true,
+			SortOrder:     1,
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		},
+		{
+			ID:            uuid.New(),
+			CourseID:      courses[0].ID,
+			Name:          "Professional Package",
+			Price:         79.99,
+			OriginalPrice: &price99,
+			ValidityDays:  180,
+			Features:      datatypes.JSON(`[{"title":"Video Lectures","is_included":true},{"title":"Code Exercises","is_included":true},{"title":"Certificate","is_included":true},{"title":"1-on-1 Mentoring","is_included":false}]`),
+			IsActive:      true,
+			SortOrder:     2,
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		},
+		{
+			ID:            uuid.New(),
+			CourseID:      courses[0].ID,
+			Name:          "Premium Access",
+			Price:         129.99,
+			OriginalPrice: &price149,
+			ValidityDays:  365,
+			Features:      datatypes.JSON(`[{"title":"Video Lectures","is_included":true},{"title":"Code Exercises","is_included":true},{"title":"Certificate","is_included":true},{"title":"1-on-1 Mentoring","is_included":true},{"title":"Career Support","is_included":true}]`),
+			IsActive:      true,
+			SortOrder:     3,
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		},
+		// React Web Development packages
+		{
+			ID:            uuid.New(),
+			CourseID:      courses[1].ID,
+			Name:          "Standard Access",
+			Price:         59.99,
+			OriginalPrice: nil,
+			ValidityDays:  90,
+			Features:      datatypes.JSON(`[{"title":"Video Lectures","is_included":true},{"title":"Project Assignments","is_included":true},{"title":"Certificate","is_included":false}]`),
+			IsActive:      true,
+			SortOrder:     1,
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		},
+		{
+			ID:            uuid.New(),
+			CourseID:      courses[1].ID,
+			Name:          "Complete Mastery",
+			Price:         99.99,
+			OriginalPrice: &price149,
+			ValidityDays:  180,
+			Features:      datatypes.JSON(`[{"title":"Video Lectures","is_included":true},{"title":"Project Assignments","is_included":true},{"title":"Certificate","is_included":true},{"title":"Source Code","is_included":true}]`),
+			IsActive:      true,
+			SortOrder:     2,
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		},
+		// Database Design packages
+		{
+			ID:            uuid.New(),
+			CourseID:      courses[2].ID,
+			Name:          "Free Access",
+			Price:         0,
+			OriginalPrice: nil,
+			ValidityDays:  90,
+			Features:      datatypes.JSON(`[{"title":"Video Lectures","is_included":true},{"title":"Exercises","is_included":false},{"title":"Certificate","is_included":false}]`),
+			IsActive:      true,
+			SortOrder:     1,
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		},
+		{
+			ID:            uuid.New(),
+			CourseID:      courses[2].ID,
+			Name:          "Complete Course",
+			Price:         44.99,
+			OriginalPrice: nil,
+			ValidityDays:  180,
+			Features:      datatypes.JSON(`[{"title":"Video Lectures","is_included":true},{"title":"Exercises","is_included":true},{"title":"Database Projects","is_included":true},{"title":"Certificate","is_included":false}]`),
+			IsActive:      true,
+			SortOrder:     2,
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		},
+	}
+
+	if err := db.Create(&packages).Error; err != nil {
+		return nil, err
+	}
+
+	return packages, nil
 }

@@ -127,6 +127,14 @@ const (
 	OrderRead   Permission = "orders:read"
 	OrderUpdate Permission = "orders:update"
 	OrderDelete Permission = "orders:delete"
+
+	// ================================================
+	// COUPON PERMISSIONS
+	// ================================================
+	CouponCreate Permission = "coupons:create"
+	CouponRead   Permission = "coupons:read"
+	CouponUpdate Permission = "coupons:update"
+	CouponDelete Permission = "coupons:delete"
 )
 
 // RolePermissions maps roles to their permissions
@@ -179,6 +187,9 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== ORDER PERMISSIONS ======
 		OrderCreate, OrderRead, OrderUpdate, OrderDelete,
+
+		// ====== COUPON PERMISSIONS ======
+		CouponCreate, CouponRead, CouponUpdate, CouponDelete,
 	},
 
 	"faculty": {
@@ -228,6 +239,10 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== ORDER PERMISSIONS ======
 		// Faculty can read and update orders
 		OrderRead, OrderUpdate,
+
+		// ====== COUPON PERMISSIONS ======
+		// Faculty can read and update coupons
+		CouponRead, CouponUpdate,
 	},
 
 	"student": {
@@ -277,5 +292,9 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== ORDER PERMISSIONS ======
 		// Students can create and read their own orders
 		OrderCreate, OrderRead,
+
+		// ====== COUPON PERMISSIONS ======
+		// Students can only read active coupons
+		CouponRead,
 	},
 }

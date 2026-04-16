@@ -84,6 +84,7 @@ func main() {
 	notificationRepo := repository.NewNotificationRepository(db.DB)
 	batchRepo := repository.NewBatchRepository(db.DB)
 	orderRepo := repository.NewOrderRepository(db.DB)
+	couponRepo := repository.NewCouponRepository(db.DB)
 	log.Println("[Main] ✓ All repositories initialized")
 
 	// ==========================================
@@ -107,6 +108,7 @@ func main() {
 	notificationService := service.NewNotificationService(notificationRepo)
 	batchService := service.NewBatchService(*batchRepo)
 	orderService := service.NewOrderService(*orderRepo, courseRepo)
+	couponService := service.NewCouponService(*couponRepo)
 	log.Println("[Main] ✓ All services initialized")
 
 	// Initialize license client with timeout
@@ -155,6 +157,7 @@ func main() {
 	notificationHandler := handlers.NewNotificationHandler(notificationService)
 	batchHandler := handlers.NewBatchHandler(batchService)
 	orderHandler := handlers.NewOrderHandler(orderService)
+	couponHandler := handlers.NewCouponHandler(couponService)
 	log.Println("[Main] ✓ All handlers initialized")
 
 	// ==========================================
@@ -267,6 +270,7 @@ func main() {
 		notificationHandler,
 		batchHandler,
 		orderHandler,
+		couponHandler,
 		permissionDecorator,
 		cfg.JWTSecret,
 	)

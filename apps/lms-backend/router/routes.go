@@ -49,6 +49,7 @@ func InitializeAllRoutes(
 	notificationHandler *handlers.NotificationHandler,
 	batchHandler *handlers.BatchHandler,
 	orderHandler *handlers.OrderHandler,
+	couponHandler *handlers.CouponHandler,
 	permissionDecorator *decorators.PermissionDecorator,
 	jwtSecret string,
 ) {
@@ -78,6 +79,7 @@ func InitializeAllRoutes(
 	InitNotificationRoutes(v1, notificationHandler, permissionDecorator)
 	InitBatchRoutes(v1, batchHandler, permissionDecorator)
 	InitOrderRoutes(v1, orderHandler, permissionDecorator)
+	InitCouponRoutes(v1, couponHandler, permissionDecorator)
 
 	log.Println("[Router] All API routes initialized successfully")
 }
@@ -633,6 +635,62 @@ func InitOrderRoutes(
 	}
 
 	log.Println("✓ Order routes initialized successfully")
+}
+
+// InitCouponRoutes initializes coupon routes with permission checks
+func InitCouponRoutes(
+	v1 *gin.RouterGroup,
+	couponHandler *handlers.CouponHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing coupon routes")
+
+	coupons := v1.Group("/coupons")
+	{
+		// List all coupons (admin only)
+		coupons.GET(
+			"",
+			permDecorator.Required(couponHandler.ListCoupons, []rbac.Permission{rbac.CouponRead}),
+		)
+
+		// List active coupons (public)
+		coupons.GET(
+			"/active",
+			couponHandler.ListActiveCoupons,
+		)
+
+		// Get specific coupon (admin only)
+		coupons.GET(
+			"/:id",
+			permDecorator.Required(couponHandler.GetCoupon, []rbac.Permission{rbac.CouponRead}),
+		)
+
+		// Create coupon (admin only)
+		coupons.POST(
+			"",
+			permDecorator.Required(couponHandler.CreateCoupon, []rbac.Permission{rbac.CouponCreate}),
+		)
+
+		// Update coupon (admin only)
+		coupons.PATCH(
+			"/:id",
+			permDecorator.Required(couponHandler.UpdateCoupon, []rbac.Permission{rbac.CouponUpdate}),
+		)
+
+		// Delete coupon (admin only)
+		coupons.DELETE(
+			"/:id",
+			permDecorator.Required(couponHandler.DeleteCoupon, []rbac.Permission{rbac.CouponDelete}),
+		)
+
+		// Validate coupon (public)
+		coupons.POST(
+			"/validate",
+			couponHandler.ValidateCoupon,
+		)
+	}
+
+	log.Println("✓ Coupon routes initialized successfully")
 }
 
 // InitModuleRoutes initializes module routes with permission checks

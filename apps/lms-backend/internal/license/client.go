@@ -24,12 +24,14 @@ type VerifyRequest struct {
 
 // VerifyResponse is received from the license API
 type VerifyResponse struct {
-	Valid      bool      `json:"valid"`
-	Status     string    `json:"status"`
-	ExpiryDate time.Time `json:"expiry_date"`
-	Features   []Feature `json:"features"`
-	CacheTTL   int64     `json:"cache_ttl"` // in seconds
-	Message    string    `json:"message,omitempty"`
+	Valid            bool      `json:"valid"`
+	Status           string    `json:"status"`
+	OrganizationName string    `json:"organization_name,omitempty"`
+	MaxUsers         int64     `json:"max_users,omitempty"`
+	ExpiryDate       time.Time `json:"expiry_date"`
+	Features         []Feature `json:"features"`
+	CacheTTL         int64     `json:"cache_ttl"` // in seconds
+	Message          string    `json:"message,omitempty"`
 }
 
 // Client handles license verification with the NestJS backend

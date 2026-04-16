@@ -62,6 +62,8 @@ func Init(cfg *config.Config) (*Database, error) {
 func runMigrations(db *gorm.DB) error {
 	tables := []interface{}{
 		&models.User{},
+		&models.Institute{},
+		&models.Category{},
 		&models.Course{},
 		&models.Module{},
 		&models.Lesson{},
@@ -75,7 +77,17 @@ func runMigrations(db *gorm.DB) error {
 		&models.Certificate{},
 		&models.LiveSession{},
 		&models.LiveSessionParticipant{},
+		&models.Batch{},
+		&models.BatchEnrollment{},
 		&models.LicenseConfig{},
+		&models.DailyPracticePaper{},
+		&models.Announcement{},
+		&models.CourseReview{},
+		&models.Coupon{},
+		&models.CouponUsage{},
+		&models.Order{},
+		&models.Notification{},
+		&models.StudyMaterial{},
 	}
 
 	for _, table := range tables {

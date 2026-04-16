@@ -1,0 +1,51 @@
+import { Book01Icon, Settings05Icon, TransactionHistoryIcon, } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import React from "react";
+import Link from "next/link";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, } from "@flcn-lms/ui/components/sidebar";
+function ResourceSidebarMenuItem({ id, title, icon, }) {
+    return (<SidebarMenuItem key={id} className="flex items-center gap-2">
+      <SidebarMenuButton tooltip={title}>
+        {icon && <HugeiconsIcon icon={icon}/>}
+        <span>{title}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>);
+}
+function CourseSidebar({ ...props }) {
+    const menuItems = [
+        {
+            id: "orders",
+            title: "My Orders",
+            icon: TransactionHistoryIcon,
+        },
+        { id: "settings", title: "Settings", icon: Settings05Icon },
+    ];
+    return (<Sidebar id="user-sidebar" collapsible="offcanvas" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground" asChild>
+              <Link href="#">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <HugeiconsIcon icon={Book01Icon} className="size-4"/>
+                </div>
+                <span className="text-base font-semibold">FLCN LMS</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent className="flex flex-col gap-2">
+            <SidebarMenu>
+              {menuItems.map((item) => (<ResourceSidebarMenuItem key={item.id} id={item.id} title={item.title} icon={item.icon}/>))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter></SidebarFooter>
+    </Sidebar>);
+}
+export default CourseSidebar;

@@ -12,6 +12,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 import { RequiredScopes } from '../api-keys/decorators/required-scopes.decorator';
 import { ApiKeyGuard } from '../api-keys/guards/api-key.guard';
@@ -44,7 +45,9 @@ import { LicensesService } from './licenses.service';
  * Handles license verification, issuance, and management for the LMS system.
  * Provides endpoints for both Gin backend and NestJS dashboard integration.
  */
-@Controller('licenses')
+@Controller({
+  version: '1',
+})
 export class LicensesController {
   constructor(private readonly licensesService: LicensesService) {}
 
@@ -101,9 +104,7 @@ export class LicensesController {
    * Returns: Statistics for all licenses by status
    */
   @Get('stats/summary')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('read:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async getStats(): Promise<{
     total: number;
@@ -134,9 +135,7 @@ export class LicensesController {
    * Returns: Created license information
    */
   @Post('issue')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('write:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.CREATED)
   async issueLicense(
     @Body() dto: IssueLicenseDto,
@@ -157,9 +156,7 @@ export class LicensesController {
    * Returns: Complete license information
    */
   @Get('key/:key')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('read:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async getLicenseByKey(@Param('key') key: string): Promise<LicenseInfoDto> {
     return this.licensesService.getLicenseByKey(key);
@@ -177,9 +174,7 @@ export class LicensesController {
    * Returns: Updated license information
    */
   @Patch(':id/suspend')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('write:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async suspendLicense(@Param('id') id: string): Promise<LicenseInfoDto> {
     return this.licensesService.suspendLicense(id);
@@ -197,9 +192,7 @@ export class LicensesController {
    * Returns: Updated license information
    */
   @Patch(':id/reactivate')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('write:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async reactivateLicense(@Param('id') id: string): Promise<LicenseInfoDto> {
     return this.licensesService.reactivateLicense(id);
@@ -217,9 +210,7 @@ export class LicensesController {
    * Returns: Array of enabled features with their configurations
    */
   @Get(':key/features')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('read:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async getFeatures(@Param('key') key: string): Promise<FeatureDto[]> {
     return this.licensesService.getFeatures(key);
@@ -237,9 +228,7 @@ export class LicensesController {
    * Returns: Complete license information including related entities
    */
   @Get(':id')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('read:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async getLicenseById(@Param('id') id: string): Promise<LicenseInfoDto> {
     return this.licensesService.getLicenseById(id);
@@ -265,9 +254,7 @@ export class LicensesController {
    * Returns: Updated license information
    */
   @Put(':id')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('write:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async updateLicense(
     @Param('id') id: string,
@@ -288,9 +275,7 @@ export class LicensesController {
    * Returns: Revocation confirmation with timestamp
    */
   @Delete(':id')
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('write:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async revokeLicense(
     @Param('id') id: string,
@@ -316,9 +301,7 @@ export class LicensesController {
    * Returns: Paginated list of licenses with metadata
    */
   @Get()
-  @UseGuards(ApiKeyGuard, RateLimitGuard)
-  @RequiredScopes('read:licenses')
-  @RateLimitApiKey()
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   async listLicenses(
     @Query() query: ListLicensesQueryDto,

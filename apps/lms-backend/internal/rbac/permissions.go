@@ -103,6 +103,13 @@ const (
 	CertificateCreate Permission = "certificates:create"
 	CertificateRead  Permission = "certificates:read"
 	CertificateDelete Permission = "certificates:delete"
+
+	// ================================================
+	// NOTIFICATION PERMISSIONS
+	// ================================================
+	NotificationRead   Permission = "notifications:read"
+	NotificationUpdate Permission = "notifications:update"
+	NotificationDelete Permission = "notifications:delete"
 )
 
 // RolePermissions maps roles to their permissions
@@ -146,6 +153,9 @@ var DefaultRolePermissions = RolePermissions{
 
 		// ====== CERTIFICATE PERMISSIONS ======
 		CertificateCreate, CertificateRead, CertificateDelete,
+
+		// ====== NOTIFICATION PERMISSIONS ======
+		NotificationRead, NotificationUpdate, NotificationDelete,
 	},
 
 	"faculty": {
@@ -183,6 +193,10 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== CERTIFICATE PERMISSIONS ======
 		// Faculty can create and read certificates
 		CertificateCreate, CertificateRead,
+
+		// ====== NOTIFICATION PERMISSIONS ======
+		// Faculty can read and update their notifications
+		NotificationRead, NotificationUpdate,
 	},
 
 	"student": {
@@ -220,5 +234,9 @@ var DefaultRolePermissions = RolePermissions{
 		// ====== CERTIFICATE PERMISSIONS ======
 		// Students can read their own certificates
 		CertificateRead,
+
+		// ====== NOTIFICATION PERMISSIONS ======
+		// Students can read and update their notifications
+		NotificationRead, NotificationUpdate,
 	},
 }

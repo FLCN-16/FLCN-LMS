@@ -15,7 +15,6 @@ import { UpdateSuperAdminDto } from './dto/update-super-admin.dto';
 import { SuperAdminsService } from './super-admins.service';
 
 @Controller({
-  path: 'super-admins',
   version: '1',
 })
 @UseGuards(AuthGuard('jwt'))

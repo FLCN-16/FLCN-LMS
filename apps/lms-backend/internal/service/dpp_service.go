@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"flcn-lms/internal/models"
-	"flcn-lms/internal/repository"
+	"flcn_lms_backend/internal/models"
+	"flcn_lms_backend/internal/repository"
 	"github.com/google/uuid"
 )
 

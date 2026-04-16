@@ -33,6 +33,7 @@ func InitializeAllRoutes(
 	instructorCourseHandler *handlers.InstructorCourseHandler,
 	moduleHandler *handlers.ModuleHandler,
 	lessonHandler *handlers.LessonHandler,
+	studyMaterialHandler *handlers.StudyMaterialHandler,
 	questionHandler *handlers.QuestionHandler,
 	testSeriesHandler *handlers.TestSeriesHandler,
 	attemptHandler *handlers.AttemptHandler,
@@ -45,6 +46,7 @@ func InitializeAllRoutes(
 	announcementHandler *handlers.AnnouncementHandler,
 	courseReviewHandler *handlers.CourseReviewHandler,
 	certificateHandler *handlers.CertificateHandler,
+	notificationHandler *handlers.NotificationHandler,
 	permissionDecorator *decorators.PermissionDecorator,
 	jwtSecret string,
 ) {
@@ -59,6 +61,7 @@ func InitializeAllRoutes(
 	InitInstructorCourseRoutes(v1, instructorCourseHandler, permissionDecorator)
 	InitModuleRoutes(v1, moduleHandler, permissionDecorator)
 	InitLessonRoutes(v1, lessonHandler, permissionDecorator)
+	InitStudyMaterialRoutes(v1, studyMaterialHandler, permissionDecorator)
 	InitQuestionRoutes(v1, questionHandler, permissionDecorator)
 	InitTestSeriesRoutes(v1, testSeriesHandler, permissionDecorator)
 	InitAttemptRoutes(v1, attemptHandler, permissionDecorator)
@@ -70,6 +73,7 @@ func InitializeAllRoutes(
 	InitAnnouncementRoutes(v1, announcementHandler, permissionDecorator)
 	InitCourseReviewRoutes(v1, courseReviewHandler, permissionDecorator)
 	InitCertificateRoutes(v1, certificateHandler, permissionDecorator)
+	InitNotificationRoutes(v1, notificationHandler, permissionDecorator)
 
 	log.Println("[Router] All API routes initialized successfully")
 }
@@ -441,6 +445,56 @@ func InitCertificateRoutes(
 	log.Println("✓ Certificate routes initialized successfully")
 }
 
+// InitNotificationRoutes initializes notification routes with permission checks
+func InitNotificationRoutes(
+	v1 *gin.RouterGroup,
+	notificationHandler *handlers.NotificationHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing notification routes")
+
+	notifications := v1.Group("/notifications")
+	{
+		// List all notifications for user
+		notifications.GET(
+			"",
+			permDecorator.Required(notificationHandler.ListNotifications, []rbac.Permission{rbac.NotificationRead}),
+		)
+
+		// List unread notifications
+		notifications.GET(
+			"/unread",
+			permDecorator.Required(notificationHandler.ListUnreadNotifications, []rbac.Permission{rbac.NotificationRead}),
+		)
+
+		// Get specific notification
+		notifications.GET(
+			"/:id",
+			permDecorator.Required(notificationHandler.GetNotification, []rbac.Permission{rbac.NotificationRead}),
+		)
+
+		// Mark notification as read
+		notifications.PATCH(
+			"/:id/read",
+			permDecorator.Required(notificationHandler.MarkAsRead, []rbac.Permission{rbac.NotificationUpdate}),
+		)
+
+		// Mark all as read
+		notifications.PATCH(
+			"/read-all",
+			permDecorator.Required(notificationHandler.MarkAllAsRead, []rbac.Permission{rbac.NotificationUpdate}),
+		)
+
+		// Delete notification
+		notifications.DELETE(
+			"/:id",
+			permDecorator.Required(notificationHandler.DeleteNotification, []rbac.Permission{rbac.NotificationDelete}),
+		)
+	}
+
+	log.Println("✓ Notification routes initialized successfully")
+}
+
 // InitModuleRoutes initializes module routes with permission checks
 func InitModuleRoutes(
 	v1 *gin.RouterGroup,
@@ -571,6 +625,60 @@ func InitLessonRoutes(
 	}
 
 	log.Println("✓ Lesson routes initialized successfully")
+}
+
+// InitStudyMaterialRoutes initializes study material routes with permission checks
+func InitStudyMaterialRoutes(
+	v1 *gin.RouterGroup,
+	studyMaterialHandler *handlers.StudyMaterialHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing study material routes")
+
+	materials := v1.Group("/study-materials")
+	{
+		// List all study materials
+		materials.GET(
+			"",
+			studyMaterialHandler.ListStudyMaterials,
+		)
+
+		// Get specific study material
+		materials.GET(
+			"/:id",
+			studyMaterialHandler.GetStudyMaterial,
+		)
+
+		// Create study material (faculty/admin only)
+		materials.POST(
+			"",
+			permDecorator.Required(studyMaterialHandler.CreateStudyMaterial, []rbac.Permission{rbac.CourseCreate}),
+		)
+
+		// Update study material (faculty/admin only)
+		materials.PATCH(
+			"/:id",
+			permDecorator.Required(studyMaterialHandler.UpdateStudyMaterial, []rbac.Permission{rbac.CourseUpdate}),
+		)
+
+		// Delete study material (faculty/admin only)
+		materials.DELETE(
+			"/:id",
+			permDecorator.Required(studyMaterialHandler.DeleteStudyMaterial, []rbac.Permission{rbac.CourseDelete}),
+		)
+	}
+
+	// Course-specific material routes
+	courses := v1.Group("/courses")
+	{
+		// Get materials for a course
+		courses.GET(
+			"/:courseId/materials",
+			studyMaterialHandler.GetMaterialsByCourse,
+		)
+	}
+
+	log.Println("✓ Study material routes initialized successfully")
 }
 
 // InitQuestionRoutes initializes question routes with permission checks

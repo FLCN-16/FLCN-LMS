@@ -64,6 +64,8 @@ export class LicensesService {
         valid: false,
         status: 'invalid',
         message: 'License is invalid',
+        organizationName: license.organizationName,
+        maxUsers: license.maxUsers,
         features: [],
       };
     }
@@ -79,6 +81,8 @@ export class LicensesService {
       return {
         valid: false,
         status: 'expired',
+        organizationName: license.organizationName,
+        maxUsers: license.maxUsers,
         expiryDate: license.expiryDate,
         message: 'License has expired',
         features: [],
@@ -90,6 +94,8 @@ export class LicensesService {
       return {
         valid: false,
         status: 'error',
+        organizationName: license.organizationName,
+        maxUsers: license.maxUsers,
         message: 'License is suspended',
         features: [],
       };
@@ -104,6 +110,8 @@ export class LicensesService {
     return {
       valid: true,
       status: 'valid',
+      organizationName: license.organizationName,
+      maxUsers: license.maxUsers,
       expiryDate: license.expiryDate,
       features: license.features as FeatureDto[],
       cacheTTL: 86400, // 24 hours in seconds

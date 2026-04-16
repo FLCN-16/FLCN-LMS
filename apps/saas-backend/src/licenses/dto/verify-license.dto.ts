@@ -48,6 +48,14 @@ export class VerifyLicenseResponseDto {
   @IsEnum(['valid', 'invalid', 'expired', 'error'])
   status!: 'valid' | 'invalid' | 'expired' | 'error';
 
+  @IsOptional()
+  @IsString()
+  organizationName?: string;
+
+  @IsOptional()
+  @IsNumber()
+  maxUsers?: number;
+
   expiryDate?: Date;
 
   @Type(() => FeatureDto)

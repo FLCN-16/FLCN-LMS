@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"flcn-lms/internal/models"
+	"flcn_lms_backend/internal/models"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )

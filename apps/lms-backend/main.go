@@ -67,6 +67,7 @@ func main() {
 	courseRepo := repository.NewCourseRepository(db.DB)
 	moduleRepo := repository.NewModuleRepository(db.DB)
 	lessonRepo := repository.NewLessonRepository(db.DB)
+	studyMaterialRepo := repository.NewStudyMaterialRepository(db.DB)
 	testSeriesRepo := repository.NewTestSeriesRepository(db.DB)
 	questionRepo := repository.NewQuestionRepository(db.DB)
 	attemptRepo := repository.NewAttemptRepository(db.DB)
@@ -80,6 +81,7 @@ func main() {
 	dppRepo := repository.NewDPPRepository(db.DB)
 	announcementRepo := repository.NewAnnouncementRepository(db.DB)
 	courseReviewRepo := repository.NewCourseReviewRepository(db.DB)
+	notificationRepo := repository.NewNotificationRepository(db.DB)
 	log.Println("[Main] ✓ All repositories initialized")
 
 	// ==========================================
@@ -90,6 +92,7 @@ func main() {
 	courseService := service.NewCourseService(courseRepo, userRepo)
 	moduleService := service.NewModuleService(moduleRepo, courseRepo)
 	lessonService := service.NewLessonService(lessonRepo, moduleRepo, lessonProgressRepo)
+	studyMaterialService := service.NewStudyMaterialService(studyMaterialRepo, courseRepo)
 	testSeriesService := service.NewTestSeriesService(testSeriesRepo, questionRepo)
 	questionService := service.NewQuestionService(questionRepo, testSeriesRepo, questionOptionRepo)
 	enrollmentService := service.NewEnrollmentService(enrollmentRepo, courseRepo, userRepo)
@@ -99,6 +102,7 @@ func main() {
 	dppService := service.NewDPPService(dppRepo)
 	announcementService := service.NewAnnouncementService(announcementRepo)
 	courseReviewService := service.NewCourseReviewService(courseReviewRepo)
+	notificationService := service.NewNotificationService(notificationRepo)
 	log.Println("[Main] ✓ All services initialized")
 
 	// Initialize license client with timeout
@@ -131,6 +135,7 @@ func main() {
 	instructorCourseHandler := handlers.NewInstructorCourseHandler(courseService, userService)
 	moduleHandler := handlers.NewModuleHandler(moduleService)
 	lessonHandler := handlers.NewLessonHandler(lessonService)
+	studyMaterialHandler := handlers.NewStudyMaterialHandler(studyMaterialService)
 	questionHandler := handlers.NewQuestionHandler(questionService)
 	testSeriesHandler := handlers.NewTestSeriesHandler(testSeriesService, userService)
 	attemptHandler := handlers.NewAttemptHandler(attemptService)
@@ -143,6 +148,7 @@ func main() {
 	announcementHandler := handlers.NewAnnouncementHandler(announcementService)
 	courseReviewHandler := handlers.NewCourseReviewHandler(courseReviewService)
 	certificateHandler := handlers.NewCertificateHandler(*certificateService, pdfGenerator)
+	notificationHandler := handlers.NewNotificationHandler(notificationService)
 	log.Println("[Main] ✓ All handlers initialized")
 
 	// ==========================================
@@ -239,6 +245,7 @@ func main() {
 		instructorCourseHandler,
 		moduleHandler,
 		lessonHandler,
+		studyMaterialHandler,
 		questionHandler,
 		testSeriesHandler,
 		attemptHandler,
@@ -251,6 +258,7 @@ func main() {
 		announcementHandler,
 		courseReviewHandler,
 		certificateHandler,
+		notificationHandler,
 		permissionDecorator,
 		cfg.JWTSecret,
 	)

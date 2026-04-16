@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
+import { getDefaultPermissionsForRole } from '@flcn-lms/types/auth';
+
 import { SuperAdmin } from '../../master-entities/super-admin.entity';
 
 /**
@@ -30,6 +32,7 @@ export interface AuthSessionUser {
   email: string;
   role: string;
   isActive: boolean;
+  permissions: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +44,9 @@ export interface AuthSessionUser {
 export interface LoginResult {
   user: AuthSessionUser;
   token: string;
+  refreshToken: string;
+  expiresIn: number;
+  refreshTokenExpiresIn: number;
 }
 
 /**
@@ -102,19 +108,31 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const token = this.signToken(
-      {
-        sub: superAdmin.id,
-        id: superAdmin.id,
-        email: superAdmin.email,
-        role: superAdmin.role || 'super_admin',
-      },
-      remember,
-    );
+    // Update last login timestamp
+    superAdmin.lastLogin = new Date();
+    await this.superAdminRepository.save(superAdmin);
+
+    const payload = {
+      sub: superAdmin.id,
+      id: superAdmin.id,
+      email: superAdmin.email,
+      role: superAdmin.role || 'super_admin',
+    };
+
+    // Access token (short-lived)
+    const accessTokenExpiresIn = remember ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 24 hours in seconds
+    const token = this.signToken(payload, remember);
+
+    // Refresh token (longer-lived)
+    const refreshToken = this.signToken(payload, true); // Refresh token valid for 30 days
+    const refreshTokenExpiresIn = 30 * 24 * 60 * 60; // 30 days in seconds
 
     return {
       user: this.toSessionUser(superAdmin),
       token,
+      refreshToken,
+      expiresIn: accessTokenExpiresIn,
+      refreshTokenExpiresIn,
     };
   }
 
@@ -218,12 +236,14 @@ export class AuthService {
    * @returns Session user object safe to send to client
    */
   private toSessionUser(superAdmin: SuperAdmin): AuthSessionUser {
+    const role = (superAdmin.role || 'super_admin') as any;
     return {
       id: superAdmin.id,
       name: superAdmin.name,
       email: superAdmin.email,
-      role: superAdmin.role || 'super_admin',
+      role,
       isActive: superAdmin.isActive,
+      permissions: getDefaultPermissionsForRole(role),
       createdAt: superAdmin.createdAt,
       updatedAt: superAdmin.updatedAt,
     };

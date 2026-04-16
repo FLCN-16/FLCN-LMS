@@ -314,10 +314,16 @@ func (ls *LicenseService) responseToModel(resp *license.VerifyResponse) *models.
 	// Marshal features to JSON
 	featuresJSON, _ := json.Marshal(resp.Features)
 
+	// Default to "Organization" if not provided by the API
+	organizationName := resp.OrganizationName
+	if organizationName == "" {
+		organizationName = "Organization"
+	}
+
 	config := &models.LicenseConfig{
 		LicenseKey:       ls.licenseKey,
-		OrganizationName: "Organization", // Could be extracted from response if available
-		MaxUsers:         0,              // Could be extracted from response features
+		OrganizationName: organizationName,
+		MaxUsers:         resp.MaxUsers,
 		Features:         featuresJSON,
 		ExpiryDate:       &resp.ExpiryDate,
 		CachedAt:         time.Now(),

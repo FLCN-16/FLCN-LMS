@@ -1,31 +1,152 @@
-import { Helmet } from "react-helmet-async"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import { lazy } from "react"
+
+import type { PermissionDescriptor } from "@flcn-lms/types/auth"
+
+import { ProtectedRoute } from "@/components/protected-route"
+import withAuth from "@/features/auth/with-auth.hoc"
+
+const AuthLayout = lazy(() => import("./layouts/auth"))
+const DashboardLayout = lazy(() => import("./layouts/dashboard"))
+const LoginPage = lazy(() => import("./pages/auth/login"))
+const ForgotPasswordPage = lazy(() => import("./pages/auth/forgot-password"))
+const ResetPasswordPage = lazy(() => import("./pages/auth/reset-password"))
+
+// SaaS Pages
+const HomePage = lazy(() => import("./pages/home"))
+const SuperAdminsPage = lazy(() => import("./pages/super-admins"))
+const SuperAdminFormPage = lazy(() => import("./pages/super-admins/form"))
+const CustomersPage = lazy(() => import("./pages/customers"))
+const CustomerFormPage = lazy(() => import("./pages/customers/form"))
+const PlansPage = lazy(() => import("./pages/plans"))
+const PlanFormPage = lazy(() => import("./pages/plans/form"))
+const LicensesPage = lazy(() => import("./pages/licenses"))
+const LicenseDetailPage = lazy(() => import("./pages/licenses/detail"))
+const LicenseFormPage = lazy(() => import("./pages/licenses/form"))
+const SubscriptionsPage = lazy(() => import("./pages/subscriptions"))
+const ApiKeysPage = lazy(() => import("./pages/api-keys"))
+const ApiKeyFormPage = lazy(() => import("./pages/api-keys/form"))
+const BillingPage = lazy(() => import("./pages/billing"))
+const InvoicesPage = lazy(() => import("./pages/invoices"))
+const RefundsPage = lazy(() => import("./pages/refunds"))
+
+const ProtectedDashboardLayout = withAuth(DashboardLayout)
+
+function withPermission(
+  element: React.ReactNode,
+  permission?: PermissionDescriptor
+) {
+  return <ProtectedRoute permission={permission}>{element}</ProtectedRoute>
+}
 
 function App() {
   return (
-    <>
-      <Helmet>
-        <title>FLCN SaaS Admin</title>
-        <meta name="description" content="FLCN SaaS Admin Dashboard" />
-      </Helmet>
-      <BrowserRouter>
-        <Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route index element={<Navigate to="/auth/login" replace />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="reset-password" element={<ResetPasswordPage />} />
+        </Route>
+
+        <Route path="/" element={<ProtectedDashboardLayout />}>
           <Route
-            path="/"
-            element={
-              <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold text-slate-900 mb-4">
-                    FLCN SaaS Admin
-                  </h1>
-                  <p className="text-lg text-slate-600">Dashboard coming soon...</p>
-                </div>
-              </div>
-            }
+            index
+            element={withPermission(<HomePage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
           />
-        </Routes>
-      </BrowserRouter>
-    </>
+          <Route
+            path="super-admins"
+            element={withPermission(<SuperAdminsPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+          <Route
+            path="customers"
+            element={withPermission(<CustomersPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+          <Route
+            path="plans"
+            element={withPermission(<PlansPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+          <Route
+            path="licenses"
+            element={withPermission(<LicensesPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+          <Route
+            path="subscriptions"
+            element={withPermission(<SubscriptionsPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+          <Route
+            path="api-keys"
+            element={withPermission(<ApiKeysPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+          <Route
+            path="billing"
+            element={withPermission(<BillingPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+          <Route
+            path="invoices"
+            element={withPermission(<InvoicesPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+          <Route
+            path="refunds"
+            element={withPermission(<RefundsPage />, {
+              action: "read",
+              subject: "Dashboard",
+            })}
+          />
+
+          {/* Licenses CRUD */}
+          <Route path="licenses/new" element={<LicenseFormPage />} />
+          <Route path="licenses/:id" element={<LicenseDetailPage />} />
+          <Route path="licenses/:id/edit" element={<LicenseFormPage />} />
+
+          {/* Plans CRUD */}
+          <Route path="plans/new" element={<PlanFormPage />} />
+          <Route path="plans/:id/edit" element={<PlanFormPage />} />
+
+          {/* Super Admins CRUD */}
+          <Route path="super-admins/new" element={<SuperAdminFormPage />} />
+          <Route path="super-admins/:id/edit" element={<SuperAdminFormPage />} />
+
+          {/* Customers CRUD */}
+          <Route path="customers/new" element={<CustomerFormPage />} />
+          <Route path="customers/:id/edit" element={<CustomerFormPage />} />
+
+          {/* API Keys CRUD */}
+          <Route path="api-keys/new" element={<ApiKeyFormPage />} />
+          <Route path="api-keys/:id/edit" element={<ApiKeyFormPage />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

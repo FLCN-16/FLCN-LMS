@@ -21,7 +21,9 @@ import { CreateBillingDto } from './dto/create-billing.dto';
 import { UpdateBillingDto } from './dto/update-billing.dto';
 import { StripeService } from './stripe.service';
 
-@Controller('billing')
+@Controller({
+  version: '1',
+})
 @UseGuards(ApiKeyGuard, RateLimitGuard)
 @RateLimitApiKey()
 export class BillingController {

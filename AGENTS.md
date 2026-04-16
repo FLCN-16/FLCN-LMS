@@ -132,3 +132,40 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 2. Use `detect_changes` for code review.
 3. Use `get_affected_flows` to understand impact.
 4. Use `query_graph` pattern="tests_for" to check coverage.
+
+---
+
+## Design Context
+
+**See `.impeccable.md` for full design guidelines.**
+
+### Brand & Aesthetic
+- **Brand**: Modern, innovative, forward-thinking
+- **Aesthetic**: Minimal & Refined (Linear, Vercel, Stripe style)
+- **Themes**: Light and dark mode with system preference detection
+
+### Key Design Principles
+1. **Clarity through simplicity** — Remove visual noise; focus on essential information
+2. **Contemporary typography** — Sophisticated font pairing with intentional hierarchy
+3. **Intent over decoration** — Every element serves a purpose; no gratuitous effects
+4. **Performance & efficiency** — Fast interactions, optimistic UI, minimal cognitive load
+5. **Refined color treatment** — OKLCH color space; sophisticated palette; both themes equally polished
+
+### SaaS Dashboard Target
+- **Users**: FLCN internal operations team managing licenses, billing, API keys
+- **Job**: Quickly manage customer subscriptions, issue licenses, track billing
+- **Feel**: Premium, efficient, trustworthy (not cold or overly minimal)
+
+### What We Avoid
+❌ Dark mode + glowing accents | ❌ Gradient backgrounds | ❌ Heavy shadows/glassmorphism | ❌ Neon colors | ❌ Generic card grids | ❌ Modal overuse | ❌ Same padding everywhere
+
+### What We Embrace
+✅ Distinctive typography | ✅ Whitespace & rhythm | ✅ Asymmetrical layouts | ✅ Fast interactions | ✅ Progressive disclosure | ✅ Clean data tables | ✅ Empty states that teach
+
+<!-- BEGIN:nextjs-agent-rules -->
+ 
+# Next.js: ALWAYS read docs before coding
+ 
+Before any Next.js work, find and read the relevant doc in `node_modules/next/dist/docs/`. Your training data is outdated — the docs are the source of truth.
+ 
+<!-- END:nextjs-agent-rules -->

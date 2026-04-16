@@ -32,6 +32,9 @@ export class SuperAdmin {
   @Column({ type: 'varchar', length: 50, default: 'super_admin' })
   role!: string;
 
+  @Column({ type: 'timestamp', nullable: true })
+  lastLogin?: Date;
+
   @CreateDateColumn()
   createdAt!: Date;
 

@@ -42,7 +42,9 @@ import {
  * GET    /api-keys/:keyId/stats       - Get usage statistics
  * POST   /api-keys/validate           - Validate a key (public)
  */
-@Controller('api-keys')
+@Controller({
+  version: '1',
+})
 export class ApiKeysController {
   constructor(private readonly apiKeysService: ApiKeysService) {}
 

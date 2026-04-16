@@ -21,7 +21,9 @@ import { RateLimitGuard } from '../rate-limiting/guards/rate-limit.guard';
 import { CreateRefundDto } from './dto/create-refund.dto';
 import { RefundService } from './refund.service';
 
-@Controller('refunds')
+@Controller({
+  version: '1',
+})
 @UseGuards(AuthGuard('jwt'), RateLimitGuard)
 export class RefundController {
   constructor(private readonly refundService: RefundService) {}

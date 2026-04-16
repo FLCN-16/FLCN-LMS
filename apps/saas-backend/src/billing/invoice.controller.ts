@@ -26,7 +26,9 @@ import {
 } from './dto/create-invoice.dto';
 import { InvoiceService } from './invoice.service';
 
-@Controller('invoices')
+@Controller({
+  version: '1',
+})
 @UseGuards(ApiKeyGuard, RateLimitGuard)
 @RateLimitApiKey()
 export class InvoiceController {

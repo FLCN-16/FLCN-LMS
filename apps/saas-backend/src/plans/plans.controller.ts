@@ -15,7 +15,6 @@ import { UpdatePlanDto } from './dto/update-plan.dto';
 import { PlansService } from './plans.service';
 
 @Controller({
-  path: 'plans',
   version: '1',
 })
 @UseGuards(AuthGuard('jwt'))

@@ -7,24 +7,27 @@ import {
   CardTitle,
 } from "@flcn-lms/ui/components/card"
 
-function TestimonialCard() {
+interface TestimonialCardProps {
+  name: string
+  role: string
+  quote: string
+  initials: string
+}
+
+function TestimonialCard({ name, role, quote, initials }: TestimonialCardProps) {
   return (
     <Card className="rounded-md">
       <CardHeader className="flex items-center gap-x-3">
         <Avatar size="xl">
-          <AvatarFallback>AE</AvatarFallback>
+          <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <CardTitle>Felipe M.</CardTitle>
-          <CardDescription>A learner since 2018</CardDescription>
+          <CardTitle>{name}</CardTitle>
+          <CardDescription>{role}</CardDescription>
         </div>
       </CardHeader>
 
-      <CardContent>
-        This learning platform has transformed how I approach online education.
-        The courses are well-structured and the instructors are incredibly
-        knowledgeable. Highly recommend!
-      </CardContent>
+      <CardContent>{quote}</CardContent>
     </Card>
   )
 }

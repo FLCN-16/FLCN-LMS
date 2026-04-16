@@ -1,6 +1,12 @@
 "use client"
 
-import { Clock, Mail, MapPin, Phone } from "lucide-react"
+import {
+  Clock01Icon,
+  Location01Icon,
+  Mail01Icon,
+  SmartPhone01Icon,
+} from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useState } from "react"
 
 import { Button } from "@flcn-lms/ui/components/button"
@@ -104,21 +110,21 @@ export default function ContactPage() {
           <div className="lg:col-span-1">
             <div className="space-y-6">
               <div className="flex gap-4">
-                <Mail className="h-6 w-6 text-primary" />
+                <HugeiconsIcon icon={Mail01Icon} className="size-6 text-primary" />
                 <div>
                   <h3 className="font-semibold">Email</h3>
                   <p className="text-muted-foreground">support@flcnlms.com</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <Phone className="h-6 w-6 text-primary" />
+                <HugeiconsIcon icon={SmartPhone01Icon} className="size-6 text-primary" />
                 <div>
                   <h3 className="font-semibold">Phone</h3>
                   <p className="text-muted-foreground">+1 (555) 123-4567</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <MapPin className="h-6 w-6 text-primary" />
+                <HugeiconsIcon icon={Location01Icon} className="size-6 text-primary" />
                 <div>
                   <h3 className="font-semibold">Address</h3>
                   <p className="text-muted-foreground">
@@ -129,7 +135,7 @@ export default function ContactPage() {
                 </div>
               </div>
               <div className="flex gap-4">
-                <Clock className="h-6 w-6 text-primary" />
+                <HugeiconsIcon icon={Clock01Icon} className="size-6 text-primary" />
                 <div>
                   <h3 className="font-semibold">Business Hours</h3>
                   <p className="text-muted-foreground">

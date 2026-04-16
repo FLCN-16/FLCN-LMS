@@ -1,4 +1,4 @@
-import { FullScreenIcon } from "@hugeicons/core-free-icons"
+import { FullscreenIcon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
 import { Button } from "@flcn-lms/ui/components/button"
@@ -18,7 +18,7 @@ function CourseHeader() {
 
         <div className="ml-auto">
           <Button variant="ghost" size="icon-lg">
-            <HugeiconsIcon icon={FullScreenIcon} />
+            <HugeiconsIcon icon={FullscreenIcon} />
           </Button>
         </div>
       </div>

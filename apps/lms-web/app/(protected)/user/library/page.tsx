@@ -2,11 +2,13 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { Badge } from "@flcn-lms/ui/components/badge"
+
+export const dynamic = "force-dynamic"
 import { Button } from "@flcn-lms/ui/components/button"
 import { Card } from "@flcn-lms/ui/components/card"
-import { Empty } from "@flcn-lms/ui/components/empty"
 import { Progress } from "@flcn-lms/ui/components/progress"
 
+import { EmptyState } from "@/components/empty-state"
 import { getEnrolledCourses } from "@/fetchers/user"
 
 async function LibraryPage() {
@@ -15,7 +17,7 @@ async function LibraryPage() {
   if (enrollments.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
-        <Empty
+        <EmptyState
           title="No courses yet"
           description="Start learning by enrolling in a course from our catalog."
           action={

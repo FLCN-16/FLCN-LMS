@@ -1,3 +1,5 @@
+import { Suspense } from "react"
+
 import { Cancel01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import Image from "next/image"
@@ -32,7 +34,9 @@ function AuthLogin() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <LoginForm />
+            <Suspense fallback={<div className="animate-pulse">Loading...</div>}>
+              <LoginForm />
+            </Suspense>
           </div>
         </div>
       </div>

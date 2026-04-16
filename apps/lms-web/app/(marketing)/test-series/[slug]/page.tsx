@@ -8,6 +8,8 @@ import { Card } from "@flcn-lms/ui/components/card"
 
 import { getTestSeriesDetail } from "@/fetchers/test-series"
 
+export const dynamic = "force-dynamic"
+
 export async function generateMetadata({
   params,
 }: {

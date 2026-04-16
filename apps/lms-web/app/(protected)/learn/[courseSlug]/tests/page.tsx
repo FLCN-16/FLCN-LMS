@@ -1,9 +1,11 @@
 import Link from "next/link"
 
 import { Button } from "@flcn-lms/ui/components/button"
-import { Card } from "@flcn-lms/ui/components/card"
-import { Empty } from "@flcn-lms/ui/components/empty"
 
+export const dynamic = "force-dynamic"
+import { Card } from "@flcn-lms/ui/components/card"
+
+import { EmptyState } from "@/components/empty-state"
 import { getCourseWithModules } from "@/fetchers/course"
 import { getTestSeries } from "@/fetchers/test-series"
 
@@ -29,7 +31,7 @@ async function CourseTestsPage({ params }: CourseTestsPageProps) {
           </p>
         </div>
 
-        <Empty
+        <EmptyState
           title="No tests available"
           description="Tests for this course will be available soon."
           action={

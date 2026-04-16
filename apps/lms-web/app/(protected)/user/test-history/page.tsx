@@ -12,6 +12,7 @@ import {
 } from "@flcn-lms/ui/components/table"
 import type { AttemptStatus } from "@flcn-lms/types/attempts"
 
+export const dynamic = "force-dynamic"
 import { getAllUserAttempts } from "@/fetchers/attempts"
 
 function getStatusColor(

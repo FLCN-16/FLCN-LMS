@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 
 import { getTestSeries } from "@/fetchers/test-series"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = {
   title: "Test Series",
   description: "Browse our comprehensive test series to prepare for your exams",

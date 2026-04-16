@@ -1,15 +1,57 @@
-import { PanelPlaceholderPage } from "@/components/panel-placeholder-page"
+import { IconArrowLeft } from "@tabler/icons-react"
+import { Helmet } from "react-helmet-async"
+import { Link, useNavigate } from "react-router-dom"
 
-export default function NewLiveClassPage() {
+import { Button } from "@flcn-lms/ui/components/button"
+
+import { useCreateLiveSession } from "@/queries/live-sessions"
+
+import { LiveSessionForm } from "./live-session-form"
+
+export default function NewLiveSessionPage() {
+  const navigate = useNavigate()
+  const createMutation = useCreateLiveSession()
+
+  const handleSubmit = (data: any) => {
+    createMutation.mutate(data, {
+      onSuccess: () => {
+        navigate("/live-classes")
+      },
+    })
+  }
+
   return (
-    <PanelPlaceholderPage
-      title="Schedule Live Class"
-      description="Set up a dedicated scheduler for live class planning, faculty assignment, and learner notifications."
-      tasks={[
-        "Choose batch, faculty, and class agenda",
-        "Schedule the delivery slot and meeting link",
-        "Prepare reminders and learner access rules",
-      ]}
-    />
+    <>
+      <Helmet>
+        <title>New Live Session — FLCN Dashboard</title>
+      </Helmet>
+      <div className="px-4 lg:px-6">
+        <div className="mb-6 flex items-center gap-3">
+          <Button variant="ghost" size="icon" asChild>
+            <Link to="/live-classes">
+              <IconArrowLeft className="size-4" />
+            </Link>
+          </Button>
+          <div>
+            <h2 className="text-xl font-semibold">New Live Session</h2>
+            <p className="text-sm text-muted-foreground">
+              Schedule a new live class session
+            </p>
+          </div>
+        </div>
+
+        {createMutation.isError && (
+          <p className="mb-4 text-sm text-destructive">
+            Failed to create session. Please try again.
+          </p>
+        )}
+
+        <LiveSessionForm
+          onSubmit={handleSubmit}
+          isLoading={createMutation.isPending}
+          submitLabel="Create Session"
+        />
+      </div>
+    </>
   )
 }

@@ -94,6 +94,26 @@ import { Button } from "@flcn-lms/ui/components/button"
 - ESLint configs extend from `@flcn-lms/eslint-config` (base, next-js, react-internal)
 - Node.js >= 20 required
 
+## TypeScript: NEVER emit compiled output
+
+**CRITICAL:** TypeScript should NEVER be compiled to JavaScript in source directories. Source files must remain `.ts`/`.tsx` only.
+
+- Always use `pnpm typecheck` or `pnpm lint` — these use `--noEmit` and are safe
+- If running `tsc` directly (not recommended), **ALWAYS add `--noEmit` flag**
+- Never commit `.js`, `.d.ts`, `.d.ts.map`, or `*.tsbuildinfo` files to source directories
+- These are build artifacts and will cause duplicate file warnings in Next.js/Vite
+
+Example of what NOT to do:
+```bash
+# ❌ WRONG - generates output files
+tsc
+npx tsc
+
+# ✅ CORRECT - type-checks without emitting
+tsc --noEmit
+pnpm typecheck
+```
+
 <!-- code-review-graph MCP tools -->
 ## MCP Tools: code-review-graph
 

@@ -30,6 +30,7 @@ dist
 # TypeScript build artifacts (should not be committed to source control)
 *.d.ts
 *.d.ts.map
+*.tsbuildinfo
 
 # JavaScript transpile outputs (source files should be TypeScript only)
 !node_modules/**/*.js

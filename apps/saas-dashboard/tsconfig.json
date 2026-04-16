@@ -1,0 +1,9 @@
+{
+  "extends": "@flcn-lms/typescript-config/tsconfig.react.json",
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
+  },
+  "include": ["src", "tsconfig.app.json", "tsconfig.node.json"],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+}

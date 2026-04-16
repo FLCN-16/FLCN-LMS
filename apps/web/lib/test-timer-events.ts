@@ -1,5 +1,0 @@
-export const TestTimeStartEvent = new Event("test:time-start")
-export const TestTimeResumeEvent = new Event("test:time-resume")
-export const TestTimePauseEvent = new Event("test:time-pause")
-export const TestTimeRestartEvent = new Event("test:time-restart")
-export const TestTimeExpiredEvent = new Event("test:time-expired")

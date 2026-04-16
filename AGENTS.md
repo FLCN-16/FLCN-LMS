@@ -2,16 +2,18 @@
 
 ## Project Overview
 
-FLCN-LMS is a Learning Management System (LMS) monorepo built with Turborepo and pnpm. It consists of three apps and shared packages.
+FLCN-LMS is a Learning Management System (LMS) monorepo built with Turborepo and pnpm. It consists of LMS apps (web, dashboard, backend), SaaS admin apps (dashboard, backend), and shared packages.
 
 ## Monorepo Structure
 
 ```
 flcn-lms/
 ├── apps/
-│   ├── web/          # Marketing + student-facing Next.js app (port 3000)
-│   ├── dashboard/    # Admin/instructor dashboard — React + Vite (port 3001)
-│   └── backend/      # API server — NestJS
+│   ├── lms-web/          # Marketing + student-facing Next.js app (port 3000)
+│   ├── lms-dashboard/    # LMS admin/instructor dashboard — React + Vite (port 3001)
+│   ├── lms-backend/      # LMS API server — Go Gin
+│   ├── saas-dashboard/   # SaaS admin dashboard — React + Vite (port 3002)
+│   └── saas-backend/     # SaaS API server — NestJS
 ├── packages/
 │   ├── ui/           # Shared component library (shadcn/ui + Radix + Tailwind v4)
 │   ├── eslint-config/       # Shared ESLint configs
@@ -22,9 +24,11 @@ flcn-lms/
 
 | Layer | Technology |
 |---|---|
-| Web frontend | Next.js 16 (App Router, Turbopack), React 19, Tailwind CSS v4 |
-| Dashboard | React 19, Vite 8, TypeScript, `@flcn-lms/ui` |
-| Backend | NestJS 11, TypeScript |
+| LMS Web frontend | Next.js 16 (App Router, Turbopack), React 19, Tailwind CSS v4 |
+| LMS Dashboard | React 19, Vite 8, TypeScript, `@flcn-lms/ui` |
+| LMS Backend | Go Gin |
+| SaaS Dashboard | React 19, Vite 8, TypeScript, `@flcn-lms/ui` |
+| SaaS Backend | NestJS 11, TypeScript |
 | UI library | shadcn/ui, Radix UI, Base UI, Recharts, Embla Carousel |
 | Monorepo | Turborepo, pnpm 10 |
 | Icons | HugeIcons |
@@ -46,14 +50,20 @@ pnpm typecheck        # type-check all packages
 ## App-Specific Dev Commands
 
 ```bash
-# Web (Next.js) — port 3000
-cd apps/web && pnpm dev
+# LMS Web (Next.js) — port 3000
+cd apps/lms-web && pnpm dev
 
-# Dashboard (Vite) — port 3001
-cd apps/dashboard && pnpm dev
+# LMS Dashboard (Vite) — port 3001
+cd apps/lms-dashboard && pnpm dev
 
-# Backend (NestJS)
-cd apps/backend && pnpm start:dev
+# LMS Backend (Go Gin) — port 8080
+cd apps/lms-backend && go run ./cmd
+
+# SaaS Dashboard (Vite) — port 3002
+cd apps/saas-dashboard && pnpm dev
+
+# SaaS Backend (NestJS) — port 3000
+cd apps/saas-backend && pnpm start:dev
 ```
 
 ## Adding UI Components
@@ -61,7 +71,7 @@ cd apps/backend && pnpm start:dev
 Components live in `packages/ui/src/components`. Add shadcn components from the repo root:
 
 ```bash
-pnpm dlx shadcn@latest add <component> -c apps/web
+pnpm dlx shadcn@latest add <component> -c apps/lms-web
 ```
 
 Import them in any app:

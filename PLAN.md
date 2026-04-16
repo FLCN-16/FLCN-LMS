@@ -22,61 +22,69 @@
 The storefront has routes and UI components in place but **zero API integration**. Every student-facing page shows static or hardcoded data.
 
 ### 1.1 API Layer Setup
-- [ ] Add React Query (`@tanstack/react-query`) to `apps/web`
-- [ ] Create typed API client (`lib/api-client.ts`) with base URL from env, JWT injection via interceptor
-- [ ] Create `lib/api/` directory with typed endpoint modules mirroring dashboard pattern:
-  - `auth.ts` — login, register, session
-  - `courses.ts` — list, get by slug, search, enroll
-  - `test-series.ts` — list, get, questions
-  - `attempts.ts` — create, submit answers, get result
-  - `user.ts` — profile, settings, enrollment list, progress
-  - `lessons.ts` — get lesson, mark progress
-- [ ] Create `QueryClientProvider` wrapper in root layout
+- [x] Enhanced `lib/fetcher.ts` with generic typing, error handling, cookie support ✅
+- [x] Created error classes in `lib/errors/api-errors.ts` ✅
+  - ApiError, UnauthorizedError, ForbiddenError, ValidationError, RateLimitError, NetworkError, ParseError
+- [x] Created `fetchers/auth.ts` module — login, register, session, password reset ✅
+- [x] Created `fetchers/course.ts` module — list, filter, enroll, progress, reviews ✅
+- [x] Created `fetchers/README.md` — comprehensive fetchers usage guide ✅
+- [x] `fetchers/test-series.ts` already exists — list tests, get test, questions
+- [x] `fetchers/attempts.ts` already exists — create attempt, submit answers, get result
+- [x] `fetchers/user.ts` already exists — profile, settings, enrollment list, certificates
+- [x] `fetchers/lessons.ts` already exists — get lesson content, mark progress
+- [x] httpOnly cookie injection implemented in `fetcher.ts` — works on server & client ✅
+- [x] JWT token injection middleware in `fetcher.ts` for authenticated requests ✅
 
 ### 1.2 Home Page (Marketing)
-- [ ] Build hero section with real course count and stats from API
-- [ ] Featured courses carousel — fetch from Go Gin API
-- [ ] Categories grid — fetch course categories
+- [ ] Build hero section with real course count and stats from API (use `getCourses()` from `fetchers/course`)
+- [ ] Featured courses carousel — fetch featured courses (use `getFeaturedCourses()` from `fetchers/course`)
+- [ ] Categories grid — fetch course categories (use `getCategories()` from `fetchers/course`)
 - [ ] Testimonials section
 - [ ] CTA sections (pricing plans, signup)
 
 ### 1.3 Courses Listing Pages
-- [ ] `app/(marketing)/courses/page.tsx` — wire to Go Gin `GET /api/v1/courses` with pagination and filters
-- [ ] `app/(marketing)/courses/[category]/page.tsx` — wire to category-filtered endpoint
-- [ ] `app/(marketing)/course/[slug]/page.tsx` — wire course detail to API (overview, modules, instructor, reviews)
-- [ ] Course search with debounced query
+- [ ] `app/(marketing)/courses/page.tsx` — wire to `getCourses()` with pagination and filters (from `fetchers/course`)
+- [ ] `app/(marketing)/courses/[category]/page.tsx` — wire to `getCoursesByCategory()` (from `fetchers/course`)
+- [ ] `app/(marketing)/course/[slug]/page.tsx` — wire to `getCourse()` (overview, modules, instructor, reviews) (from `fetchers/course`)
+- [ ] Course search with debounced query — use `searchCourses()` (from `fetchers/course`)
 
 ### 1.4 Student Panel — Course Consumption
-- [ ] `app/(protected)/learn/[courseSlug]/page.tsx` — load course structure, redirect to first incomplete lesson
-- [ ] `app/(protected)/learn/[courseSlug]/[moduleSlug]/page.tsx` — module overview with lesson list and progress indicators
-- [ ] `app/(protected)/learn/[courseSlug]/[moduleSlug]/[lessonSlug]/page.tsx` — replace hardcoded Mux URL with dynamic lesson data; wire video player to real URL
-- [ ] Lesson progress auto-save (mark lesson complete on video end / manual)
-- [ ] Module progress calculation
-- [ ] Course sidebar — show current position, progress per module
-- [ ] Resume learning button (last accessed lesson)
+- [ ] `app/(protected)/learn/[courseSlug]/page.tsx` — load course with `getCourse()`, redirect to first incomplete lesson (from `fetchers/course`)
+- [ ] `app/(protected)/learn/[courseSlug]/[moduleSlug]/page.tsx` — module overview with `getLesson()`, progress indicators (from `fetchers/lessons`)
+- [ ] `app/(protected)/learn/[courseSlug]/[moduleSlug]/[lessonSlug]/page.tsx` — wire `getLesson()` for video URL, replace hardcoded Mux URL (from `fetchers/lessons`)
+- [ ] Lesson progress auto-save — use `markLessonComplete()` on video end (from `fetchers/lessons`)
+- [ ] Module progress calculation — use `getProgress()` (from `fetchers/course`)
+- [ ] Course sidebar — show current position using enrolled course list
+- [ ] Resume learning button — store last accessed lesson in localStorage or server
 
 ### 1.5 Student Panel — Test / Exam Flow
-- [ ] `app/(protected)/test/[slug]/page.tsx` — load test series info, enrollment check, start button
-- [ ] `app/(protected)/test/[slug]/attempt/page.tsx` — full exam UI: questions, options, timer, navigation, submit
-- [ ] `app/(protected)/test/[slug]/result/page.tsx` — score, rank, answer review, solution explanations
+- [x] `fetchers/test-series.ts` already exists — list, get by slug, questions ✅
+- [ ] `app/(protected)/test/[slug]/page.tsx` — load test with `getTestSeries()`, check enrollment, start button (from `fetchers/test-series`)
+- [ ] `app/(protected)/test/[slug]/attempt/page.tsx` — full exam UI: questions, timer, navigation; wire to `startAttempt()` and `submitAnswers()` (from `fetchers/attempts`)
+- [ ] `app/(protected)/test/[slug]/result/page.tsx` — display score, rank, answer review from `getAttemptResult()` (from `fetchers/attempts`)
+- [x] `fetchers/attempts.ts` already exists — create, submit answers, get result ✅
 
 ### 1.6 Student Panel — User Profile
-- [ ] `app/(protected)/user/profile/page.tsx` — profile form (name, avatar, contact)
-- [ ] `app/(protected)/user/settings/page.tsx` — password change, notification preferences
-- [ ] `app/(protected)/user/courses/page.tsx` — enrolled courses with progress
-- [ ] `app/(protected)/user/certificates/page.tsx` — earned certificates with download
+- [x] `fetchers/user.ts` already exists — profile, settings, password change, certificates ✅
+- [ ] `app/(protected)/user/profile/page.tsx` — profile form with `updateProfile()` (from `fetchers/user`)
+- [ ] `app/(protected)/user/settings/page.tsx` — password change with `changePassword()`, notification preferences (from `fetchers/user`)
+- [ ] `app/(protected)/user/courses/page.tsx` — enrolled courses using `getEnrolledCourses()` with progress (from `fetchers/course`)
+- [ ] `app/(protected)/user/certificates/page.tsx` — earned certificates with `getCertificates()`, download links (from `fetchers/user`)
 
 ### 1.7 Checkout & Cart
-- [ ] Wire `app/(marketing)/cart/page.tsx` to real cart state (Jotai/localStorage)
-- [ ] Wire `app/(marketing)/checkout/page.tsx` to payment flow (Stripe Elements)
-- [ ] Order confirmation page after successful payment
+- [ ] Wire `app/(marketing)/cart/page.tsx` to real cart state (Zustand/Jotai store)
+- [ ] Wire `app/(marketing)/checkout/page.tsx` to payment flow — create payment fetcher in `fetchers/payment.ts`
+- [ ] Create `fetchers/payment.ts` — payment intent, payment status, order confirmation
+- [ ] Order confirmation page — display order summary after successful payment
 
 ### 1.8 Auth Improvements
-- [ ] Connect login/register forms to NestJS auth API
-- [ ] Persist JWT in httpOnly cookie via Next.js route handlers
-- [ ] Session refresh / token rotation
-- [ ] Redirect after login to intended page
+- [x] Connect login/register forms to `login()` and `register()` from `fetchers/auth` ✅ (ready to use)
+- [x] Persist JWT in httpOnly cookie — cookie injection implemented in `fetcher.ts` ✅
+- [ ] Session refresh / token rotation — implement `refreshToken()` on token expiry (from `fetchers/auth`)
+- [ ] Redirect after login to intended page (from query param or session store)
 - [ ] Add `loading.tsx` and `error.tsx` to all route segments (currently missing on 34 of 38 pages)
+- [ ] Implement middleware to check authentication on protected routes
+- [ ] Add `verifyEmail()` flow for email verification (from `fetchers/auth`)
 
 ### 1.9 Static / Marketing Pages
 - [ ] `app/(marketing)/about/page.tsx` — team info

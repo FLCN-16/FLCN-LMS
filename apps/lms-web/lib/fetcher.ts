@@ -19,12 +19,19 @@ import { COOKIES } from "./cookies"
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
 
+// Fetch timeout in milliseconds (30 seconds)
+const FETCH_TIMEOUT = 30000
+
 export type FetcherConfig = RequestInit & {
   /**
    * Whether to include credentials (cookies) in the request.
    * Defaults to true for automatic httpOnly cookie inclusion.
    */
   credentials?: RequestCredentials
+  /**
+   * Custom timeout in milliseconds. Defaults to 30s.
+   */
+  timeout?: number
 }
 
 /**
@@ -135,12 +142,19 @@ export async function fetcher<T = unknown>(
   // Inject auth token from cookies (works on both server and client)
   await injectAuthToken(headers)
 
+  // Create AbortController for timeout
+  const controller = new AbortController()
+  const timeoutMs = config.timeout ?? FETCH_TIMEOUT
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
   // Prepare final fetch config
   const finalConfig: RequestInit = {
     ...config,
     headers,
     // Include credentials (httpOnly cookies) by default
     credentials: config.credentials ?? "include",
+    // Add abort signal for timeout
+    signal: controller.signal,
   }
 
   let response: Response
@@ -149,12 +163,17 @@ export async function fetcher<T = unknown>(
   try {
     response = await fetch(absoluteUrl, finalConfig)
   } catch (error) {
+    if (error instanceof TypeError && error.message.includes("abort")) {
+      throw new NetworkError(`Request timeout after ${timeoutMs}ms for ${url}`)
+    }
     if (error instanceof TypeError) {
       throw new NetworkError(`Network error fetching ${url}: ${error.message}`)
     }
     throw new NetworkError(
       `Network error fetching ${url}: ${error instanceof Error ? error.message : "Unknown error"}`
     )
+  } finally {
+    clearTimeout(timeoutId)
   }
 
   // Parse response body

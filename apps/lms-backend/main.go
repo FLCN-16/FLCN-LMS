@@ -88,8 +88,8 @@ func main() {
 	log.Println("[Main] Initializing services...")
 	userService := service.NewUserService(userRepo, jwtManager)
 	courseService := service.NewCourseService(courseRepo, userRepo)
-	_ = service.NewModuleService(moduleRepo, courseRepo)
-	_ = service.NewLessonService(lessonRepo, moduleRepo, lessonProgressRepo)
+	moduleService := service.NewModuleService(moduleRepo, courseRepo)
+	lessonService := service.NewLessonService(lessonRepo, moduleRepo, lessonProgressRepo)
 	testSeriesService := service.NewTestSeriesService(testSeriesRepo, questionRepo)
 	_ = service.NewQuestionService(questionRepo, testSeriesRepo, questionOptionRepo)
 	enrollmentService := service.NewEnrollmentService(enrollmentRepo, courseRepo, userRepo)
@@ -129,6 +129,8 @@ func main() {
 	authHandler := handlers.NewAuthHandler(userService)
 	courseHandler := handlers.NewCourseHandler(courseService, userService)
 	instructorCourseHandler := handlers.NewInstructorCourseHandler(courseService, userService)
+	moduleHandler := handlers.NewModuleHandler(moduleService)
+	lessonHandler := handlers.NewLessonHandler(lessonService)
 	testSeriesHandler := handlers.NewTestSeriesHandler(testSeriesService, userService)
 	attemptHandler := handlers.NewAttemptHandler(attemptService)
 	userHandler := handlers.NewUserHandler(userService)
@@ -234,6 +236,8 @@ func main() {
 		authHandler,
 		courseHandler,
 		instructorCourseHandler,
+		moduleHandler,
+		lessonHandler,
 		testSeriesHandler,
 		attemptHandler,
 		userHandler,

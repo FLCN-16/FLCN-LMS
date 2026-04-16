@@ -31,6 +31,8 @@ func InitializeAllRoutes(
 	authHandler *handlers.AuthHandler,
 	courseHandler *handlers.CourseHandler,
 	instructorCourseHandler *handlers.InstructorCourseHandler,
+	moduleHandler *handlers.ModuleHandler,
+	lessonHandler *handlers.LessonHandler,
 	testSeriesHandler *handlers.TestSeriesHandler,
 	attemptHandler *handlers.AttemptHandler,
 	userHandler *handlers.UserHandler,
@@ -54,6 +56,8 @@ func InitializeAllRoutes(
 	// Protected routes (authentication required)
 	InitCourseRoutes(v1, courseHandler, permissionDecorator)
 	InitInstructorCourseRoutes(v1, instructorCourseHandler, permissionDecorator)
+	InitModuleRoutes(v1, moduleHandler, permissionDecorator)
+	InitLessonRoutes(v1, lessonHandler, permissionDecorator)
 	InitTestSeriesRoutes(v1, testSeriesHandler, permissionDecorator)
 	InitAttemptRoutes(v1, attemptHandler, permissionDecorator)
 	InitUserRoutes(v1, userHandler, permissionDecorator)
@@ -433,4 +437,136 @@ func InitCertificateRoutes(
 	}
 
 	log.Println("✓ Certificate routes initialized successfully")
+}
+
+// InitModuleRoutes initializes module routes with permission checks
+func InitModuleRoutes(
+	v1 *gin.RouterGroup,
+	moduleHandler *handlers.ModuleHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing module routes")
+
+	modules := v1.Group("/modules")
+	{
+		// List all modules
+		modules.GET(
+			"",
+			moduleHandler.ListModules,
+		)
+
+		// Get specific module
+		modules.GET(
+			"/:id",
+			moduleHandler.GetModule,
+		)
+
+		// Search modules
+		modules.GET(
+			"/search",
+			moduleHandler.SearchModules,
+		)
+
+		// Create module (faculty/admin only)
+		modules.POST(
+			"",
+			permDecorator.Required(moduleHandler.CreateModule, []rbac.Permission{rbac.CourseCreate}),
+		)
+
+		// Update module (faculty/admin only)
+		modules.PATCH(
+			"/:id",
+			permDecorator.Required(moduleHandler.UpdateModule, []rbac.Permission{rbac.CourseUpdate}),
+		)
+
+		// Delete module (faculty/admin only)
+		modules.DELETE(
+			"/:id",
+			permDecorator.Required(moduleHandler.DeleteModule, []rbac.Permission{rbac.CourseDelete}),
+		)
+	}
+
+	// Course-specific module routes
+	courses := v1.Group("/courses")
+	{
+		// Get modules for a course
+		courses.GET(
+			"/:courseId/modules",
+			moduleHandler.GetModulesByCourse,
+		)
+
+		// Create module for a course
+		courses.POST(
+			"/:courseId/modules",
+			permDecorator.Required(moduleHandler.CreateModule, []rbac.Permission{rbac.CourseCreate}),
+		)
+	}
+
+	log.Println("✓ Module routes initialized successfully")
+}
+
+// InitLessonRoutes initializes lesson routes with permission checks
+func InitLessonRoutes(
+	v1 *gin.RouterGroup,
+	lessonHandler *handlers.LessonHandler,
+	permDecorator *decorators.PermissionDecorator,
+) {
+	log.Println("Initializing lesson routes")
+
+	lessons := v1.Group("/lessons")
+	{
+		// List all lessons
+		lessons.GET(
+			"",
+			lessonHandler.ListLessons,
+		)
+
+		// Get specific lesson
+		lessons.GET(
+			"/:id",
+			lessonHandler.GetLesson,
+		)
+
+		// Search lessons
+		lessons.GET(
+			"/search",
+			lessonHandler.SearchLessons,
+		)
+
+		// Create lesson (faculty/admin only)
+		lessons.POST(
+			"",
+			permDecorator.Required(lessonHandler.CreateLesson, []rbac.Permission{rbac.CourseCreate}),
+		)
+
+		// Update lesson (faculty/admin only)
+		lessons.PATCH(
+			"/:id",
+			permDecorator.Required(lessonHandler.UpdateLesson, []rbac.Permission{rbac.CourseUpdate}),
+		)
+
+		// Delete lesson (faculty/admin only)
+		lessons.DELETE(
+			"/:id",
+			permDecorator.Required(lessonHandler.DeleteLesson, []rbac.Permission{rbac.CourseDelete}),
+		)
+	}
+
+	// Module-specific lesson routes
+	modules := v1.Group("/modules")
+	{
+		// Get lessons for a module
+		modules.GET(
+			"/:moduleId/lessons",
+			lessonHandler.GetLessonsByModule,
+		)
+
+		// Create lesson for a module
+		modules.POST(
+			"/:moduleId/lessons",
+			permDecorator.Required(lessonHandler.CreateLesson, []rbac.Permission{rbac.CourseCreate}),
+		)
+	}
+
+	log.Println("✓ Lesson routes initialized successfully")
 }

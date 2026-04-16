@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 
 // Protected route patterns that require authentication
-const protectedPatterns = [
-  "/learn/",
-  "/user/",
-  "/test/",
-  "/live/",
-  "/panel/",
-]
+const protectedPatterns = ["/learn/", "/user/", "/test/", "/live/", "/panel/"]
 
-export async function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // Check if the current path is a protected route

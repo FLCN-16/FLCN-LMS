@@ -1,12 +1,30 @@
 import type { Metadata } from "next"
+import dynamic from "next/dynamic"
 
-import CtaBannerSection from "./_components/landing/cta-banner-section"
-import FeaturedCoursesSection from "./_components/landing/featured-courses-section"
-import FeaturesSection from "./_components/landing/features-section"
 import HeroSection from "./_components/landing/hero-section"
-import HowItWorksSection from "./_components/landing/how-it-works-section"
 import StatsSection from "./_components/landing/stats-section"
-import TestimonialsSection from "./_components/landing/testimonials-section"
+import FeaturedCoursesSection from "./_components/landing/featured-courses-section"
+
+// Lazy load below-the-fold sections for better initial page load performance
+const FeaturesSection = dynamic(
+  () => import("./_components/landing/features-section"),
+  { loading: () => <div className="h-96 bg-muted/20 animate-pulse" /> }
+)
+
+const HowItWorksSection = dynamic(
+  () => import("./_components/landing/how-it-works-section"),
+  { loading: () => <div className="h-96 bg-muted/20 animate-pulse" /> }
+)
+
+const TestimonialsSection = dynamic(
+  () => import("./_components/landing/testimonials-section"),
+  { loading: () => <div className="h-96 bg-muted/20 animate-pulse" /> }
+)
+
+const CtaBannerSection = dynamic(
+  () => import("./_components/landing/cta-banner-section"),
+  { loading: () => <div className="h-64 bg-muted/20 animate-pulse" /> }
+)
 
 export const metadata: Metadata = {
   title: "FLCN LMS — Learn, Grow, Achieve",

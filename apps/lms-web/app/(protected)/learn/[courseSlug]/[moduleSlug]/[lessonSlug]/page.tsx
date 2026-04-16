@@ -7,7 +7,11 @@ import { Card } from "@flcn-lms/ui/components/card"
 
 import { getCourseWithModules } from "@/fetchers/course"
 
-const PlayerComponent = dynamic(() => import("@/components/player"))
+const PlayerComponent = dynamic(() => import("@/components/player"), {
+  loading: () => (
+    <div className="w-full aspect-video bg-muted/20 animate-pulse rounded-lg" />
+  ),
+})
 
 interface UserCourseLessonPageProps {
   params: Promise<{

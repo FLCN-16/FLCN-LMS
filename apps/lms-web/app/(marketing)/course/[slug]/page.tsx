@@ -3,9 +3,17 @@ import dynamic from "next/dynamic"
 import CourseDetailBreadcrumb from "./_components/breadcumb"
 import CourseDetailHeader from "./_components/header"
 
-const CoursePackages = dynamic(() => import("./_components/packages"))
-const CourseTestimonials = dynamic(() => import("./_components/testimonials"))
-const CourseDetailSupport = dynamic(() => import("./_components/support"))
+const CoursePackages = dynamic(() => import("./_components/packages"), {
+  loading: () => <div className="h-80 bg-muted/20 animate-pulse rounded-lg" />,
+})
+
+const CourseTestimonials = dynamic(() => import("./_components/testimonials"), {
+  loading: () => <div className="h-96 bg-muted/20 animate-pulse rounded-lg" />,
+})
+
+const CourseDetailSupport = dynamic(() => import("./_components/support"), {
+  loading: () => <div className="h-64 bg-muted/20 animate-pulse rounded-lg" />,
+})
 
 interface CoursePageProps {
   params: Promise<{ slug: string }>

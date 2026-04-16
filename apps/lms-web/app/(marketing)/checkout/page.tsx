@@ -1,12 +1,25 @@
 import dynamic from "next/dynamic"
 
-const CheckoutSummary = dynamic(() => import("./_components/checkout-summary"))
+const CheckoutSummary = dynamic(() => import("./_components/checkout-summary"), {
+  loading: () => <div className="h-80 bg-muted/20 animate-pulse rounded-lg" />,
+})
+
 const CheckoutPackages = dynamic(
-  () => import("./_components/checkout-packages")
+  () => import("./_components/checkout-packages"),
+  {
+    loading: () => <div className="h-96 bg-muted/20 animate-pulse rounded-lg" />,
+  }
 )
-const CheckoutTotals = dynamic(() => import("./_components/checkout-totals"))
+
+const CheckoutTotals = dynamic(() => import("./_components/checkout-totals"), {
+  loading: () => <div className="h-48 bg-muted/20 animate-pulse rounded-lg" />,
+})
+
 const CheckoutUserDetails = dynamic(
-  () => import("./_components/checkout-user-details")
+  () => import("./_components/checkout-user-details"),
+  {
+    loading: () => <div className="h-64 bg-muted/20 animate-pulse rounded-lg" />,
+  }
 )
 
 async function CheckoutPage() {

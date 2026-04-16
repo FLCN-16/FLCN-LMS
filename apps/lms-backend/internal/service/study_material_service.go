@@ -212,6 +212,22 @@ func (sms *StudyMaterialService) DeleteStudyMaterial(id uuid.UUID) error {
 	return nil
 }
 
+// SearchStudyMaterials searches for study materials by query
+func (sms *StudyMaterialService) SearchStudyMaterials(query string, page, limit int) ([]StudyMaterialResponse, int64, error) {
+	materials, total, err := sms.materialRepo.Search(query, page, limit)
+	if err != nil {
+		log.Printf("[Study Material Service] Failed to search materials: %v", err)
+		return nil, 0, err
+	}
+
+	var responses []StudyMaterialResponse
+	for _, material := range materials {
+		responses = append(responses, *materialToResponse(&material))
+	}
+
+	return responses, total, nil
+}
+
 // Helper function to convert model to response
 func materialToResponse(material *models.StudyMaterial) *StudyMaterialResponse {
 	return &StudyMaterialResponse{

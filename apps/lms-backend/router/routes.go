@@ -841,6 +841,12 @@ func InitStudyMaterialRoutes(
 			studyMaterialHandler.ListStudyMaterials,
 		)
 
+		// Search study materials
+		materials.GET(
+			"/search",
+			studyMaterialHandler.SearchStudyMaterials,
+		)
+
 		// Get specific study material
 		materials.GET(
 			"/:id",

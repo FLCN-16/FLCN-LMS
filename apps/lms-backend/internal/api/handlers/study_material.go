@@ -246,6 +246,56 @@ func (smh *StudyMaterialHandler) UpdateStudyMaterial(c *gin.Context) {
 	response.Success(c, http.StatusOK, material)
 }
 
+// SearchStudyMaterials godoc
+// @Summary Search study materials
+// @Description Search for study materials by title or description
+// @Tags Study Materials
+// @Accept json
+// @Produce json
+// @Param query query string true "Search query"
+// @Param page query int false "Page number (default 1)" default(1)
+// @Param limit query int false "Number of materials per page (default 10)" default(10)
+// @Success 200 {object} response.Response
+// @Failure 400 {object} response.Response
+// @Router /study-materials/search [get]
+func (smh *StudyMaterialHandler) SearchStudyMaterials(c *gin.Context) {
+	log.Println("[Study Material Handler] Searching study materials")
+
+	query := c.Query("query")
+	if query == "" {
+		response.BadRequest(c, "query parameter is required")
+		return
+	}
+
+	page := 1
+	if p := c.Query("page"); p != "" {
+		if pageNum, err := strconv.Atoi(p); err == nil && pageNum > 0 {
+			page = pageNum
+		}
+	}
+
+	limit := 10
+	if l := c.Query("limit"); l != "" {
+		if limitNum, err := strconv.Atoi(l); err == nil && limitNum > 0 && limitNum <= 100 {
+			limit = limitNum
+		}
+	}
+
+	materials, total, err := smh.studyMaterialService.SearchStudyMaterials(query, page, limit)
+	if err != nil {
+		log.Printf("[Study Material Handler] Failed to search materials: %v", err)
+		response.InternalServerError(c, err.Error())
+		return
+	}
+
+	response.Success(c, http.StatusOK, gin.H{
+		"data":  materials,
+		"total": total,
+		"page":  page,
+		"limit": limit,
+	})
+}
+
 // DeleteStudyMaterial godoc
 // @Summary Delete a study material
 // @Description Delete a study material and its associated file (faculty/admin only)

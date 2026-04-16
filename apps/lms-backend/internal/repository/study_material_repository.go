@@ -99,3 +99,32 @@ func (sr *StudyMaterialRepository) Delete(id uuid.UUID) error {
 	}
 	return nil
 }
+
+// Search searches for study materials by title or description
+func (sr *StudyMaterialRepository) Search(query string, page, limit int) ([]models.StudyMaterial, int64, error) {
+	var materials []models.StudyMaterial
+	var total int64
+
+	searchPattern := "%" + query + "%"
+
+	// Get total count matching query
+	if err := sr.db.Model(&models.StudyMaterial{}).Where(
+		sr.db.Where("title ILIKE ?", searchPattern).
+			Or("description ILIKE ?", searchPattern),
+	).Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count study materials: %w", err)
+	}
+
+	// Calculate offset
+	offset := (page - 1) * limit
+
+	// Get paginated results
+	if err := sr.db.Where(
+		sr.db.Where("title ILIKE ?", searchPattern).
+			Or("description ILIKE ?", searchPattern),
+	).Offset(offset).Limit(limit).Order("created_at DESC").Find(&materials).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to search study materials: %w", err)
+	}
+
+	return materials, total, nil
+}

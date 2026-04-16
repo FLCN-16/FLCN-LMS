@@ -1,6 +1,17 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "JWT_EXPIRES_IN",
+    "CORS_ORIGIN",
+    "INTERNAL_API_URL",
+    "NEXT_PUBLIC_ROOT_DOMAIN",
+    "VITE_API_URL",
+    "PORT",
+    "NODE_ENV"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -8,10 +19,14 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "outputs": []
+    },
+    "lint:fix": {
+      "outputs": []
     },
     "format": {
-      "dependsOn": ["^format"]
+      "dependsOn": ["^format"],
+      "outputs": []
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]

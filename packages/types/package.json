@@ -3,15 +3,26 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "format": "prettier --ignore-path ../../.prettierignore --config ../../prettier.config.mjs --write ."
+  },
   "exports": {
-    "./exam-type": "./src/exam-type.ts",
-    "./questions": "./src/questions.ts",
-    "./test-series": "./src/test-series.ts",
-    "./attempts": "./src/attempts.ts",
-    "./leaderboard": "./src/leaderboard.ts"
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "src/*"
+      ]
+    }
   },
   "devDependencies": {
+    "@flcn-lms/prettier-config": "workspace:*",
     "@flcn-lms/typescript-config": "workspace:*",
+    "prettier": "^3.8.1",
     "typescript": "^5.7.3"
   }
 }

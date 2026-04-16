@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flcn-lms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: flcn_lms
+      POSTGRES_USER: flcn
+      POSTGRES_PASSWORD: flcn_password
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U flcn -d flcn_lms']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

@@ -1,5 +1,5 @@
-export type QuestionType = 'MCQ' | 'MSQ' | 'INTEGER' | 'SUBJECTIVE'
-export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD'
+export type QuestionType = "MCQ" | "MSQ" | "INTEGER" | "SUBJECTIVE"
+export type Difficulty = "EASY" | "MEDIUM" | "HARD"
 
 export interface QuestionOption {
   id: string
@@ -12,7 +12,7 @@ export interface QuestionOption {
 
 export interface Question {
   id: string
-  tenantId?: string
+  instituteId?: string
   type: QuestionType
   subject: string
   topic: string
@@ -42,5 +42,15 @@ export interface CreateQuestionPayload {
   positiveMarks?: number
   negativeMarks?: number
   correctInteger?: number
-  options: Omit<QuestionOption, 'id' | 'questionId'>[]
+  options: Omit<QuestionOption, "id" | "questionId">[]
+}
+
+export interface UpdateQuestionPayload extends Partial<CreateQuestionPayload> {}
+
+export interface QuestionBankFilters {
+  subject?: string
+  topic?: string
+  difficulty?: Difficulty
+  type?: QuestionType
+  isApproved?: boolean
 }

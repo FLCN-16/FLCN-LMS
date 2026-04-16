@@ -1,0 +1,1 @@
+export { default } from "@flcn-lms/ui/postcss.config"

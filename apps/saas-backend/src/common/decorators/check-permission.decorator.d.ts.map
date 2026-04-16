@@ -1,0 +1,1 @@
+{"version":3,"file":"check-permission.decorator.d.ts","sourceRoot":"","sources":["check-permission.decorator.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,SAAS,EAAE,UAAU,EAAE,MAAM,sBAAsB,CAAC;AAElE,eAAO,MAAM,oBAAoB,qBAAqB,CAAC;AAEvD,wBAAgB,eAAe,CAAC,MAAM,EAAE,SAAS,EAAE,OAAO,EAAE,UAAU,oDAErE"}

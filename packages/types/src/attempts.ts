@@ -1,5 +1,10 @@
-export type AttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'TIMED_OUT' | 'PAUSED'
-export type ResponseStatus = 'UNATTEMPTED' | 'ATTEMPTED' | 'MARKED_REVIEW' | 'ATTEMPTED_MARKED'
+export type AttemptStatus = "IN_PROGRESS" | "SUBMITTED" | "TIMED_OUT" | "PAUSED"
+
+export type ResponseStatus =
+  | "UNATTEMPTED"
+  | "ATTEMPTED"
+  | "MARKED_REVIEW"
+  | "ATTEMPTED_MARKED"
 
 export interface TestAttempt {
   id: string
@@ -47,6 +52,7 @@ export interface SectionBreakdownEntry {
 export interface TopicBreakdownEntry {
   correct: number
   wrong: number
+  skipped?: number
 }
 
 export interface TestResult {

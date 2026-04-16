@@ -1,10 +1,18 @@
-import { cn } from "@flcn-lms/ui/lib/utils"
-import { HugeiconsIcon } from "@hugeicons/react"
 import { Loading03Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react"
 
-function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
+import { cn } from "@flcn-lms/ui/lib/utils"
+
+function Spinner({ className, ...props }: Omit<HugeiconsIconProps, "icon">) {
   return (
-    <HugeiconsIcon icon={Loading03Icon} strokeWidth={2} role="status" aria-label="Loading" className={cn("size-4 animate-spin", className)} {...props} />
+    <HugeiconsIcon
+      icon={Loading03Icon}
+      strokeWidth={2}
+      role="status"
+      aria-label="Loading"
+      className={cn("size-4 animate-spin", className)}
+      {...props}
+    />
   )
 }
 

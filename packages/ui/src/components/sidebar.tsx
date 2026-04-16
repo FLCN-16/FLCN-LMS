@@ -1,11 +1,11 @@
 "use client"
 
-import * as React from "react"
+import { SidebarLeftIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
+import * as React from "react"
 
-import { useIsMobile } from "@flcn-lms/ui/hooks/use-mobile"
-import { cn } from "@flcn-lms/ui/lib/utils"
 import { Button } from "@flcn-lms/ui/components/button"
 import { Input } from "@flcn-lms/ui/components/input"
 import { Separator } from "@flcn-lms/ui/components/separator"
@@ -22,8 +22,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@flcn-lms/ui/components/tooltip"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { SidebarLeftIcon } from "@hugeicons/core-free-icons"
+import { useIsMobile } from "@flcn-lms/ui/hooks/use-mobile"
+import { cn } from "@flcn-lms/ui/lib/utils"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

@@ -1,0 +1,39 @@
+/* FLCN LMS Theme - extends @flcn-lms/ui/globals.css */
+@import "@flcn-lms/ui/globals.css";
+
+:root {
+  /* Light mode theme overrides and extensions */
+  --accent: oklch(0.68 0.27 57);
+  --accent-foreground: oklch(1 0 0);
+
+  /* Primary Color Scheme */
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+
+  /* Secondary Color Scheme */
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+}
+
+.dark {
+  /* Dark mode theme overrides and extensions */
+  --accent: oklch(0.75 0.22 60);
+  --accent-foreground: oklch(0.145 0 0);
+
+  /* Primary Color Scheme */
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+
+  /* Secondary Color Scheme */
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+}

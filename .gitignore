@@ -27,6 +27,16 @@ out/
 build
 dist
 
+# TypeScript build artifacts (should not be committed to source control)
+*.d.ts
+*.d.ts.map
+*.tsbuildinfo
+
+# JavaScript transpile outputs (source files should be TypeScript only)
+!node_modules/**/*.js
+!packages/**/*.js
+!apps/**/dist/**/*.js
+
 
 # Debug
 npm-debug.log*
@@ -34,3 +44,19 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+*.bak
+*.tmp
+
+# Go
+go.sum
+/bin/
+*.exe
+*.dll
+*.dylib
+*.so
+
+# Compiled Go binaries
+flcn_lms_backend
+
+# Added by code-review-graph
+.code-review-graph/

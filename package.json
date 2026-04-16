@@ -5,17 +5,25 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "lint": "turbo lint",
-    "format": "turbo format",
+    "lint": "turbo run lint --filter=@flcn-lms/lms-web --filter=@flcn-lms/lms-dashboard --filter=@flcn-lms/saas-backend --filter=@flcn-lms/ui",
+    "lint:fix": "turbo run lint:fix --filter=@flcn-lms/lms-web --filter=@flcn-lms/lms-dashboard --filter=@flcn-lms/saas-backend --filter=@flcn-lms/ui",
+    "format:prettier": "turbo run format",
+    "format": "pnpm format:prettier && pnpm lint:fix",
+    "check:fix": "pnpm format",
     "typecheck": "turbo typecheck"
   },
   "devDependencies": {
     "@flcn-lms/eslint-config": "workspace:*",
+    "@flcn-lms/prettier-config": "workspace:*",
     "@flcn-lms/typescript-config": "workspace:*",
     "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
-    "turbo": "^2.8.20",
+    "turbo": "^2.9.3",
     "typescript": "6.0.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "minimatch": "^10.2.4"
+    }
   },
   "packageManager": "pnpm@10.33.0",
   "engines": {

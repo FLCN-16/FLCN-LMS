@@ -19,6 +19,8 @@ export default function MobileNav() {
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Courses", href: "/courses" },
+    { label: "Test Series", href: "/test-series" },
+    { label: "Blog", href: "/blogs" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ]

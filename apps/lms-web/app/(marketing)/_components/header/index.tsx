@@ -24,7 +24,10 @@ const ThemeToggle = dynamic(() => import("./theme-toggle"), {
 function Header() {
   const navLinks = [
     { label: "All Courses", href: "/courses" },
+    { label: "Test Series", href: "/test-series" },
+    { label: "Blog", href: "/blogs" },
     { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ]
 
   return (

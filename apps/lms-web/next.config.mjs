@@ -8,6 +8,9 @@ const nextConfig = {
       {
         hostname: "d3njjcbhbojbot.cloudfront.net",
       },
+      {
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   async redirects() {
